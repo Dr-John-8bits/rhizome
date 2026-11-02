@@ -14,7 +14,7 @@ static void md_beads_ribbon(const md_patch *p,uint16_t col,int top){
  cv_rect(4,top-2,232,52,MD_BG);
  for(int i=0;i<MD_TAPE_GRAINS;i++){if(!tv.grain[i].active)continue;
   const int gx=x0+w-1-(int)(tv.grain[i].behind*scale);int gw=(int)(tv.grain[i].len*scale);if(gw<2)gw=2;
-  unsigned mix=(unsigned)(4+tv.grain[i].env*space*24);if(mix>28)mix=28;
+  unsigned mix=(unsigned)(3+tv.grain[i].env*space*10);if(mix>13)mix=13; // light: the memory shows through
   int a=gx,z=gx+gw;if(a<x0)a=x0;if(z>x0+w)z=x0+w;if(z>a)cv_rect(a,top,z-a,2*half+1,md_tint(MD_BG,col,mix));}
  // The level written along the memory (the write head moves toward lower indices: older is at head + behind).
  for(int px=0;px<w;px++){const float behind=(w-1-px)/scale;const unsigned pos=(unsigned)(tv.head+(unsigned)behind)%(unsigned)len;

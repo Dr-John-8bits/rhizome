@@ -319,7 +319,7 @@ static void md_draw_all(void) {
    {"K1 drive: record saturation","K2 age: hiss, dull, dropouts","K3 tone of each pass","K4 run, freeze, stop","Freeze: the loop repeats."},
    {"K1 decay: 0.5 s to infinite","K2 size of the hall","K3 pre-delay: 0-250 ms","K4 mod: a shimmer in the tail","Lines: low, mid, high decay."},
    {"K1 bass: lows last 0.5-2x","K2 treble: highs damped","K3 diffusion of the onset","K4 vintage: 22 kHz, darker","Dots: the tail's energy now."},
-   {"K1 density: middle = none","Left regular, right random","K2 shape of each grain","K3 random / K4 media","Media: memory 1.4 to 5.8 s."}};
+   {"K1 density: middle = none","Left regular, right random","K2 shape of each grain","K3 random / K4 media: 1.4-5.8 s","A new media empties memory."}};
   if(md_context_help())lines=newhelp[dream_ui.page-MIXER];
   for(i=0;i<5;i++)md_text(14,80+i*22,lines[i],MD_INK);
   md_text(14,197,"Release, then tap any key to close.",MD_DIM);return;

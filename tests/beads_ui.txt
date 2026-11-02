@@ -1,0 +1,48 @@
+wait 3400
+tap HOME
+turn PRESET 61
+wait 50
+expect biome 61
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+expect page 3
+spin K1 20
+wait 50
+tap FX
+expect page 38
+spin K1 5
+spin K2 10
+spin K3 5
+spin K4 -1
+wait 50
+expect beads_media 2
+tap EDIT
+tap EDIT
+tap EDIT
+tap EDIT
+expect page 4
+spin K2 25
+wait 50
+tap PLAY
+peakreset
+wait 6000
+tap FX
+expect page 34
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+expect page 38
+expect beads_grains >0
+tap LFO
+wait 2000
+expect freeze 1
+tap LFO
+wait 1000
+expect peak_db_max >-30
+expect invalid 0
+expect queue_drops 0

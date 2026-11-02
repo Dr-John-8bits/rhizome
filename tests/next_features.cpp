@@ -472,6 +472,20 @@ int main(){
    for(int b=0;b<700;b++){md_render(buf,64);for(float x:buf)s1+=x*x;}for(int b=0;b<2000;b++)md_render(buf,64);for(int b=0;b<700;b++){md_render(buf,64);for(float x:buf)s2+=x*x;}
    assert(s1>1e-6&&s2>s1*.5); // infinite: three seconds on, the tail is still there
    md_patch bad=*md_state();bad.hall_predelay=251;assert(!md_validate(&bad));bad=*md_state();bad.reverb_time=1001;assert(!md_validate(&bad));}
+  // Beads: each media gives its memory; DENSITY in the middle makes no grain, either side makes some; FREEZE keeps
+  // playing what is in memory after the tracks fall silent; SPACE at 0 rests (nothing recorded, nothing computed).
+  {static const float secs[MD_BEADS_MEDIAS]={5.76f,3.84f,1.92f,1.44f}; // DIRTY TAPE, CLEAN TAPE, VINTAGE, DIGITAL
+   md_patch q=blank(MD_VA);q.track[0].send=1000;q.macro[3]=800;q.tempo=120;q.beads_density=900;float buf[128];
+   for(int m=0;m<MD_BEADS_MEDIAS;m++){md_patch r=q;r.beads_media=m;md_init();assert(md_load(&r));md_render(buf,64);assert(fabsf(md_beads_seconds()-secs[m])<.02f);}
+   auto most_grains=[&](int density){md_patch r=q;r.beads_media=MD_BEADS_DIGITAL;r.beads_density=density;md_init();assert(md_load(&r));assert(md_command(MD_PLAY,0,1));int most=0;
+    for(int b=0;b<2000;b++){md_render(buf,64);if(b%25==0){md_tape t;md_tape_view(&t);int n=0;for(int j=0;j<MD_TAPE_GRAINS;j++)n+=t.grain[j].active;if(n>most)most=n;}}return most;};
+   assert(most_grains(500)==0&&most_grains(900)>=2&&most_grains(150)>=1);
+   auto after=[&](bool frozen){md_patch r=q;r.beads_media=MD_BEADS_DIGITAL;md_init();assert(md_load(&r));assert(md_command(MD_PLAY,0,1));for(int b=0;b<1400;b++)md_render(buf,64);
+    assert(md_command(MD_MUTE,0,1));if(frozen)assert(md_command(MD_FREEZE,0,1));for(int b=0;b<1400;b++)md_render(buf,64); // two seconds: the memory has turned over
+    double e=0;for(int b=0;b<700;b++){md_render(buf,64);for(float x:buf)e+=x*x;}return e;};
+   const double still=after(true),gone=after(false);assert(still>1e-4&&still>20*gone);
+   {md_patch r=q;r.macro[3]=0;md_init();assert(md_load(&r));assert(md_command(MD_PLAY,0,1));const uint32_t w=md_status()->grain_writes;for(int b=0;b<500;b++)md_render(buf,64);assert(md_status()->grain_writes==w);}
+   md_patch bad=q;bad.beads_media=MD_BEADS_MEDIAS;assert(!md_validate(&bad));bad=q;bad.beads_density=1001;assert(!md_validate(&bad));}
   // A new period while playing keeps the body where it is: no burst of gates.
   p.orbit[1].gates=0;p.orbit[0]={16,4,300,0,MD_PITCH_ORBIT};
   {md_init();assert(md_load(&p));assert(md_command(MD_PLAY,0,1));float buf[128];for(int b=0;b<400;b++)md_render(buf,64);
@@ -499,7 +513,7 @@ int main(){
   {md_init();md_patch q=*md_state();q.version=10;assert(md_import(&q,offsetof(md_patch,orbit)));assert(md_state()->version==11);
    for(int i=0;i<6;i++)assert(md_state()->orbit[i].gates==0);
    md_patch bad=*md_state();bad.orbit[2].ecc=MD_ORBIT_ECC_MAX+1;assert(!md_validate(&bad));}
-  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, comet, chord, real systems, tape echo heads / freeze / stop, hall RT60 / vintage / infinite, v10 import");
+  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, comet, chord, real systems, tape echo heads / freeze / stop, hall RT60 / vintage / infinite, beads media / density / freeze / rest, v10 import");
  }
  puts("ALL NEXT FEATURE TESTS PASSED; no hardware-performance claim");
 }
