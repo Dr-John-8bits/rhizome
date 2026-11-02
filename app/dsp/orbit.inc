@@ -5,11 +5,13 @@
  * turns the mean anomaly into a position; the body plays when it crosses one of its gates, fixed directions around the
  * star spread as a euclidean rhythm. A round orbit plays that rhythm exactly. An eccentric one hurries near the star and
  * lingers far from it (Kepler's second law): the same loop, with rubato. Precession turns each ellipse slowly, so the
- * rubato slides against the bar; two bodies aligned with the star (a conjunction) accent their next beat. */
+ * rubato slides against the bar; two bodies aligned with the star (a conjunction) accent their next beat. Each note
+ * spins the body's moons once around it; a moon plays an ornament as it passes the body's outer side. */
 static const int16_t orbit_steps_of[MD_ORBIT_PERIODS]={4,6,8,12,16,24,32,48,64,96,112,128,192};
+static const int8_t orbit_moon_steps_of[MD_MOON_SPINS]={1,2,3,4,6,8,12,16};
 static const float ORBIT_TAU=6.28318531f,ORBIT_PI=3.14159265f;
 static const float orbit_tilt[6]={-.6f,.5f,1.6f,2.7f,3.8f,4.9f}; // each periapsis in its own direction (radians)
-struct Orbit { float M0,w0,gate_M[MD_ORBIT_GATES_MAX];int gate_n,motif;float accent_until; };
+struct Orbit { float M0,w0,gate_M[MD_ORBIT_GATES_MAX];int gate_n,motif;float accent_until,moon_t0,moon_vel; };
 static Orbit orbits[6];
 static float orbit_step_len=5512.5f,orbit_since,orbit_prev=-1; // samples in the current step, since its tick; last position run
 static unsigned orbit_rng=1,orbit_rest; // its own random stream (perturbation); tracks FORM rests this step
@@ -53,8 +55,8 @@ static float orbit_pos_now(){return step?(float)(step-1)+fminf(orbit_since/orbit
 
 static void orbit_reset(){ // PLAY: every body starts at the top, together
  orbit_prev=-1;orbit_since=0;orbit_prepared=-1;orbit_rng=patch.seed|1;orbit_rest=0;
- for(unsigned i=0;i<6;i++){Orbit &o=orbits[i];o.w0=orbit_tilt[i];o.M0=orbit_mean_of(-1.57079633f-o.w0,orbit_e(i,0));o.accent_until=-1;o.motif=0;o.gate_n=0;
-  stats.orbit_hit_gate[i]=-1;stats.orbit_hit_pos[i]=-100;stats.orbit_hit_skip[i]=0;}
+ for(unsigned i=0;i<6;i++){Orbit &o=orbits[i];o.w0=orbit_tilt[i];o.M0=orbit_mean_of(-1.57079633f-o.w0,orbit_e(i,0));o.accent_until=-1;o.motif=0;o.gate_n=0;o.moon_t0=-100;
+  stats.moon_t0[i]=-100;stats.moon_hit[i]=0;stats.orbit_hit_gate[i]=-1;stats.orbit_hit_pos[i]=-100;stats.orbit_hit_skip[i]=0;}
  memset(conj_cool,0,sizeof conj_cool);memset(conj_seen,0,sizeof conj_seen);stats.conj_a=stats.conj_b=-1;stats.conj_pos=-100;stats.orbit_pos=0;
 }
 // A new period or precession keeps each body where it is (no jump, no burst of gates).
@@ -103,6 +105,25 @@ static void orbit_fire(unsigned i,int gate,float pos){
  const float velocity=o.accent_until>pos?1.0f:.55f+.15f*(1-rn);
  stats.orbit_hit_skip[i]=0;stats.orbit_hits[i]++;
  fire(i,pitch,velocity);out_note(i,pitch,velocity,orbit_step_len*.5f);
+ if(c.moons){o.moon_t0=stats.moon_t0[i]=pos;o.moon_vel=velocity; // the note spins its moons; each one's ornament, from it
+  static const int8_t harmonics[MD_MOONS_MAX]={12,19,24};
+  for(int k=1;k<=c.moons;k++){float m=pitch;
+   if(t.model>=MD_FM){const int deg=c.moon_interval==MD_MOON_UP?k:c.moon_interval==MD_MOON_DOWN?-k:c.moon_interval==MD_MOON_THIRDS_UP?2*k:c.moon_interval==MD_MOON_THIRDS_DOWN?-2*k:0;
+    if(c.moon_interval==MD_MOON_HARMONICS)m=quantize_any(m+harmonics[k-1],patch.root,patch.scale,0);
+    for(int s=0;s<deg;s++)m=scale_neighbour(m,1);for(int s=0;s>deg;s--)m=scale_neighbour(m,-1);}
+   stats.moon_note[i][k-1]=m;}}
+}
+static float orbit_moon_steps(unsigned i){return orbit_moon_steps_of[bound(patch.orbit[i].moon_spin,0,MD_MOON_SPINS-1)];}
+// Moon k's ornament, quieter than the note it follows.
+static void orbit_moon_fire(unsigned i,int k){
+ const md_orbit &c=patch.orbit[i];const Orbit &o=orbits[i];
+ stats.moon_hit[i]=k;stats.moon_hits[i]++;
+ if(patch.track[i].mute||((orbit_rest>>i)&1))return;
+ const float pitch=stats.moon_note[i][k-1],velocity=o.moon_vel*c.moon_level*.01f*(1-.15f*(k-1));if(velocity<=0)return;
+ // An ornament, not a new note: ECHO and the next meend still follow the body's own note.
+ const float last=stats.last_pitch[i];const int32_t last_note=stats.last_note[i];
+ fire(i,pitch,velocity);out_note(i,pitch,velocity,orbit_step_len*orbit_moon_steps(i)/(c.moons+1)*.6f);
+ stats.last_pitch[i]=last;stats.last_note[i]=last_note;
 }
 // Once per rendered block, before the voices: gates crossed since the last block, then conjunctions.
 static void orbit_run(){
@@ -112,6 +133,9 @@ static void orbit_run(){
  float phi[6];bool on[6];
  for(unsigned i=0;i<6;i++){const Orbit &o=orbits[i];const float M1=orbit_M(i,orbit_prev),M2=orbit_M(i,pos),e=orbit_e(i,pos),w=orbit_w(i,pos);
   for(int g=0;g<o.gate_n;g++){float m=o.gate_M[g]+ORBIT_TAU*ceilf((M1-o.gate_M[g])/ORBIT_TAU);if(m<=M1)m+=ORBIT_TAU;if(m<=M2)orbit_fire(i,g,pos);}
+  // Moons: moon k passes the outer side k/(n+1) of the way through its spin.
+  if(const int n=patch.orbit[i].moons){const float span=orbit_moon_steps(i),f1=(orbit_prev-o.moon_t0)/span*(n+1),f2=(pos-o.moon_t0)/span*(n+1);
+   if(o.moon_t0>-100&&f1<n)for(int k=1;k<=n;k++)if(f1<k&&k<=f2)orbit_moon_fire(i,k);}
   stats.orbit_M[i]=M2;stats.orbit_w[i]=w;stats.orbit_e[i]=e;
   on[i]=patch.orbit[i].gates&&!patch.track[i].mute;if(on[i])phi[i]=orbit_true_of(orbit_E(M2,e),e)+w;}
  for(unsigned i=0,k=0;i<6;i++)for(unsigned j=i+1;j<6;j++,k++){

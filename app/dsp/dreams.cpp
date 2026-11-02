@@ -60,7 +60,7 @@ static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob valu
 static uint16_t chorus_line[2048]; // ordinary RAM: the pool must keep 8 KB spare (base/tools/build.py)
 static int16_t diffuser[1210];static unsigned diffuser_head[4];static const unsigned diffuser_len[4]={150,214,319,527}; // Monades: 12 dB high-pass on the echo and room sends
 static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;memset(diffuser,0,sizeof diffuser);memset(diffuser_head,0,sizeof diffuser_head);fx_active=false;memset(echo,0,sizeof echo);memset(room,0,sizeof room);memset(room_head,0,sizeof room_head);memset(room_lp,0,sizeof room_lp);echo_head=0;echo_lp=fx_smooth=fx_highpass_in=fx_highpass_out=0;delay_smooth=8820;}
-static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT};p.orbit_prec=p.orbit_pert=0;} // Rhizome: orbits off, one bar a turn
+static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;} // Rhizome: orbits off, one bar a turn
 static void v10_defaults(md_patch &p){p.motion_every=0;v11_defaults(p);}
 static void v9_defaults(md_patch &p){for(int i=0;i<6;i++){p.gamaka[i]=MD_GAMAKA_OFF;p.gamaka_amount[i]=500;}p.vadi=p.samvadi=-1;v10_defaults(p);}
 static void v8_defaults(md_patch &p){for(int i=0;i<6;i++)p.gen[i]={MD_GEN_OFF,500,8,12};p.form=0;p.form_bars=1;p.form_drops=2;v9_defaults(p);}
@@ -314,6 +314,10 @@ static void apply_command(Command e) {
  case MD_ORBIT_PITCH:patch.orbit[i].pitch=bound(v,0,MD_PITCH_SOURCES-1);break;
  case MD_ORBIT_PREC:orbit_rebase_prec(bound(v,0,100));break;
  case MD_ORBIT_PERT:patch.orbit_pert=bound(v,0,100);break;
+ case MD_ORBIT_MOONS:patch.orbit[i].moons=bound(v,0,MD_MOONS_MAX);break;
+ case MD_ORBIT_MOON_SPIN:patch.orbit[i].moon_spin=bound(v,0,MD_MOON_SPINS-1);break;
+ case MD_ORBIT_MOON_INTERVAL:patch.orbit[i].moon_interval=bound(v,0,MD_MOON_INTERVALS-1);break;
+ case MD_ORBIT_MOON_LEVEL:patch.orbit[i].moon_level=bound(v,0,100);break;
  case MD_ROOT:patch.root=bound(v,0,11);break;
  case MD_SCALE:patch.scale=bound(v,0,SCALE_COUNT-1);break;
  case MD_TRANSPOSE:patch.transpose=bound(v,-24,24);break;
@@ -720,6 +724,7 @@ static void quantum(float *lr,unsigned n) {
 extern "C" {
 int md_hit(unsigned s,unsigned h,unsigned l,unsigned r) {if(!l||l>32)return 0;h=h>l?l:h;return (((s+r)%l)*h)%l<h;}
 int md_orbit_steps(int period){return orbit_steps_of[bound(period,0,MD_ORBIT_PERIODS-1)];}
+int md_orbit_moon_steps(int spin){return orbit_moon_steps_of[bound(spin,0,MD_MOON_SPINS-1)];}
 // The gates of a track: its turn's steps, the euclidean hits among them, each as a direction (top = -pi/2, clockwise).
 int md_orbit_gate_angles(const md_patch *p,int track,float *phi){
  const md_orbit &o=p->orbit[bound(track,0,5)];const int n=md_orbit_steps(o.period),k=o.gates<n?o.gates:n;int count=0;
@@ -843,7 +848,8 @@ int md_validate(const md_patch *p) {
  for(int i=0;i<6;i++){const md_gen &g=p->gen[i];if(g.source<0||g.source>=MD_GEN_SOURCES||g.dejavu<0||g.dejavu>1000||g.loop<1||g.loop>16||g.spread<0||g.spread>24)return 0;}
  for(int i=0;i<6;i++)if(p->gamaka[i]<0||p->gamaka[i]>=MD_GAMAKAS||p->gamaka_amount[i]<0||p->gamaka_amount[i]>1000)return 0;
  if(p->motion_every<0||p->motion_every>4)return 0;
- for(int i=0;i<6;i++){const md_orbit &o=p->orbit[i];if(o.gates<0||o.gates>MD_ORBIT_GATES_MAX||o.period<0||o.period>=MD_ORBIT_PERIODS||o.ecc<0||o.ecc>MD_ORBIT_ECC_MAX||o.phase<0||o.phase>=MD_ORBIT_PHASES||o.pitch<0||o.pitch>=MD_PITCH_SOURCES)return 0;}
+ for(int i=0;i<6;i++){const md_orbit &o=p->orbit[i];if(o.gates<0||o.gates>MD_ORBIT_GATES_MAX||o.period<0||o.period>=MD_ORBIT_PERIODS||o.ecc<0||o.ecc>MD_ORBIT_ECC_MAX||o.phase<0||o.phase>=MD_ORBIT_PHASES||o.pitch<0||o.pitch>=MD_PITCH_SOURCES||
+  o.moons<0||o.moons>MD_MOONS_MAX||o.moon_spin<0||o.moon_spin>=MD_MOON_SPINS||o.moon_interval<0||o.moon_interval>=MD_MOON_INTERVALS||o.moon_level<0||o.moon_level>100)return 0;}
  if(p->orbit_prec<0||p->orbit_prec>100||p->orbit_pert<0||p->orbit_pert>100)return 0;
  if(p->vadi< -1||p->vadi>11||p->samvadi< -1||p->samvadi>11)return 0;
  if(p->form<0||p->form>1000||p->form_bars<0||p->form_bars>3||p->form_drops<0||p->form_drops>3)return 0;

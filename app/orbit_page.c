@@ -1,15 +1,17 @@
 /* SPDX-License-Identifier: GPL-3.0-only
- * Rhizome: the ORBIT and ORBIT / SYSTEM pages. Included by app.c before md_draw_all.
+ * Rhizome: the ORBIT, ORBIT / SYSTEM and ORBIT / MOONS pages. Included by app.c before md_draw_all.
  * One large drawing, a thin strip for K1-K4, and the card of the knob being turned in the corner opposite what it
  * changes. Everything drawn is the engine's state: the ellipses as they are now (precession, breathing), the gates
  * where the bodies play, each body where it is with a trail whose length is its speed (the rubato), a ripple for each
  * note, the gate lit when it plays (grey when the perturbation refused it), a line for a conjunction, the bar on the
- * outer ring. The geometry is computed once a frame (orbit_view_update), then drawn band by band. */
-enum { OV_CX=120, OV_CY=119, OV_RING=78, OV_TRAIL=10 };
-typedef struct { int on; float a,e,w,x,y,tx[OV_TRAIL],ty[OV_TRAIL]; } OrbitView;
+ * outer ring, the moons where the last note's spin has taken them (each lit as it plays, on the body's outer side).
+ * The geometry is computed once a frame (orbit_view_update), then drawn band by band. */
+enum { OV_CX=120, OV_CY=119, OV_RING=78, OV_TRAIL=10, OV_MOON=9 };
+typedef struct { int on; float a,e,w,x,y,tx[OV_TRAIL],ty[OV_TRAIL],out,mx[MD_MOONS_MAX],my[MD_MOONS_MAX]; } OrbitView;
 static OrbitView ov[6];
 static float ov_pos,ov_level;
-static uint32_t ov_hits_seen[6],ov_hit_ms[6],ov_conj_seen,ov_conj_ms,ov_touch_ms;
+static uint32_t ov_hits_seen[6],ov_hit_ms[6],ov_conj_seen,ov_conj_ms,ov_touch_ms,ov_moon_seen[6],ov_moon_ms[6];
+static int ov_moon_k[6];
 static int ov_hit_gate[6]={-1,-1,-1,-1,-1,-1},ov_hit_skip[6],ov_conj_a=-1,ov_conj_b=-1,ov_touch=-1,ov_touch_page=-1;
 static float ov_hit_x[6],ov_hit_y[6],ov_hit_vel[6];
 
@@ -36,7 +38,12 @@ static void orbit_view_update(void){
   for(int k=0;k<OV_TRAIL;k++)ov_point(o,M-(k+1)*(6.2831853f/9/OV_TRAIL),&o->tx[k],&o->ty[k]); // a ninth of a turn behind
   if(ms->orbit_hits[i]!=ov_hits_seen[i]||ms->orbit_hit_gate[i]!=ov_hit_gate[i]){ // a note (or a refused gate) since the last frame
    if(ms->orbit_hits[i]!=ov_hits_seen[i]){ov_hit_ms[i]=plat_ms();ov_hit_x[i]=o->x;ov_hit_y[i]=o->y;ov_hit_vel[i]=ms->track_peak[i];}
-   ov_hits_seen[i]=ms->orbit_hits[i];ov_hit_gate[i]=ms->orbit_hit_gate[i];ov_hit_skip[i]=ms->orbit_hit_skip[i];if(ov_hit_skip[i])ov_hit_ms[i]=plat_ms();}}
+   ov_hits_seen[i]=ms->orbit_hits[i];ov_hit_gate[i]=ms->orbit_hit_gate[i];ov_hit_skip[i]=ms->orbit_hit_skip[i];if(ov_hit_skip[i])ov_hit_ms[i]=plat_ms();}
+  // Moons: parked behind the outer side, evenly; a note spins them once round, so moon k passes it k/(n+1) of the way.
+  {const int n=p->orbit[i].moons;o->out=md_atan2(o->y-OV_CY,o->x-OV_CX);float f=0;
+   if(md_playing()&&ms->moon_t0[i]>-100){f=(ms->orbit_pos-ms->moon_t0[i])/md_orbit_moon_steps(p->orbit[i].moon_spin);f=f<0?0:f>1?1:f;}
+   for(int k=0;k<n;k++){const float a=o->out+6.2831853f*(f-(k+1)/(float)(n+1));o->mx[k]=o->x+OV_MOON*fm_cosf(a);o->my[k]=o->y+OV_MOON*fm_sinf(a);}
+   if(ms->moon_hits[i]!=ov_moon_seen[i]){ov_moon_seen[i]=ms->moon_hits[i];ov_moon_ms[i]=plat_ms();ov_moon_k[i]=ms->moon_hit[i];}}}
  if(ms->conj_count!=ov_conj_seen){ov_conj_seen=ms->conj_count;ov_conj_ms=plat_ms();ov_conj_a=ms->conj_a;ov_conj_b=ms->conj_b;}
  ov_level=fmaxf(ms->out_peak[0],ms->out_peak[1]);
 }
@@ -65,6 +72,9 @@ static void ov_fmt_milli(int v,char *s){md_num(v/1000,s);while(*s)s++;*s++='.';*
 static void ov_append(char *s,const char *a){while(*s)s++;while(*a)*s++=*a++;*s=0;}
 static int ov_gcd(int a,int b){while(b){int t=a%b;a=b;b=t;}return a;}
 static const char *ov_pitch_name(int src){return src==MD_PITCH_MOTIF?"MOTIF":src==MD_PITCH_ECHO?"ECHO":"ORBIT";}
+static void ov_fmt_bar(int num,int den,char *s){ // a fraction of a bar, reduced: 3/16, 1/4, 1 BAR
+ const int g=ov_gcd(num,den);num/=g;den/=g;md_num(num,s);if(den==1){ov_append(s," BAR");return;}ov_append(s,"/");char b[8];md_num(den,b);ov_append(s,b);
+}
 // Label, value and what it does, for each knob of the two pages.
 static void ov_knob(const md_patch *p,int page,int k,const char **label,char *value,char *info,int brief){
  const int tr=dream_ui.track;const md_orbit *o=&p->orbit[tr];info[0]=0;
@@ -78,7 +88,7 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
   else if(k==2){*label="GATES";if(!o->gates){ov_append(value,"OFF");ov_append(info,"BACK ON ITS RHYTHM PAGE");}
    else{const int n=md_orbit_steps(o->period),g=o->gates<n?o->gates:n;md_num(g,value);char b[8];ov_append(info,"E(");md_num(g,b);ov_append(info,b);ov_append(info,",");md_num(n,b);ov_append(info,b);ov_append(info,") A TURN");}}
   else{*label="PHASE";md_num(o->phase*15,value);ov_append(info,"DEGREES: THE GATES TURN");}
- }else{
+ }else if(page==ORBIT_SYS){
   if(k==0){*label="PRECESSION";if(!p->orbit_prec){ov_append(value,"OFF");ov_append(info,"THE ELLIPSES STAY STILL");}
    else{md_num(p->orbit_prec,value);char b[8];ov_append(info,"1 TURN IN ");md_num((1600+p->orbit_prec/2)/p->orbit_prec,b);ov_append(info,b);ov_append(info," BARS");}}
   else if(k==1){*label="PERTURBATION";md_num(p->orbit_pert,value);ov_append(info,p->orbit_pert?"BREATHES, SKIPS, NEIGHBOURS":"PERFECT CLOCKWORK");}
@@ -86,11 +96,48 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
    if(o->pitch==MD_PITCH_ECHO){char b[4]={'T',(char)('1'+(tr+5)%6),0};ov_append(info,"TRIAD NOTE ABOVE ");ov_append(info,b);}
    else ov_append(info,o->pitch==MD_PITCH_MOTIF?"THE PHRASE, IN ORDER":"NEAR THE STAR = HIGHER");}
   else{*label="NOTE";const int n=p->track[tr].note;ov_append(value,md_pitch_names[n%12]);char b[4];md_num(n/12-1,b);ov_append(value,b);ov_append(info,"BASE NOTE OF THE TRACK");}
+ }else{
+  const int n=o->moons,spin=md_orbit_moon_steps(o->moon_spin);
+  if(k==0){*label="MOONS";if(!n){ov_append(value,"OFF");ov_append(info,"NO ORNAMENT");}
+   else{md_num(n,value);ov_append(info,n>1?"ORNAMENTS AFTER EACH NOTE":"ORNAMENT AFTER EACH NOTE");}}
+  else if(k==1){*label="SPIN";ov_fmt_bar(spin,16,value);if(n){ov_append(info,"ONE EVERY ");char b[16];b[0]=0;ov_fmt_bar(spin,16*(n+1),b);ov_append(info,b);}else ov_append(info,"ONE TURN AFTER EACH NOTE");}
+  else if(k==2){static const char *const brief_names[MD_MOON_INTERVALS]={"SAME","UP","DOWN","3RD+","3RD-","HARM"},
+    *const names[MD_MOON_INTERVALS]={"REPEAT","STEPS UP","STEPS DOWN","THIRDS UP","THIRDS DOWN","HARMONICS"},
+    *const infos[MD_MOON_INTERVALS]={"THE SAME NOTE AGAIN","UP THE SCALE, STEP BY STEP","DOWN THE SCALE, STEP BY STEP","UP THE SCALE IN THIRDS","DOWN THE SCALE IN THIRDS","OCTAVE, +FIFTH, 2 OCTAVES"};
+   *label="INTERVAL";ov_append(value,(brief?brief_names:names)[o->moon_interval]);ov_append(info,p->track[tr].model<MD_FM?"A DRUM: THE SAME HIT":infos[o->moon_interval]);}
+  else{*label="LEVEL";md_num(o->moon_level,value);ov_append(info,"OF THE NOTE'S VELOCITY");}
  }
+}
+// The MOONS page: the selected body close up, its outer side (away from the star) at the top, where each moon plays as
+// the note's spin carries it past; each moon is labelled with the note it plays, the body with its own.
+enum { MC_X=120, MC_Y=114, MC_R=42 };
+static void ov_note_name(float pitch,char *s){const int n=(int)fm_floorf(pitch+.5f);s[0]=0;if(n<=0)return;ov_append(s,md_pitch_names[n%12]);char b[4];md_num(n/12-1,b);ov_append(s,b);}
+static void ov_label(float x,float y,const char *s,uint16_t ink){if(*s&&ov_band(y-6,y+6))cv_text((int)(x-text_w(&FONT_XS,s)*.5f+.5f),(int)(y-4),&FONT_XS,s,ink);}
+static void ov_closeup(const md_patch *p,int tr,int hk,uint32_t now){
+ const md_orbit *o=&p->orbit[tr];const md_stats *ms=md_status();const uint16_t c=dream_colors[tr];const int n=o->moons,spun=ms->moon_t0[tr]>-100;
+ float f=0;if(md_playing()&&spun){f=(ms->orbit_pos-ms->moon_t0[tr])/md_orbit_moon_steps(o->moon_spin);f=f<0?0:f>1?1:f;}
+ // The star, below: a dotted line to it, clear of the labels.
+ for(int y=MC_Y+24;y<182;y+=4)if((y<MC_Y+MC_R-6||y>MC_Y+MC_R+18)&&ov_band((float)y,(float)y))md_soft_point(MC_X,(float)y,md_tint(MD_BG,MD_INK,9));
+ ov_ring(MC_X,186,4,md_tint(MD_BG,MD_INK,10),1.2f);md_circle(MC_X,186,1,MD_INK,1);
+ // The moons' orbit, the outer side marked at the top (white as a moon plays there).
+ const int lit=n&&ov_moon_k[tr]>0&&now-ov_moon_ms[tr]<260;
+ ov_ring(MC_X,MC_Y,MC_R,md_tint(MD_BG,c,n?(hk==1?24u:14u):6u),n?1.3f:4);
+ ov_seg(MC_X,MC_Y-MC_R-6,MC_X,MC_Y-MC_R+6,lit?MD_INK:md_tint(MD_BG,c,26));ov_seg(MC_X+1,MC_Y-MC_R-6,MC_X+1,MC_Y-MC_R+6,lit?MD_INK:md_tint(MD_BG,c,14));
+ // The body: a ripple for each note, its note under it.
+ if(dream_prefs.motion&&!ov_hit_skip[tr]&&now-ov_hit_ms[tr]<700&&md_playing()){const float k=(now-ov_hit_ms[tr])/700.0f;ov_ring(MC_X,MC_Y,9+20*fm_sqrtf(k),md_tint(MD_BG,c,(unsigned)(30*(1-k))),1.3f);}
+ if(ov_band(MC_Y-8,MC_Y+8))md_circle(MC_X,MC_Y,7,o->gates?c:md_tint(MD_BG,c,12),1);
+ {char s[8];ov_note_name(spun?ms->last_pitch[tr]:0,s);ov_label(MC_X,MC_Y+16,s,MD_DIM);}
+ // The moons, parked behind the top until a note spins them once round; moon k passes the top k/(n+1) of the way.
+ for(int k=0;k<n;k++){const float a=-1.5707963f+6.2831853f*(f-(k+1)/(float)(n+1)),x=MC_X+MC_R*fm_cosf(a),y=MC_Y+MC_R*fm_sinf(a);
+  const int on=lit&&ov_moon_k[tr]==k+1;
+  if(on&&dream_prefs.motion){const float q=(now-ov_moon_ms[tr])/260.0f;ov_ring(x,y,5+7*q,md_tint(MD_BG,MD_INK,(unsigned)(28*(1-q))),1.3f);}
+  if(ov_band(y-4,y+4))md_circle((int)(x+.5f),(int)(y+.5f),on?4:3,on?MD_INK:md_tint(MD_BG,MD_INK,hk==0?30u:24u),1);
+  char s[8];ov_note_name(spun?ms->moon_note[tr][k]:0,s);ov_label(MC_X+(MC_R+14)*fm_cosf(a),MC_Y+(MC_R+12)*fm_sinf(a),s,on?MD_INK:hk==2?c:MD_DIM);}
 }
 static void md_orbit_page(const md_patch *p,uint16_t col){
  const int tr=dream_ui.track,page=dream_ui.page;const uint32_t now=plat_ms();
  const int touched=ov_touch>=0&&ov_touch_page==page&&now-ov_touch_ms<1500;const int hk=touched?ov_touch:-1;
+ if(page==ORBIT_MOONS)ov_closeup(p,tr,hk,now);else{
  // The bar: a ring, four beats, a dot where the sequence is.
  ov_ring(OV_CX,OV_CY,OV_RING,md_tint(MD_BG,MD_EDGE,20),1.4f);
  for(int k=0;k<4;k++){const float a=-1.5707963f+k*1.5707963f;ov_seg(OV_CX+(OV_RING-3)*fm_cosf(a),OV_CY+(OV_RING-3)*fm_sinf(a),OV_CX+(OV_RING+3)*fm_cosf(a),OV_CY+(OV_RING+3)*fm_sinf(a),k?MD_EDGE:MD_DIM);}
@@ -119,14 +166,20 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  for(int i=0;i<6;i++){const OrbitView *o=&ov[i];if(!o->on)continue;const uint16_t c=dream_colors[i];const int has=p->orbit[i].gates>0;
   if(dream_prefs.motion&&has){float x=o->x,y=o->y;for(int k=0;k<OV_TRAIL;k++){ov_seg(x,y,o->tx[k],o->ty[k],md_tint(MD_BG,c,(unsigned)(32-k*28/OV_TRAIL)));ov_seg(x+.5f,y+.5f,o->tx[k]+.5f,o->ty[k]+.5f,md_tint(MD_BG,c,(unsigned)(20-k*18/OV_TRAIL)));x=o->tx[k];y=o->ty[k];}}
   if(dream_prefs.motion&&has&&!ov_hit_skip[i]&&now-ov_hit_ms[i]<700){const float k=(now-ov_hit_ms[i])/700.0f;ov_ring(ov_hit_x[i],ov_hit_y[i],4+(7+12*fminf(1,ov_hit_vel[i]*3))*fm_sqrtf(k),md_tint(MD_BG,c,(unsigned)(30*(1-k))),1.3f);}
+  // Moons, where the last note's spin has taken them; lit as each plays (the MOONS page shows them close up).
+  if(has&&p->orbit[i].moons&&ov_band(o->y-OV_MOON-3,o->y+OV_MOON+3))
+   for(int k=0;k<p->orbit[i].moons;k++){const int lit=ov_moon_k[i]==k+1&&now-ov_moon_ms[i]<220;
+    md_circle((int)(o->mx[k]+.5f),(int)(o->my[k]+.5f),lit?2:1,lit?MD_INK:md_tint(MD_BG,MD_INK,i==tr?28u:20u),1);}
   if(ov_band(o->y-8,o->y+8)){if(i==tr)md_circle((int)(o->x+.5f),(int)(o->y+.5f),6,md_tint(MD_BG,c,has?28u:12u),0);md_circle((int)(o->x+.5f),(int)(o->y+.5f),i==tr?4:3,has?c:md_tint(MD_BG,c,12),1);}}
  // The star glows with what is playing; the perturbation shows as a halo while it is turned.
  {const float g=4+fminf(9,ov_level*30);ov_ring(OV_CX,OV_CY,g,md_tint(MD_BG,MD_INK,8),1.2f);ov_ring(OV_CX,OV_CY,g*.6f,md_tint(MD_BG,MD_INK,14),1.2f);
   if(page==ORBIT_SYS&&hk==1&&p->orbit_pert)ov_ring(OV_CX,OV_CY,10+p->orbit_pert*.12f,md_tint(MD_BG,MD_INK,16),3);
   md_circle(OV_CX,OV_CY,2,MD_INK,1);}
+ }
  // Words only where they help.
- if(!p->orbit[tr].gates)md_text(10,44,"K3 GATES STARTS THIS ORBIT",MD_DIM);
- else if(!md_playing())md_text(10,44,"PLAY: ALL START FROM THE TOP",MD_DIM);
+ if(!p->orbit[tr].gates)md_text(10,44,page==ORBIT?"K3 GATES STARTS THIS ORBIT":"NO ORBIT: ORBIT PAGE, K3 GATES",MD_DIM);
+ else if(page==ORBIT_MOONS&&!p->orbit[tr].moons)md_text(10,44,"K1 MOONS: ORNAMENTS AFTER NOTES",MD_DIM);
+ else if(!md_playing())md_text(10,44,page==ORBIT_MOONS?"EACH NOTE SPINS ITS MOONS ONCE":"PLAY: ALL START FROM THE TOP",MD_DIM);
  // The strip: four knobs, value and a short gauge.
  {const int y=200;cv_rect(0,y-1,240,25,MD_BG);cv_rect(6,y-1,228,1,MD_EDGE);
   for(int k=0;k<4;k++){const char *label;char value[24]={0},info[48];ov_knob(p,page,k,&label,value,info,1);const int x=6+k*58;
@@ -135,9 +188,9 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  // The card of the knob being turned, in the corner opposite the body it changes.
  // A full-width card, on the half of the screen away from the body, with a thread to it.
  if(touched){const char *label;char value[24]={0},info[48];ov_knob(p,page,hk,&label,value,info,0);
-  const OrbitView *o=&ov[tr];const int body=page==ORBIT||hk>=2,y=body&&o->y<OV_CY?164:42;
+  const OrbitView *o=&ov[tr];const int body=page==ORBIT||(page==ORBIT_SYS&&hk>=2),y=page==ORBIT_MOONS||(body&&o->y<OV_CY)?164:42;
   char head[24]={'K',(char)('1'+hk),' ',0};ov_append(head,label);
   cv_rect(6,y,228,33,MD_CARD);cv_rect(6,y,228,1,col);cv_text(12,y+3,&FONT_XS,head,MD_DIM);
   cv_text(228-text_w(&FONT_B,value),y+2,&FONT_B,value,col);cv_text(12,y+18,&FONT_XS,info,MD_INK);
-  if(body&&o->on)ov_seg(o->x,o->y,o->x,y<OV_CY?(float)y+33:(float)y,md_tint(MD_BG,col,14));}
+  if(body&&o->on&&page!=ORBIT_MOONS)ov_seg(o->x,o->y,o->x,y<OV_CY?(float)y+33:(float)y,md_tint(MD_BG,col,14));}
 }

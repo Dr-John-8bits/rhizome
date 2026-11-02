@@ -34,12 +34,24 @@ spin K3 2
 wait 50
 expect orbit_pitch 2
 tap SEQ
+expect page 32
+spin K1 2
+spin K2 2
+spin K3 1
+turn SELECT 1
+spin K1 3
+spin K3 5
+spin K4 -3
+wait 50
+expect orbit_moons 3
+tap SEQ
 expect page 2
 tap PLAY
 peakreset
 wait 12000
 expect orbit_hits >20
 expect conjunctions >0
+expect moon_hits >10
 expect peak_db_max >-30
 expect invalid 0
 expect queue_drops 0

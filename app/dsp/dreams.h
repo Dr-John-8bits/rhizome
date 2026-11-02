@@ -19,7 +19,8 @@ enum { MD_MODEL, MD_TONE, MD_HARM, MD_DECAY, MD_LEVEL, MD_SEND, MD_HITS,
  MD_MORPH_TO,MD_MORPH,MD_MORPH_BARS,MD_MORPH_SCOPE,MD_MORPH_KEEP,
  MD_DRIFT_SLOW,MD_DRIFT_AMOUNT,MD_DRIFT_VOYAGE,MD_DRIFT_SCOPE,MD_DRIFT_HOME,
  MD_OVERLOAD,
- MD_ORBIT_GATES,MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_PHASE,MD_ORBIT_PITCH,MD_ORBIT_PREC,MD_ORBIT_PERT, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
+ MD_ORBIT_GATES,MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_PHASE,MD_ORBIT_PITCH,MD_ORBIT_PREC,MD_ORBIT_PERT,
+ MD_ORBIT_MOONS,MD_ORBIT_MOON_SPIN,MD_ORBIT_MOON_INTERVAL,MD_ORBIT_MOON_LEVEL, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
  MD_COMMAND_COUNT }; /* OVERLOAD: the audio ran late; FULL drops to ECO, ECO sheds chorus and room diffusion until the next Monde */ /* CLEAR_PHRASE: all 16 steps rest, cursor on step 1 */ /* LFO commands: track argument = track + 6 * slot (A, B) */
 typedef struct { int32_t model,tone,harm,decay,level,send,hits,length,rotate,prob,note,pan,mute,speed,attack,ratchet,accent,shape,cutoff,resonance,filter,breathe; } md_track;
 typedef struct { int32_t delay_send,reverb_send,bass_mode,pattern,glide,marbles,tides,tides_rate,warps,edit_step; int32_t notes[16]; } md_extension;
@@ -49,10 +50,15 @@ typedef struct { int32_t source,dejavu,loop,spread; } md_gen;
  * gates per turn, spread as a euclidean rhythm on the turn's steps. period: index of md_orbit_steps (one turn in
  * sixteenths, 4 to 192). ecc 0..850 thousandths (0 = round: the exact euclidean rhythm). phase: the gates turn by
  * 15 degree steps (0..23). pitch: where notes come from: the distance to the star, the track's phrase in order, or
- * the triad note above the previous track's last note (tintinnabuli). */
-enum { MD_ORBIT_PERIODS=13, MD_ORBIT_PHASES=24, MD_ORBIT_ECC_MAX=850, MD_ORBIT_GATES_MAX=16 };
+ * the triad note above the previous track's last note (tintinnabuli).
+ * Moons (0..3) circle the body: each note it plays spins them once around it, in moon_spin (index of md_orbit_moon_steps,
+ * 1 to 16 sixteenths), and each moon plays an ornament as it passes the body's outer side, so the moons share the spin
+ * evenly after the note. moon_interval: what they play from the note (the same note, scale steps up or down, thirds
+ * up or down, or the harmonics octave, octave and fifth, two octaves). moon_level 0..100: their velocity, from the note's. */
+enum { MD_ORBIT_PERIODS=13, MD_ORBIT_PHASES=24, MD_ORBIT_ECC_MAX=850, MD_ORBIT_GATES_MAX=16, MD_MOONS_MAX=3, MD_MOON_SPINS=8 };
 enum { MD_PITCH_ORBIT, MD_PITCH_MOTIF, MD_PITCH_ECHO, MD_PITCH_SOURCES };
-typedef struct { int32_t gates,period,ecc,phase,pitch; } md_orbit;
+enum { MD_MOON_REPEAT, MD_MOON_UP, MD_MOON_DOWN, MD_MOON_THIRDS_UP, MD_MOON_THIRDS_DOWN, MD_MOON_HARMONICS, MD_MOON_INTERVALS };
+typedef struct { int32_t gates,period,ecc,phase,pitch,moons,moon_spin,moon_interval,moon_level; } md_orbit;
 typedef struct {
  uint32_t magic,version,seed; int32_t macro[4],tempo,locked,freeze,grain_size,grain_pos,feedback,quality;
  md_track track[MD_TRACKS];
@@ -88,9 +94,12 @@ typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; floa
  int32_t hits_now[6],rotate_now[6]; /* the hits and rotation the sequencer last used per track (Density, FORM, LFOs included) */
  /* Rhizome orbits as the engine holds them: position in steps since PLAY, each body's mean anomaly, periapsis direction
   * and eccentricity now (radians; direction 0 = right, -pi/2 = top), its last gate crossed (or refused by the
-  * perturbation) at which step position, and the last conjunction (two bodies aligned with the star). */
+  * perturbation) at which step position, and the last conjunction (two bodies aligned with the star). moon_t0: the step
+  * position of the note that spun a body's moons (-100: none yet), moon_note: what each moon plays after it,
+  * moon_hit: the last moon that played (1..3). */
  float orbit_pos,orbit_M[6],orbit_w[6],orbit_e[6],orbit_hit_pos[6];int32_t orbit_hit_gate[6],orbit_hit_skip[6];uint32_t orbit_hits[6];
- int32_t conj_a,conj_b;float conj_pos;uint32_t conj_count; } md_stats;
+ int32_t conj_a,conj_b;float conj_pos;uint32_t conj_count;
+ float moon_t0[6],moon_note[6][3];int32_t moon_hit[6];uint32_t moon_hits[6]; } md_stats;
 /* Monades granular view: tape overview (256 columns, oldest wraps at the write head), grains as samples behind the head. */
 typedef struct { uint8_t peak[256]; uint32_t head,valid,length; int32_t freeze; float zone,zone_len; struct { float behind,len,env; int32_t active; } grain[4]; } md_tape;
 void md_tape_view(md_tape *view);
@@ -123,6 +132,7 @@ int md_has_envelope(int model);
 int md_cutoff_hz(int value);
 int md_hit(unsigned step,unsigned hits,unsigned length,unsigned rotate);
 int md_orbit_steps(int period); /* one turn, in sixteenths */
+int md_orbit_moon_steps(int spin); /* one spin of the moons, in sixteenths */
 int md_orbit_gate_angles(const md_patch *p,int track,float *phi); /* directions of its gates (radians), returns the count */
 float md_orbit_eccentric(float mean,float e); /* Kepler's equation: the eccentric anomaly E, M = E - e sin E */
 float md_atan2(float y,float x);

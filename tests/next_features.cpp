@@ -14,7 +14,7 @@ static void cmd(int c,int t,int v){assert(md_command(c,t,v));run(1);}
 static md_patch blank(int model){md_init();cmd(MD_SCENE,0,64);md_patch p=*md_state();p.track[0].mute=0;p.track[0].model=model;p.track[0].note=36;p.track[0].level=650;p.track[0].decay=200;p.track[0].attack=0;p.track[0].hits=16;p.track[0].length=16;p.track[0].prob=1000;p.macro[0]=500;p.macro[1]=0;p.macro[2]=500;p.macro[3]=0;return p;}
 static uint64_t hash(const md_patch &p){md_init();assert(md_load(&p));cmd(MD_PLAY,0,1);uint64_t h=1469598103934665603ull;for(int b=0;b<2200;b++){md_render(audio,128);for(float x:audio){uint32_t u;memcpy(&u,&x,4);h=(h^u)*1099511628211ull;}}return h;}
 int main(){
- static_assert(sizeof(md_patch)==1808,"Browser patch size must match");
+ static_assert(sizeof(md_patch)==1904,"Browser patch size must match");
  auto p=blank(MD_BASS);assert(md_load(&p));cmd(MD_TRIGGER,0,36);assert(run(300)>1);puts("PASS round bass audible");
  uint8_t legacy[652];memcpy(legacy,&p,652);uint32_t v=4;memcpy(legacy+4,&v,4);assert(md_import(legacy,sizeof legacy));assert(md_state()->version==11&&md_state()->fx_level==0);puts("PASS 1.0 migration retains old fields and disables additions");
  p=*md_state();p.fx_level=1001;assert(!md_load(&p));p=*md_state();p.ext[0].notes[15]=25;assert(!md_load(&p));
@@ -416,11 +416,29 @@ int main(){
   {md_init();assert(md_load(&p));assert(md_command(MD_PLAY,0,1));float buf[128];for(int b=0;b<400;b++)md_render(buf,64);
    const uint32_t before=md_status()->orbit_hits[0];assert(md_command(MD_ORBIT_PERIOD,0,12));md_render(buf,64);md_render(buf,64);
    assert(md_status()->orbit_hits[0]-before<=1);}
+  // Moons: each note spins them once; moon k plays k/(n+1) of the spin after it, quieter, and leaves the note in place.
+  p.orbit[0]={4,4,0,0,MD_PITCH_ORBIT,3,3,MD_MOON_UP,80}; // a note every beat, three moons spun in a beat
+  {md_init();assert(md_load(&p));assert(md_command(MD_PLAY,0,1));float buf[128];std::vector<float> notes,moons;uint32_t ns=0,ms=0;int body=-1;
+   for(int guard=0;md_status()->orbit_pos<31.9f&&guard<200000;guard++){md_render(buf,64);const md_stats *s=md_status();
+    if(s->orbit_hits[0]!=ns){ns=s->orbit_hits[0];notes.push_back(s->orbit_hit_pos[0]);body=s->last_note[0];}
+    if(s->moon_hits[0]!=ms){ms=s->moon_hits[0];moons.push_back(s->orbit_pos);assert(s->last_note[0]==body);}}
+   assert(notes.size()==8&&moons.size()==24);
+   for(size_t k=0;k<moons.size();k++)assert(fabsf(moons[k]-(notes[k/3]+(float)(k%3+1)))<.05f);
+   const md_stats *s=md_status();assert(s->last_pitch[0]<s->moon_note[0][0]&&s->moon_note[0][0]<s->moon_note[0][1]&&s->moon_note[0][1]<s->moon_note[0][2]);}
+  p.orbit[0].moon_interval=MD_MOON_HARMONICS; // the octave first, two octaves last
+  {md_init();assert(md_load(&p));assert(md_command(MD_PLAY,0,1));float buf[128];for(int b=0;b<200;b++)md_render(buf,64);
+   const md_stats *s=md_status();assert(s->moon_t0[0]>-100&&fabsf(s->moon_note[0][0]-s->last_pitch[0]-12)<.01f&&fabsf(s->moon_note[0][2]-s->last_pitch[0]-24)<.01f);}
+  p.orbit[0].moon_interval=MD_MOON_UP;
+  p.orbit[0].moon_spin=0; // a sixteenth: a quick triplet of ornaments inside the step
+  {md_init();assert(md_load(&p));assert(md_command(MD_PLAY,0,1));float buf[128];std::vector<float> moons;uint32_t ms=0;
+   for(int guard=0;md_status()->orbit_pos<3.9f&&guard<200000;guard++){md_render(buf,64);if(md_status()->moon_hits[0]!=ms){ms=md_status()->moon_hits[0];moons.push_back(md_status()->orbit_pos);}}
+   assert(moons.size()==3);for(int k=0;k<3;k++)assert(fabsf(moons[k]-.25f*(k+1))<.03f);}
+  {md_patch bad=p;bad.orbit[0].moons=MD_MOONS_MAX+1;assert(!md_validate(&bad));bad=p;bad.orbit[0].moon_interval=MD_MOON_INTERVALS;assert(!md_validate(&bad));}
   // Monades v10 patches load with the orbits off.
   {md_init();md_patch q=*md_state();q.version=10;assert(md_import(&q,offsetof(md_patch,orbit)));assert(md_state()->version==11);
    for(int i=0;i<6;i++)assert(md_state()->orbit[i].gates==0);
    md_patch bad=*md_state();bad.orbit[2].ecc=MD_ORBIT_ECC_MAX+1;assert(!md_validate(&bad));}
-  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, v10 import");
+  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, v10 import");
  }
  puts("ALL NEXT FEATURE TESTS PASSED; no hardware-performance claim");
 }
