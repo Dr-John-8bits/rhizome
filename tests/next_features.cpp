@@ -14,7 +14,7 @@ static void cmd(int c,int t,int v){assert(md_command(c,t,v));run(1);}
 static md_patch blank(int model){md_init();cmd(MD_SCENE,0,64);md_patch p=*md_state();p.track[0].mute=0;p.track[0].model=model;p.track[0].note=36;p.track[0].level=650;p.track[0].decay=200;p.track[0].attack=0;p.track[0].hits=16;p.track[0].length=16;p.track[0].prob=1000;p.macro[0]=500;p.macro[1]=0;p.macro[2]=500;p.macro[3]=0;return p;}
 static uint64_t hash(const md_patch &p){md_init();assert(md_load(&p));cmd(MD_PLAY,0,1);uint64_t h=1469598103934665603ull;for(int b=0;b<2200;b++){md_render(audio,128);for(float x:audio){uint32_t u;memcpy(&u,&x,4);h=(h^u)*1099511628211ull;}}return h;}
 int main(){
- static_assert(sizeof(md_patch)==1924,"Browser patch size must match");
+ static_assert(sizeof(md_patch)==1940,"Browser patch size must match");
  auto p=blank(MD_BASS);assert(md_load(&p));cmd(MD_TRIGGER,0,36);assert(run(300)>1);puts("PASS round bass audible");
  uint8_t legacy[652];memcpy(legacy,&p,652);uint32_t v=4;memcpy(legacy+4,&v,4);assert(md_import(legacy,sizeof legacy));assert(md_state()->version==11&&md_state()->fx_level==0);puts("PASS 1.0 migration retains old fields and disables additions");
  p=*md_state();p.fx_level=1001;assert(!md_load(&p));p=*md_state();p.ext[0].notes[15]=25;assert(!md_load(&p));
@@ -138,9 +138,10 @@ int main(){
   // HITS: a negative square removes hits for half of each bar.
   auto events=[&](int depth){md_patch r=blank(MD_VA);r.lfo[0][1]={3,MD_LFO_SQUARE,MD_TO_HITS,depth};assert(md_load(&r));cmd(MD_PLAY,0,1);run(1500);cmd(MD_PLAY,0,0);return md_status()->events[0];};
   assert(events(-1000)<events(0)*3/4);
-  // Echo sync: 1/8 at 120 BPM = 250 ms; 1/4 at 60 BPM (1 s) is halved twice to fit the 371 ms line.
+  // Echo sync: 1/8 at 120 BPM = 250 ms; 1/4 at 60 BPM (1 s) is halved to fit head 1 (0.95 s at the slowest tape),
+  // and fits whole on head 3 (2.86 s).
   q=blank(MD_VA);q.tempo=120;q.echo_sync=6;assert(md_load(&q));assert(fabsf(md_echo_ms()-250)<.01f);
-  q.tempo=60;q.echo_sync=9;assert(md_load(&q));assert(fabsf(md_echo_ms()-250)<.01f);q.echo_sync=0;q.delay_ms=123;assert(md_load(&q));assert(md_echo_ms()==123);
+  q.tempo=60;q.echo_sync=9;assert(md_load(&q));assert(fabsf(md_echo_ms()-500)<.01f);q.tape_heads=4;assert(md_load(&q));assert(fabsf(md_echo_ms()-1000)<.01f);q.tape_heads=1;q.echo_sync=0;q.delay_ms=123;assert(md_load(&q));assert(md_echo_ms()==123);
   q.echo_sync=MD_ECHO_SYNCS;assert(!md_validate(&q));
   // Chorus and room diffusion change the sound and stay finite.
   auto out=[&](int chorus,int diffusion){md_patch r=blank(MD_VA);r.chorus=chorus;r.chorus_depth=800;r.room_diffusion=diffusion;r.ext[0].reverb_send=800;r.fx_level=800;return hash(r);};
@@ -438,6 +439,23 @@ int main(){
    md_command(MD_PLAY,0,0);md_render(buf,64);assert(md_command(MD_ORBIT_SYSTEM,0,4));md_render(buf,64);s=md_state(); // PLUTO: Charon
    assert(md_orbit_steps(s->orbit[1].period)==64&&md_orbit_steps(s->orbit[2].period)==96&&s->orbit[2].ecc==249&&s->orbit[2].moons==1&&s->orbit[3].gates==0);
    md_patch bad=*s;bad.orbit_system=MD_ORBIT_SYSTEMS;assert(!md_validate(&bad));}
+  // The tape echo: a pluck comes back on each head in use, at its share of TIME; FREEZE loops the tape; STOP brakes it.
+  {auto echoes=[](int heads,int ms){md_patch q=blank(MD_BASS);q.track[0].decay=0;q.ext[0].delay_send=1000;q.ext[0].reverb_send=0;
+    q.fx_level=1000;q.delay_fb=0;q.delay_ms=ms;q.echo_sync=0;q.tape_heads=heads;md_init();assert(md_load(&q));float buf[128];
+    for(int b=0;b<700;b++)md_render(buf,64); // the tape reaches its speed
+    assert(md_command(MD_TRIGGER,0,48));std::vector<double> e;for(int b=0;b<1500;b++){md_render(buf,64);double s=0;for(float x:buf)s+=x*x;e.push_back(s);}
+    return e;};
+   auto win=[](const std::vector<double> &e,int t0,int t1){double s=0;for(int b=t0*441/640;b<t1*441/640;b++)s+=e[b];return s;}; // ms to 64-sample blocks
+   {auto e=echoes(1,300);assert(win(e,300,330)>30*win(e,250,285));}
+   {auto e=echoes(7,600);for(int t:{200,400,600})assert(win(e,t,t+30)>10*win(e,t-50,t-15));}
+   md_reel r;md_reel_view(&r);assert(r.heads==7&&fabsf(r.speed-31500/(600*22.05f))<.05f);}
+  {md_patch q=blank(MD_BASS);q.track[0].decay=0;q.ext[0].delay_send=1000;q.fx_level=1000;q.delay_fb=0;q.delay_ms=500;q.tape_heads=1;
+   md_init();assert(md_load(&q));float buf[128];auto energy=[&](int blocks){double s=0;for(int b=0;b<blocks;b++){md_render(buf,64);for(float x:buf)s+=x*x;}return s;};
+   energy(700);assert(md_command(MD_TRIGGER,0,48));energy(100);assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_FREEZE));
+   energy(2000);assert(energy(1400)>1e-3); // two seconds later, without feedback, the loop still plays the pluck
+   assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_STOP));energy(3000);md_reel r;md_reel_view(&r);assert(r.speed<.01f&&r.transport==MD_TAPE_STOP&&energy(700)<1e-6);
+   assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_RUN));energy(3000);md_reel_view(&r);assert(fabsf(r.speed-10500/(500*22.05f))<.05f);
+   md_patch bad=q;bad.tape_heads=0;assert(!md_validate(&bad));bad=q;bad.delay_ms=MD_TAPE_MS_MAX+1;assert(!md_validate(&bad));}
   // A new period while playing keeps the body where it is: no burst of gates.
   p.orbit[1].gates=0;p.orbit[0]={16,4,300,0,MD_PITCH_ORBIT};
   {md_init();assert(md_load(&p));assert(md_command(MD_PLAY,0,1));float buf[128];for(int b=0;b<400;b++)md_render(buf,64);
@@ -465,7 +483,7 @@ int main(){
   {md_init();md_patch q=*md_state();q.version=10;assert(md_import(&q,offsetof(md_patch,orbit)));assert(md_state()->version==11);
    for(int i=0;i<6;i++)assert(md_state()->orbit[i].gates==0);
    md_patch bad=*md_state();bad.orbit[2].ecc=MD_ORBIT_ECC_MAX+1;assert(!md_validate(&bad));}
-  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, comet, chord, real systems, v10 import");
+  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, comet, chord, real systems, tape echo heads / freeze / stop, v10 import");
  }
  puts("ALL NEXT FEATURE TESTS PASSED; no hardware-performance claim");
 }

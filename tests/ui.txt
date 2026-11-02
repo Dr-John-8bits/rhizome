@@ -51,6 +51,8 @@ expect ratchet 3
 wait 100
 shot groove.png
 tap FX
+tap FX
+tap FX
 wait 100
 shot grain.png
 tap FX

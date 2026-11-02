@@ -239,6 +239,49 @@ Monades n'utilise de Plaits que trois moteurs (FM, VA, additif) et les batteries
   - le flutter (6 à 12 Hz) serait invisible ou faux à l'image : on le montre par l'amplitude du bras tendeur ;
   - une bobine à trois rayons paraît tourner à l'envers au-delà d'un tiers de tour par image (2 tours par seconde à 12 images par seconde) : vitesse d'affichage à l'échelle.
 
+### Dans le firmware (2 novembre 2026)
+Le delay à bande **remplace l'écho de Monades**, dans la même mémoire (32 Ko).
+
+**La mécanique**
+- C'est une boucle de 32 768 échantillons μ-law qui défile sous une tête d'enregistrement et trois têtes de lecture fixes, à 1/3, 2/3 et au bout du trajet.
+- **TIME règle la vitesse de la bande**, pour que la tête la plus lointaine en service réponde après TIME :
+  - bande rapide (jusqu'à ×12) : échos courts et nets ;
+  - bande lente (jusqu'à ×0,5, soit 11 kHz) : échos longs et plus sombres, jusqu'à 2,86 s sur la tête 3.
+  - C'est le compromis d'une vraie machine : la durée vient de la vitesse, pas de la mémoire.
+- La vitesse a de l'inertie : changer TIME fait glisser la hauteur.
+
+**Le son**
+- Wow (0,55 Hz), flutter (7,3 Hz) et dérive aléatoire font varier la vitesse.
+- La tête d'enregistrement sature (DRIVE).
+- Chaque passage traverse le filtre TONE, et le filtre d'enregistrement suit la vitesse de la bande.
+- AGE ajoute du souffle (seulement sous ce qui est enregistré : une bande vide reste silencieuse, PANIC donne un silence exact), perd des aigus et provoque des chutes de niveau.
+- Les trois têtes sont réparties dans l'espace stéréo.
+
+**Les commandes**
+- K4 TRANSPORT : RUN, FREEZE (la tête d'enregistrement se lève, la boucle se répète) et STOP (la bande freine, le son plonge ; RUN la relance).
+- Le REWIND n'est pas fait, et les gestes passent par K4 plutôt que par des touches.
+
+**Les réglages déjà là restent** : temps, retour, synchro (avec trois divisions de plus : 1/4 pointée, 1/2, 1/2 pointée), tonalité et envois par piste. Les patchs de Monades jouent sur la tête 1, entre 40 ms et 0,95 s.
+
+**Pages** (FX les ouvre en premier) :
+- **TAPE ECHO** : K1 TIME, K2 FEEDBACK, K3 HEADS (1, 2, 1+2, 3, 1+3, 2+3, 1+2+3), K4 WOW ;
+- **TAPE ECHO / AGE** : K1 DRIVE, K2 AGE, K3 TONE, K4 TRANSPORT.
+
+**L'écran**
+- Les deux bobines tournent à la vraie vitesse, ramenée à l'échelle (vitesse^0,625).
+- Le bras tendeur suit le wow.
+- **Ce que la tête d'enregistrement a écrit est dessiné sur la bande et avance vers les têtes de lecture : on voit l'écho arriver.**
+- Les têtes en service sont colorées, blanches quand elles rejouent, et chacune affiche son temps réel. La tête d'enregistrement se lève sous FREEZE.
+- Une ligne prévient si le retour est à 0 ou si aucune piste n'envoie vers la bande.
+
+**Calcul**
+- Mesure sur le Mac, avant et après, avec les mêmes Mondes : +1,0 à +1,2 ms de calcul par seconde de son, soit environ **+4 à +5 % du FM-1**. Les Mondes 87 et 89 passeraient d'environ 69 et 76 % à environ 73 et 81 %.
+- La première version coûtait le double ; deux réglages l'ont ramenée là :
+  - un seul encodage par échantillon de sortie quand la bande va vite ;
+  - une interpolation linéaire au-delà de ×2.
+
+**Reste** : REWIND, les gestes sur les touches, et 64 Ko de bande (2,97 s à ×1) quand Beads aura remplacé la mémoire granulaire de Monades.
+
 ## Ce qu'on garde de Monades
 - **Sortie audio USB du mélange final** vers l'ordinateur (dans `fm1.toml`, c'est la ligne `usb_audio_in = true`, nom trompeur).
 - **Sortie MIDI** des notes générées, par pistes ou par zones (`midi_out.inc`).
@@ -392,7 +435,7 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
    - le patch v11 n'est encore sorti nulle part : sa taille peut changer sans conversion jusqu'à la première version installée ;
    - remarque : avec cinq corps, les conjonctions sont fréquentes (18 en 12 s), donc moins « rares et précieuses » qu'avec deux ou trois. À régler à l'oreille ; K4 CONJUNCTION sur OFF les rend muettes ;
    - **reste à faire : le compiler pour le FM-1 et l'essayer sur l'appareil.**
-4. **Delay à bande** et son animation.
+4. **Delay à bande** et son animation. **Dans le simulateur le 2 novembre 2026** (voir « Dans le firmware » plus haut). Tests : temps de chaque tête, FREEZE qui boucle, STOP qui freine, PANIC silencieux, scénario `tests/tape_ui.txt`. Une écoute dans `M-VAVE FM1/ecoutes/`.
 5. **Réverbe HALL**.
 6. **Granulaire Beads**.
 7. **Voix Plaits 1.2 et Rings.**

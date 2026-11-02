@@ -21,14 +21,15 @@ enum { MD_MODEL, MD_TONE, MD_HARM, MD_DECAY, MD_LEVEL, MD_SEND, MD_HITS,
  MD_OVERLOAD,
  MD_ORBIT_GATES,MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_PHASE,MD_ORBIT_PITCH,MD_ORBIT_PREC,MD_ORBIT_PERT,
  MD_ORBIT_MOONS,MD_ORBIT_MOON_SPIN,MD_ORBIT_MOON_INTERVAL,MD_ORBIT_MOON_LEVEL,
- MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ,MD_ORBIT_SYSTEM, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
+ MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ,MD_ORBIT_SYSTEM,
+ MD_TAPE_HEADS,MD_TAPE_WOW,MD_TAPE_DRIVE,MD_TAPE_AGE,MD_TAPE_TRANSPORT, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
  MD_COMMAND_COUNT }; /* OVERLOAD: the audio ran late; FULL drops to ECO, ECO sheds chorus and room diffusion until the next Monde */ /* CLEAR_PHRASE: all 16 steps rest, cursor on step 1 */ /* LFO commands: track argument = track + 6 * slot (A, B) */
 typedef struct { int32_t model,tone,harm,decay,level,send,hits,length,rotate,prob,note,pan,mute,speed,attack,ratchet,accent,shape,cutoff,resonance,filter,breathe; } md_track;
 typedef struct { int32_t delay_send,reverb_send,bass_mode,pattern,glide,marbles,tides,tides_rate,warps,edit_step; int32_t notes[16]; } md_extension;
 /* Monades LFO, two per track. rate: 0..14 synced to the tempo (8 bars .. 1/32), 15..30 free 0.02..20 Hz.
  * depth -1000..1000 (0 = off, negative inverts). Filter modes: 0 off, 1 LP12, 2 LP24, 3 LPG, 4 HP12, 5 BP, 6 notch, 7 HP24.
  * echo_sync: 0 = Echo ms, 1..9 = 1/32 .. 1/4 of the tempo (halved until it fits the 350 ms line). */
-enum { MD_LFO_SYNCED=15, MD_LFO_RATES=31, MD_LFO_SHAPES=7, MD_LFO_TARGETS=20, MD_FILTER_MODES=8, MD_ECHO_SYNCS=10 };
+enum { MD_LFO_SYNCED=15, MD_LFO_RATES=31, MD_LFO_SHAPES=7, MD_LFO_TARGETS=20, MD_FILTER_MODES=8, MD_ECHO_SYNCS=13 };
 enum { MD_LFO_SINE, MD_LFO_TRIANGLE, MD_LFO_RAMP_UP, MD_LFO_RAMP_DOWN, MD_LFO_SQUARE, MD_LFO_SAMPLE_HOLD, MD_LFO_SMOOTH_RANDOM };
 enum { MD_TO_CUTOFF, MD_TO_RESONANCE, MD_TO_LEVEL, MD_TO_PAN, MD_TO_PITCH, MD_TO_TONE, MD_TO_HARMONICS, MD_TO_SHAPE,
  MD_TO_ECHO_SEND, MD_TO_ROOM_SEND, MD_TO_GRAIN_SEND, MD_TO_ECHO_TIME, MD_TO_GRAIN_POS,
@@ -68,6 +69,13 @@ enum { MD_CONJ_OFF, MD_CONJ_ACCENT, MD_CONJ_CHORD, MD_CONJ_MODES };
  * first): measured period ratios and eccentricities, the same number of gates on each body so the ratios are heard as
  * a polyrhythm. Any later change to an orbit makes the system your own again (0). ENV undoes the load. */
 enum { MD_ORBIT_SYSTEMS=5 };
+/* Rhizome's tape echo (in place of the echo; delay_ms, delay_fb, echo_sync, echo_tone and the sends keep their roles).
+ * tape_heads: which of the three playback heads play (bits 1, 2, 4: a third, two thirds, all of the path); delay_ms
+ * (40..2860) is the time of the longest one, reached by the tape's speed (0.5 to 12 times the slowest). tape_wow, tape_drive, tape_age 0..1000.
+ * MD_TAPE_TRANSPORT (not stored): RUN, FREEZE (the loop repeats, nothing recorded), STOP (the tape brakes). */
+enum { MD_TAPE_RUN, MD_TAPE_FREEZE, MD_TAPE_STOP, MD_TAPE_TRANSPORTS, MD_TAPE_MS_MAX=2860 };
+typedef struct { float speed,wow,path,head_peak[3],rec_peak; uint32_t pos,length; int32_t heads,transport; uint8_t trace[128]; } md_reel;
+void md_reel_view(md_reel *view); /* speed: 1 = the slowest tape that still gives 1.43 s on head 3 */
 enum { MD_MOON_REPEAT, MD_MOON_UP, MD_MOON_DOWN, MD_MOON_THIRDS_UP, MD_MOON_THIRDS_DOWN, MD_MOON_HARMONICS, MD_MOON_INTERVALS };
 typedef struct { int32_t gates,period,ecc,phase,pitch,moons,moon_spin,moon_interval,moon_level; } md_orbit;
 typedef struct {
@@ -85,7 +93,7 @@ typedef struct {
  int32_t gamaka[6],gamaka_amount[6],vadi,samvadi;
  int32_t motion_every; /* v10: K2 Motion holds its variation for 1, 2, 4, 8 or 16 steps (0..4); 0 = every step, as 1.1 */
  /* Rhizome v11: the orbits; precession 0..100 (100 = each ellipse turns once in 16 bars), perturbation 0..100. */
- md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj,orbit_system;
+ md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj,orbit_system,tape_heads,tape_wow,tape_drive,tape_age;
 } md_patch;
 typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; float peak; uint32_t grain_writes,voice_quanta,skipped_quanta; int32_t last_note[6]; uint32_t quality_reductions,element_modes; float track_peak[6];
  /* Monades meters, output-referred like the final mix: grain/delay/room returns, master L/R, pre-limiter peak. */

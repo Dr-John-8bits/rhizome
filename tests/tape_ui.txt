@@ -1,0 +1,34 @@
+wait 3400
+tap HOME
+turn PRESET 61
+wait 50
+expect biome 61
+tap FX
+expect page 34
+spin K3 6
+spin K2 10
+spin K4 2
+wait 50
+expect tape_heads 7
+tap FX
+expect page 35
+spin K1 2
+spin K2 2
+tap PLAY
+peakreset
+wait 4000
+spin K4 1
+wait 50
+expect tape_transport 1
+wait 3000
+spin K4 1
+wait 50
+expect tape_transport 2
+wait 2000
+spin K4 -2
+wait 50
+expect tape_transport 0
+wait 3000
+expect peak_db_max >-30
+expect invalid 0
+expect queue_drops 0

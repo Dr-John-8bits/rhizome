@@ -48,19 +48,18 @@ static Voice *voices;
 static elements::Resonator element_body[6];
 static elements::Exciter element_strike[6];
 static int16_t tape[GN] POOL;
-// Independent effect storage: never borrow or shorten the granular tape.
-static int16_t echo[16384] POOL;
+static void reel_reset(); // Rhizome's tape echo (tape_echo.inc) holds the echo's 32 KiB
 static int16_t room[4][1201];
 static bool fx_active;
-static unsigned echo_head,room_head[4];
-static float echo_lp,room_lp[4],fx_smooth,delay_smooth=8820,fx_highpass_in,fx_highpass_out;
+static unsigned room_head[4];
+static float room_lp[4],fx_smooth,fx_highpass_in,fx_highpass_out;
 static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob value the coefficients were computed for
 // Monades: Rings chorus on the dry mix (4 KiB line), and Dattorro / Griesinger input diffusion before the room
 // (four allpasses, 1210 samples). Both are skipped entirely at 0.
 static uint16_t chorus_line[2048]; // ordinary RAM: the pool must keep 8 KB spare (base/tools/build.py)
 static int16_t diffuser[1210];static unsigned diffuser_head[4];static const unsigned diffuser_len[4]={150,214,319,527}; // Monades: 12 dB high-pass on the echo and room sends
-static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;memset(diffuser,0,sizeof diffuser);memset(diffuser_head,0,sizeof diffuser_head);fx_active=false;memset(echo,0,sizeof echo);memset(room,0,sizeof room);memset(room_head,0,sizeof room_head);memset(room_lp,0,sizeof room_lp);echo_head=0;echo_lp=fx_smooth=fx_highpass_in=fx_highpass_out=0;delay_smooth=8820;}
-static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;} // Rhizome: orbits off, one bar a turn
+static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;memset(diffuser,0,sizeof diffuser);memset(diffuser_head,0,sizeof diffuser_head);fx_active=false;reel_reset();memset(room,0,sizeof room);memset(room_head,0,sizeof room_head);memset(room_lp,0,sizeof room_lp);fx_smooth=fx_highpass_in=fx_highpass_out=0;}
+static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;p.tape_heads=1;p.tape_wow=p.tape_drive=p.tape_age=0;} // the echo: head 1 alone (40 ms to 0.95 s), a clean tape // Rhizome: orbits off, one bar a turn
 static void v10_defaults(md_patch &p){p.motion_every=0;v11_defaults(p);}
 static void v9_defaults(md_patch &p){for(int i=0;i<6;i++){p.gamaka[i]=MD_GAMAKA_OFF;p.gamaka_amount[i]=500;}p.vadi=p.samvadi=-1;v10_defaults(p);}
 static void v8_defaults(md_patch &p){for(int i=0;i<6;i++)p.gen[i]={MD_GEN_OFF,500,8,12};p.form=0;p.form_bars=1;p.form_drops=2;v9_defaults(p);}
@@ -72,6 +71,7 @@ struct Repeat { float left,spacing,note,velocity; unsigned remaining; };
 static Repeat repeats[6];
 static Grain grains[4];
 static md_patch patch,previous;
+#include "tape_echo.inc"
 static md_stats stats;
 static unsigned writehead,grainclock,tape_valid;
 static uint8_t tape_peak[256];static unsigned tape_peak_col;
@@ -202,11 +202,12 @@ static float clamp01(float x){return x<0?0:x>1?1:x;}
 #include "morph.inc"
 #include "drift.inc"
 // Echo sync: the division in sixteenths.
-static const float echo_sync_len[MD_ECHO_SYNCS]={0,.5f,2/3.0f,1,4/3.0f,1.5f,2,8/3.0f,3,4}; // sixteenths
+static const float echo_sync_len[MD_ECHO_SYNCS]={0,.5f,2/3.0f,1,4/3.0f,1.5f,2,8/3.0f,3,4,6,8,12}; // sixteenths
 static float echo_ms_now(){
- if(!patch.echo_sync)return (float)patch.delay_ms;
+ const float hi=reel_ms_max(),lo=reel_ms_min();
+ if(!patch.echo_sync)return fminf(hi,fmaxf(lo,(float)patch.delay_ms)); // the tape's speed limits the time of the heads in use
  float ms=echo_sync_len[bound(patch.echo_sync,1,MD_ECHO_SYNCS-1)]*15000.0f/patch.tempo;
- while(ms>350)ms*=.5f;while(ms<40)ms*=2; // the line holds 371 ms: a slow tempo plays half the division (still on the grid)
+ while(ms>hi)ms*=.5f;while(ms<lo)ms*=2; // too long for the tape: half the division (still on the grid)
  return ms;
 }
 // Echo / room damping: 500 keeps Mutable Dreams' exact coefficient.
@@ -334,7 +335,12 @@ static void apply_command(Command e) {
  case MD_DUCK_RELEASE:patch.duck_release=bound(v,0,1000);break;
  case MD_DELAY_SEND:patch.ext[i].delay_send=bound(v,0,1000);break;
  case MD_REVERB_SEND:patch.ext[i].reverb_send=bound(v,0,1000);break;
- case MD_DELAY_TIME:patch.delay_ms=bound(v,40,350);break;
+ case MD_DELAY_TIME:patch.delay_ms=bound(v,40,MD_TAPE_MS_MAX);break;
+ case MD_TAPE_HEADS:patch.tape_heads=bound(v,1,7);break;
+ case MD_TAPE_WOW:patch.tape_wow=bound(v,0,1000);break;
+ case MD_TAPE_DRIVE:patch.tape_drive=bound(v,0,1000);break;
+ case MD_TAPE_AGE:patch.tape_age=bound(v,0,1000);break;
+ case MD_TAPE_TRANSPORT:reel_transport=bound(v,0,MD_TAPE_TRANSPORTS-1);break;
  case MD_DELAY_FB:patch.delay_fb=bound(v,0,800);break;
  case MD_REVERB_TIME:patch.reverb_time=bound(v,0,850);break;
  case MD_FX_LEVEL:patch.fx_level=bound(v,0,1000);break;
@@ -642,8 +648,9 @@ static void quantum(float *lr,unsigned n) {
   stats.env_now[i]=melodic?v.env:0;stats.env_attacking[i]=melodic&&v.attacking;
   if(melodic&&!v.attacking&&v.env<.000001f)v.active=0;
  }
- const float echo_feedback=lfo_echo_fb?fminf(.8f,clamp01(unit(patch.delay_fb)+lfo_echo_fb*.5f)):unit(patch.delay_fb),room_decay=.45f+.5f*unit(patch.reverb_time)+(.49f-.5f*unit(patch.reverb_time))*comet_swell,effect_return=unit(patch.fx_level)+(1.4f-unit(patch.fx_level))*comet_swell,echo_target=fminf(15435.0f,fmaxf(1764.0f,(patch.echo_sync?echo_ms_now():(float)patch.delay_ms)*44.1f*(1+lfo_echo_time*.5f)));
- const float echo_glide=lfo_echo_time?.002f:.00005f,echo_tone=tone_coef(patch.echo_tone,.04f,.25f,.9f),room_tone=tone_coef(patch.room_tone,.05f,.3f,.85f);
+ const float echo_feedback=lfo_echo_fb?fminf(.8f,clamp01(unit(patch.delay_fb)+lfo_echo_fb*.5f)):unit(patch.delay_fb),room_decay=.45f+.5f*unit(patch.reverb_time)+(.49f-.5f*unit(patch.reverb_time))*comet_swell,effect_return=unit(patch.fx_level)+(1.4f-unit(patch.fx_level))*comet_swell;
+ reel_block(n,echo_ms_now()*(1+lfo_echo_time*.5f),lfo_echo_time?.002f:.00005f); // Rhizome: the tape's speed, wow, dropouts
+ const float echo_tone=tone_coef(patch.echo_tone,.04f,.25f,.9f),room_tone=tone_coef(patch.room_tone,.05f,.3f,.85f);
  const float diffusion=fx_shed?0:patch.room_diffusion*.0007f; // up to 0.7, Dattorro uses 0.625-0.75
  const bool send_hp=patch.send_hp>0;if(send_hp&&patch.send_hp!=send_hp_set){send_hp_set=patch.send_hp;float fc=md_send_hp_hz(patch.send_hp)/(float)MD_RATE;send_hp_filter[0].set_f_q<stmlib::FREQUENCY_ACCURATE>(fc,.707f);send_hp_filter[1].set_f_q<stmlib::FREQUENCY_ACCURATE>(fc,.707f);}
  if(patch.chorus&&!fx_shed){ // de-interleave in place through the scratch buffers: no extra memory
@@ -694,23 +701,18 @@ static void quantum(float *lr,unsigned n) {
   float effect[2]={};
   if(patch.fx_level||comet_swell>.001f)fx_active=true;
   if(fx_active){
-  // Full-rate independent echo, interpolated time movement, bounded feedback.
-  delay_smooth+=(echo_target-delay_smooth)*echo_glide;
-  float read=echo_head+16384.0f-delay_smooth;unsigned ri=(unsigned)read;float frac=read-ri;
-  float delayed=(echo[ri&16383]*(1-frac)+echo[(ri+1)&16383]*frac)/32768.0f;
-  echo_lp+=(delayed-echo_lp)*echo_tone;
   float echo_in=delay_send[k],room_input=room_send[k];
   if(send_hp){echo_in=send_hp_filter[0].Process<stmlib::FILTER_MODE_HIGH_PASS>(echo_in);room_input=send_hp_filter[1].Process<stmlib::FILTER_MODE_HIGH_PASS>(room_input);}
-  echo[echo_head]=int16_t(clip(echo_in+echo_lp*echo_feedback)*32767);echo_head=(echo_head+1)&16383;
+  float tape_l,tape_r;reel_sample(echo_in,echo_feedback,echo_tone,&tape_l,&tape_r); // Rhizome: the tape echo
   float hp=room_input-fx_highpass_in+.985f*fx_highpass_out;fx_highpass_in=room_input;fx_highpass_out=hp;
   if(diffusion>0){float x=hp;unsigned base=0;for(unsigned j=0;j<4;j++){int16_t &cell=diffuser[base+diffuser_head[j]];float d=cell*(1.0f/32768.0f),y=d-diffusion*x;cell=int16_t(clip(x+diffusion*y)*32767);if(++diffuser_head[j]>=diffuser_len[j])diffuser_head[j]=0;base+=diffuser_len[j];x=y;}hp=x;} // smears the room's attack
   static const unsigned lens[4]={887,1013,1151,1201};float rv[4],sum=0;
   for(unsigned j=0;j<4;j++){rv[j]=room[j][room_head[j]]/32768.0f;room_lp[j]+=(rv[j]-room_lp[j])*room_tone;sum+=room_lp[j];}
   for(unsigned j=0;j<4;j++){float value=hp*.3f*(1+comet_swell)+(sum*.5f-room_lp[j])*room_decay;room[j][room_head[j]]=int16_t(clip(value)*32767);if(++room_head[j]>=lens[j])room_head[j]=0;}
   fx_smooth+=(effect_return-fx_smooth)*.002f;
-  effect[0]=fx_smooth*(delayed*.5f+(rv[0]+rv[2])*.35f);effect[1]=fx_smooth*(delayed*.5f+(rv[1]+rv[3])*.35f);
+  effect[0]=fx_smooth*(tape_l+(rv[0]+rv[2])*.35f);effect[1]=fx_smooth*(tape_r+(rv[1]+rv[3])*.35f);
   // Meters only: the returns as they reach the final 1.9x mix stage.
-  fx_peak[1]=fmaxf(fx_peak[1],fabsf(fx_smooth*delayed)*.95f);fx_peak[2]=fmaxf(fx_peak[2],fx_smooth*fmaxf(fabsf(rv[0]+rv[2]),fabsf(rv[1]+rv[3]))*.665f);
+  fx_peak[1]=fmaxf(fx_peak[1],fabsf(fx_smooth*(tape_l+tape_r))*.95f);fx_peak[2]=fmaxf(fx_peak[2],fx_smooth*fmaxf(fabsf(rv[0]+rv[2]),fabsf(rv[1]+rv[3]))*.665f);
   }
   fx_peak[0]=fmaxf(fx_peak[0],fmaxf(fabsf(wet[0]),fabsf(wet[1]))*smooth[3]*3.23f*duck[k]);
   for(unsigned c=0;c<2;c++) {
@@ -853,7 +855,7 @@ int md_validate(const md_patch *p) {
  for(int i=0;i<6;i++){const md_track &t=p->track[i];if(t.attack<0||t.attack>1000||t.ratchet<1||t.ratchet>4||t.accent<0||t.accent>1000)return 0;if(t.model<0||t.model>=MD_MODELS||t.length<1||t.length>32||t.hits<0||t.hits>t.length||t.rotate<0||t.rotate>=t.length||t.note<24||t.note>96||t.mute<0||t.mute>1||t.speed<1||t.speed>8)return 0;
  if(t.filter<0||t.filter>=MD_FILTER_MODES)return 0;const int q[]={t.tone,t.harm,t.decay,t.level,t.send,t.shape,t.cutoff,t.resonance,t.breathe};for(int j=0;j<9;j++)if(q[j]<0||q[j]>1000)return 0;if(t.prob<0||t.prob>1000||t.pan<0||t.pan>1000)return 0;}
  for(int i=0;i<6;i++){const md_extension &e=p->ext[i];const int values[]={e.delay_send,e.reverb_send,e.glide,e.marbles,e.tides,e.tides_rate,e.warps};for(int v:values)if(v<0||v>1000)return 0;if(e.bass_mode<0||e.bass_mode>2||e.pattern<0||e.pattern>3||e.edit_step<0||e.edit_step>15)return 0;for(int v:e.notes)if(v< -1||v>24)return 0;}
- if(p->delay_ms<40||p->delay_ms>350||p->delay_fb<0||p->delay_fb>800||p->reverb_time<0||p->reverb_time>850||p->fx_level<0||p->fx_level>1000)return 0;
+ if(p->delay_ms<40||p->delay_ms>MD_TAPE_MS_MAX||p->delay_fb<0||p->delay_fb>800||p->reverb_time<0||p->reverb_time>850||p->fx_level<0||p->fx_level>1000)return 0;
  if(p->send_hp<0||p->send_hp>1000||p->echo_tone<0||p->echo_tone>1000||p->room_tone<0||p->room_tone>1000)return 0;
  for(int i=0;i<6;i++){const md_gen &g=p->gen[i];if(g.source<0||g.source>=MD_GEN_SOURCES||g.dejavu<0||g.dejavu>1000||g.loop<1||g.loop>16||g.spread<0||g.spread>24)return 0;}
  for(int i=0;i<6;i++)if(p->gamaka[i]<0||p->gamaka[i]>=MD_GAMAKAS||p->gamaka_amount[i]<0||p->gamaka_amount[i]>1000)return 0;
@@ -861,6 +863,7 @@ int md_validate(const md_patch *p) {
  for(int i=0;i<6;i++){const md_orbit &o=p->orbit[i];if(o.gates<0||o.gates>MD_ORBIT_GATES_MAX||o.period<0||o.period>=MD_ORBIT_PERIODS||o.ecc<0||o.ecc>MD_ORBIT_ECC_MAX||o.phase<0||o.phase>=MD_ORBIT_PHASES||o.pitch<0||o.pitch>=MD_PITCH_SOURCES||
   o.moons<0||o.moons>MD_MOONS_MAX||o.moon_spin<0||o.moon_spin>=MD_MOON_SPINS||o.moon_interval<0||o.moon_interval>=MD_MOON_INTERVALS||o.moon_level<0||o.moon_level>100)return 0;}
  if(p->orbit_comet<0||p->orbit_comet>=MD_COMETS||p->comet_event<0||p->comet_event>=MD_COMET_EVENTS||p->comet_amount<0||p->comet_amount>100||p->orbit_conj<0||p->orbit_conj>=MD_CONJ_MODES||p->orbit_system<0||p->orbit_system>=MD_ORBIT_SYSTEMS)return 0;
+ if(p->tape_heads<1||p->tape_heads>7||p->tape_wow<0||p->tape_wow>1000||p->tape_drive<0||p->tape_drive>1000||p->tape_age<0||p->tape_age>1000)return 0;
  if(p->orbit_prec<0||p->orbit_prec>100||p->orbit_pert<0||p->orbit_pert>100)return 0;
  if(p->vadi< -1||p->vadi>11||p->samvadi< -1||p->samvadi>11)return 0;
  if(p->form<0||p->form>1000||p->form_bars<0||p->form_bars>3||p->form_drops<0||p->form_drops>3)return 0;
@@ -869,7 +872,7 @@ int md_validate(const md_patch *p) {
  return 1;
 }
 int md_load(const md_patch *p){if(playing||!md_validate(p))return 0;patch=*p;orbit_prepared=-1;previous=patch;returnable=0;morph_on=0;drift_on=0;drift_slow=0;morph_span=0;fx_shed=0;seqrng=patch.seed;clear_audio();for(int j=0;j<4;j++)smooth[j]=unit(patch.macro[j]);for(int i=0;i<6;i++)reset_voice(i);mark_saved();return 1;}
-unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof diffuser+sizeof element_body+sizeof element_strike+sizeof echo+sizeof room+sizeof voices_raw+sizeof tape+sizeof grains+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
+unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof diffuser+sizeof element_body+sizeof element_strike+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof room+sizeof voices_raw+sizeof tape+sizeof grains+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
 int md_decode(md_patch *out,const void *data,unsigned bytes){
  if(!out||!data)return 0;
  if(bytes==sizeof(md_patch)){md_patch p;memcpy(&p,data,sizeof p);if(!md_validate(&p))return 0;*out=p;return 1;}
@@ -940,6 +943,10 @@ const char *md_lfo_rate_name(int rate){rate=bound(rate,0,MD_LFO_RATES-1);return 
 const char *md_lfo_shape_name(int s){static const char *const n[MD_LFO_SHAPES]={"SINE","TRIANGLE","RAMP UP","RAMP DOWN","SQUARE","SAMPLE & HOLD","SMOOTH RANDOM"};return n[bound(s,0,MD_LFO_SHAPES-1)];}
 const char *md_lfo_target_name(int t){static const char *const n[MD_LFO_TARGETS]={"CUTOFF","RESONANCE","LEVEL","PAN","PITCH","TONE","HARMONICS","SHAPE","ECHO SEND","ROOM SEND","GRAIN SEND","ECHO TIME","GRAIN POS","ATTACK","DECAY","ECHO FEEDBACK","GRAIN SIZE","NOTES IN SCALE","HITS","ROTATE"};return n[bound(t,0,MD_LFO_TARGETS-1)];}
 float md_echo_ms(void){return echo_ms_now();}
+void md_reel_view(md_reel *v){
+ v->speed=reel_speed*reel_mod;v->wow=reel_wow_now*patch.tape_wow*.001f;v->path=REEL_PATH;v->pos=(uint32_t)reel_pos;v->length=REEL_N;v->heads=reel_heads();v->transport=reel_transport;
+ for(int k=0;k<3;k++){v->head_peak[k]=reel_head_peak[k];reel_head_peak[k]*=.5f;}v->rec_peak=reel_rec_peak;reel_rec_peak*=.5f;memcpy(v->trace,reel_trace,sizeof v->trace);
+}
 int md_morph_bars_len(int bars){return morph_len(bars);}
 int md_drift_bars(int slow){return drift_len(slow);}
 void md_drift_view(md_drift_state *s,const md_patch **home){
@@ -962,7 +969,7 @@ const char *md_gamaka_name(int s){static const char *const n[MD_GAMAKAS]={"OFF",
 float md_gamaka_shape(int style,int amount,float from,float ms){return gamaka_shape(style,amount,from,ms);}
 const char *md_gen_source_name(int s){static const char *const n[MD_GEN_SOURCES]={"OFF","RANDOM","MARKOV","MOTIF"};return n[bound(s,0,MD_GEN_SOURCES-1)];}
 float md_echo_sync_len16(int s){return echo_sync_len[bound(s,0,MD_ECHO_SYNCS-1)];}
-const char *md_echo_sync_name(int s){static const char *const n[MD_ECHO_SYNCS]={"OFF","1/32","1/16 T","1/16","1/8 T","1/16 .","1/8","1/4 T","1/8 .","1/4"};return n[bound(s,0,MD_ECHO_SYNCS-1)];}
+const char *md_echo_sync_name(int s){static const char *const n[MD_ECHO_SYNCS]={"OFF","1/32","1/16 T","1/16","1/8 T","1/16 .","1/8","1/4 T","1/8 .","1/4","1/4 .","1/2","1/2 ."};return n[bound(s,0,MD_ECHO_SYNCS-1)];}
 int md_send_hp_hz(int v){return v>0?(int)(20.0f*stmlib::SemitonesToRatio(bound(v,0,1000)*.0797262f)+.5f):0;}
 void md_set_custom_scale(unsigned mask){custom_scale=(uint16_t)((mask&0xfff)|1u);}
 const char *md_model_name(int m){static const char *names[]={"PLAITS KICK","PLAITS SNARE","PLAITS HAT","PLAITS FM","PLAITS VA","RINGS MODAL","PLAITS HARMONIC","SINE CHOIR","ROUND BASS","ELEMENTS STRIKE","MELLOW DRIFT","SATIN MORPH"};return names[bound(m,0,MD_MODELS-1)];}
