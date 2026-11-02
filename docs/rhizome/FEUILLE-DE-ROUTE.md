@@ -512,4 +512,9 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
    - **Reste à faire** : la mesure sur l'appareil (voir « Points de vigilance »).
 7. **Voix Plaits 1.2 et Rings.**
 
+**Site et mode d'emploi** (2 novembre 2026, le dépôt étant devenu public) :
+- le mode d'emploi est dans `docs/rhizome/MODE-D-EMPLOI.md`, et sur le site (`site/manuel/`, régénéré par `tools/site_manual.py`) ;
+- le mode d'emploi de Monades reste sur le site (`site/monades/manuel/`) pour les pages héritées ;
+- le simulateur est compilé par GitHub Actions (`.github/workflows/pages.yml`, avec le WASI SDK 34) et publié avec le site sur GitHub Pages.
+
 Chaque étape se développe d'abord sur le Mac (`tools/build_local.py host`), puis dans le navigateur, puis sur le FM-1.

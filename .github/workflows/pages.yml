@@ -1,0 +1,55 @@
+# Rhizome's site on GitHub Pages: site/ (home page, manual, Monades' manual) plus the simulator, built here from the
+# firmware's sources with the WASI SDK (the same app and DSP as on the FM-1).
+name: Site
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "app/**", "base/**", "web/**", "tools/package_emu.py", "docs/rhizome/captures/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pillow (the font generator)
+        run: pip install pillow
+      - name: WASI SDK 34
+        run: |
+          curl -sSL -o wasi.tar.gz https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-34/wasi-sdk-34.0-x86_64-linux.tar.gz
+          mkdir -p "$RUNNER_TEMP/wasi" && tar -xzf wasi.tar.gz -C "$RUNNER_TEMP/wasi" --strip-components=1
+          echo "WASI_SDK=$RUNNER_TEMP/wasi" >> "$GITHUB_ENV"
+      - name: Firmware for the browser
+        run: python tools/build_local.py web
+      - name: Engine check in Node (patch size, pages, import and export)
+        continue-on-error: true
+        run: node tests/web_engine.mjs
+      - name: Simulator page
+        run: python tools/package_emu.py site/simulateur
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,4 +1,4 @@
-/* Monades site: shared by every page but the manual and the simulator, which keep their own. */
+/* Rhizome site (from Monades'): the home page and the manual; the simulator and Monades' manual keep their own. */
 :root{
   /* Deep space by default, like the FM-1 screen; "Clair" switches to a daylight version. */
   --paper:#06081a; --ink:#f2f0ff; --muted:#9aa2c4; --rule:#252a4a; --mark:#ffc668; --lit:#f2f0ff; --off:#252a4a;

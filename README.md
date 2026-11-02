@@ -6,9 +6,11 @@ Monades (premier FM-1, Flash Dog Duker Silver) fait les notes. Rhizome fait l'es
 
 Le nom vient de Deleuze et Guattari (*Rhizome*, 1976) : un réseau sans centre, qui pousse par tous les bouts.
 
-> **État (2 novembre 2026)** : idée, feuille de route et maquette. Le code est encore celui de **Monades 0.1.3**, dont Rhizome repart. Rien n'est à installer pour l'instant.
+> **État (2 novembre 2026)** : le séquenceur orbital (lunes, comète, systèmes réels), le delay à bande, la réverbe HALL et le granulaire Beads tournent dans le simulateur. **Rhizome n'a pas encore été compilé ni mesuré sur un FM-1 : ne l'installez pas pour l'instant.**
 
-- Feuille de route, faisabilité et budget mémoire : [docs/rhizome/FEUILLE-DE-ROUTE.md](docs/rhizome/FEUILLE-DE-ROUTE.md)
+- Site, avec le simulateur dans le navigateur : [dr-john-8bits.github.io/rhizome](https://dr-john-8bits.github.io/rhizome/)
+- Mode d'emploi : [docs/rhizome/MODE-D-EMPLOI.md](docs/rhizome/MODE-D-EMPLOI.md) (le même [sur le site](https://dr-john-8bits.github.io/rhizome/manuel/))
+- Feuille de route, faisabilité, budget mémoire et points de vigilance : [docs/rhizome/FEUILLE-DE-ROUTE.md](docs/rhizome/FEUILLE-DE-ROUTE.md)
 - Maquette jouable de l'écran ORBIT (à ouvrir dans un navigateur) : [docs/rhizome/maquette/orbite.html](docs/rhizome/maquette/orbite.html)
 
 ## D'où vient le code
@@ -19,12 +21,12 @@ Sources Git de ce dépôt :
 - `monades` : pour récupérer les corrections communes (MIDI, gammes, plateforme) ;
 - `upstream` : Mutable Dreams.
 
-La publication du site de Monades (`.github/workflows/pages.yml`) a été retirée : Rhizome aura son propre site plus tard.
+Le site (`site/`) est publié par `.github/workflows/pages.yml`, qui compile aussi le simulateur. Le mode d'emploi du site se régénère depuis le Markdown avec `python3 tools/site_manual.py`, puis `python3 tools/site_nav.py`.
 
 ## Crédits et licence
 - **Monades** : Dr-John-8bits.
 - **Mutable Dreams** : Kid Bunka / Christoph Link.
-- **Mutable Instruments** : Émilie Gillet (Plaits, Rings, Elements, Clouds, Beads, stmlib, sous licence MIT).
+- **Mutable Instruments** : Émilie Gillet (Plaits, Rings, Elements, Clouds, Beads, stmlib, sous licence MIT ; Beads est dans `app/third_party/beads`, avec ses changements dans son `NOTICE.md`).
 - **fm1-base** (Charles Vestal) et **Felucca / felucca-bsp** (Leo Kuroshita).
 
 Distribution combinée sous **GPL-3.0-only**. Les notices MIT, MPL-2.0 et des polices sont conservées (voir [LICENSING-GPL.txt](LICENSING-GPL.txt)). Projet indépendant, sans lien avec Mutable Instruments, M-VAVE ni l'auteur de Mutable Dreams, et non approuvé par eux.
