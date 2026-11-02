@@ -14,7 +14,7 @@ static void cmd(int c,int t,int v){assert(md_command(c,t,v));run(1);}
 static md_patch blank(int model){md_init();cmd(MD_SCENE,0,64);md_patch p=*md_state();p.track[0].mute=0;p.track[0].model=model;p.track[0].note=36;p.track[0].level=650;p.track[0].decay=200;p.track[0].attack=0;p.track[0].hits=16;p.track[0].length=16;p.track[0].prob=1000;p.macro[0]=500;p.macro[1]=0;p.macro[2]=500;p.macro[3]=0;return p;}
 static uint64_t hash(const md_patch &p){md_init();assert(md_load(&p));cmd(MD_PLAY,0,1);uint64_t h=1469598103934665603ull;for(int b=0;b<2200;b++){md_render(audio,128);for(float x:audio){uint32_t u;memcpy(&u,&x,4);h=(h^u)*1099511628211ull;}}return h;}
 int main(){
- static_assert(sizeof(md_patch)==1920,"Browser patch size must match");
+ static_assert(sizeof(md_patch)==1924,"Browser patch size must match");
  auto p=blank(MD_BASS);assert(md_load(&p));cmd(MD_TRIGGER,0,36);assert(run(300)>1);puts("PASS round bass audible");
  uint8_t legacy[652];memcpy(legacy,&p,652);uint32_t v=4;memcpy(legacy+4,&v,4);assert(md_import(legacy,sizeof legacy));assert(md_state()->version==11&&md_state()->fx_level==0);puts("PASS 1.0 migration retains old fields and disables additions");
  p=*md_state();p.fx_level=1001;assert(!md_load(&p));p=*md_state();p.ext[0].notes[15]=25;assert(!md_load(&p));
@@ -407,7 +407,8 @@ int main(){
   // MOTIF walks the phrase in order, rests skipped.
   p.orbit[0]={3,4,0,0,MD_PITCH_MOTIF};for(int k=0;k<16;k++)p.ext[0].notes[k]=-1;p.ext[0].notes[0]=0;p.ext[0].notes[5]=7;p.ext[0].notes[9]=12;
   {std::vector<float> at;std::vector<int> n;play_orbit(p,3,at,&n);assert(n.size()==9);
-   for(size_t k=3;k<n.size();k++)assert(n[k]==n[k-3]);assert(n[0]<n[1]&&n[1]<n[2]);}
+   for(size_t k=3;k<n.size();k++)assert(n[k]==n[k-3]);assert(n[0]<n[1]&&n[1]<n[2]);
+   assert(md_status()->motif_at[0]==1);} // the gate at the very end of the third turn played step 0 again: it looks from step 1
   // Two bodies at different speeds meet (a conjunction) and the counter says so.
   p.orbit[0]={1,4,0,0,MD_PITCH_ORBIT};p.track[1]=p.track[0];p.orbit[1]={1,5,0,0,MD_PITCH_ORBIT};
   {std::vector<float> at;play_orbit(p,7,at);assert(md_status()->conj_count>=1);}
@@ -425,6 +426,18 @@ int main(){
    const float share=(float)acting/blocks;assert(share>.12f&&share<.25f);
    md_command(MD_PLAY,0,0);for(int b=0;b<20;b++)md_render(buf,64);md_tape t;md_tape_view(&t);assert(!t.freeze);}
   {md_patch bad=p;bad.orbit_comet=MD_COMETS;assert(!md_validate(&bad));bad=p;bad.orbit_conj=MD_CONJ_MODES;assert(!md_validate(&bad));}
+  // Real systems: KEPLER-223 on the unmuted melodic tracks, its 3:4:6:8 heard as a polyrhythm (same gates on each body).
+  {md_patch q=p;for(int i=1;i<5;i++){q.track[i]=q.track[0];q.orbit[i].gates=0;}q.track[0].mute=1;q.orbit[0].gates=0;q.orbit[1].gates=0;
+   md_init();assert(md_load(&q));assert(md_command(MD_ORBIT_SYSTEM,0,2));float buf[128];md_render(buf,64);const md_patch *s=md_state();
+   assert(s->orbit_system==2&&s->orbit[0].gates==0&&!strcmp(md_orbit_system_name(2,0),"KEPLER-223"));
+   static const int steps[4]={48,64,96,128},ecc[4]={78,150,37,51};
+   for(int b=0;b<4;b++)assert(md_orbit_steps(s->orbit[b+1].period)==steps[b]&&s->orbit[b+1].ecc==ecc[b]&&s->orbit[b+1].gates==4);
+   assert(md_command(MD_PLAY,0,1));for(int guard=0;md_status()->orbit_pos<383.9f&&guard<2000000;guard++)md_render(buf,64);
+   for(int b=0;b<4;b++)assert(md_status()->orbit_hits[b+1]==(uint32_t)(4*384/steps[b]));
+   assert(md_command(MD_ORBIT_ECC,1,100));md_render(buf,64);assert(md_state()->orbit_system==0); // edited: your own
+   md_command(MD_PLAY,0,0);md_render(buf,64);assert(md_command(MD_ORBIT_SYSTEM,0,4));md_render(buf,64);s=md_state(); // PLUTO: Charon
+   assert(md_orbit_steps(s->orbit[1].period)==64&&md_orbit_steps(s->orbit[2].period)==96&&s->orbit[2].ecc==249&&s->orbit[2].moons==1&&s->orbit[3].gates==0);
+   md_patch bad=*s;bad.orbit_system=MD_ORBIT_SYSTEMS;assert(!md_validate(&bad));}
   // A new period while playing keeps the body where it is: no burst of gates.
   p.orbit[1].gates=0;p.orbit[0]={16,4,300,0,MD_PITCH_ORBIT};
   {md_init();assert(md_load(&p));assert(md_command(MD_PLAY,0,1));float buf[128];for(int b=0;b<400;b++)md_render(buf,64);
@@ -452,7 +465,7 @@ int main(){
   {md_init();md_patch q=*md_state();q.version=10;assert(md_import(&q,offsetof(md_patch,orbit)));assert(md_state()->version==11);
    for(int i=0;i<6;i++)assert(md_state()->orbit[i].gates==0);
    md_patch bad=*md_state();bad.orbit[2].ecc=MD_ORBIT_ECC_MAX+1;assert(!md_validate(&bad));}
-  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, comet, chord, v10 import");
+  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, comet, chord, real systems, v10 import");
  }
  puts("ALL NEXT FEATURE TESTS PASSED; no hardware-performance claim");
 }

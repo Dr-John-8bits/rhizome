@@ -307,7 +307,7 @@ static void md_draw_all(void) {
    {"K1 how far from home","K2 glide length; OFF stops","K3 voyage: stay, family, any","K4 what drifts","REC new home / ENV home"},
    {"K1 track / K2 channel in","K3 channel out (TRACKS mode)","K4 all six from one channel","OFF: not heard / not sent","Tracks may share a channel."},
    {"K1 period: a beat to 12 bars","K2 eccentricity: the rubato","K3 gates a turn; 0 = off","K4 phase: the gates turn","A round orbit is euclidean."},
-   {"K1 precession: ellipses turn","K2 perturbation: it lives","K3 pitch: orbit, motif, echo","K4 the track's base note","Aligned bodies: accent."},
+   {"K1 precession: ellipses turn","K2 perturbation: it lives","K3 pitch: orbit, motif, echo","K4 a real system: Jupiter...","ENV: back to your own orbits."},
    {"K1 moons: 0 to 3 a body","K2 spin: one turn after a note","K3 interval: what they play","K4 level, from the note's","A moon plays on the outer side."},
    {"K1 comet: a turn in 4-64 bars","K2 event: swell, freeze, both","K3 how much its passage does","K4 conjunction: accent, chord","It acts as it nears the star."}};
   if(md_context_help())lines=newhelp[dream_ui.page-MIXER];
@@ -1023,7 +1023,7 @@ void app_input_only(void) {
   if(dream_ui.page==APPEARANCE){if(b==0)dream_prefs.motion=clamp(dream_prefs.motion+d,0,1);else if(b==1)dream_prefs.boot_sound=clamp(dream_prefs.boot_sound+d,0,1);else if(b==2)dream_intro();else{cpu_peak=0;plat_audio_peak_reset();}continue;}
   if(orbit_page(dream_ui.page)){const md_orbit *o=&p->orbit[tr];orbit_touch(b);
    if(dream_ui.page==ORBIT){const int cs[]={MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_GATES,MD_ORBIT_PHASE},vs[]={o->period,o->ecc,o->gates,o->phase};dream_cmd(cs[b],tr,vs[b]+d*(b==1?25:1));}
-   else if(dream_ui.page==ORBIT_SYS){const int cs[]={MD_ORBIT_PREC,MD_ORBIT_PERT,MD_ORBIT_PITCH,MD_NOTE},vs[]={p->orbit_prec,p->orbit_pert,o->pitch,t->note};dream_cmd(cs[b],tr,vs[b]+d*(b<2?5:1));}
+   else if(dream_ui.page==ORBIT_SYS){const int cs[]={MD_ORBIT_PREC,MD_ORBIT_PERT,MD_ORBIT_PITCH,MD_ORBIT_SYSTEM},vs[]={p->orbit_prec,p->orbit_pert,o->pitch,p->orbit_system};dream_cmd(cs[b],tr,vs[b]+d*(b<2?5:1));}
    else if(dream_ui.page==ORBIT_COMET){const int cs[]={MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ},vs[]={p->orbit_comet,p->comet_event,p->comet_amount,p->orbit_conj};dream_cmd(cs[b],tr,vs[b]+d*(b==2?5:1));}
    else{const int cs[]={MD_ORBIT_MOONS,MD_ORBIT_MOON_SPIN,MD_ORBIT_MOON_INTERVAL,MD_ORBIT_MOON_LEVEL},vs[]={o->moons,o->moon_spin,o->moon_interval,o->moon_level};dream_cmd(cs[b],tr,vs[b]+d*(b==3?5:1));}
    continue;}

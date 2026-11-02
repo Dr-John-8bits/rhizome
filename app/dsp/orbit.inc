@@ -58,7 +58,7 @@ static float orbit_pos_now(){return step?(float)(step-1)+fminf(orbit_since/orbit
 
 static void orbit_reset(){ // PLAY: every body starts at the top, together
  orbit_prev=-1;orbit_since=0;orbit_prepared=-1;orbit_rng=patch.seed|1;orbit_rest=0;
- for(unsigned i=0;i<6;i++){Orbit &o=orbits[i];o.w0=orbit_tilt[i];o.M0=orbit_mean_of(-1.57079633f-o.w0,orbit_e(i,0));o.accent_until=-1;o.motif=0;o.gate_n=0;o.moon_t0=-100;
+ for(unsigned i=0;i<6;i++){Orbit &o=orbits[i];o.w0=orbit_tilt[i];o.M0=orbit_mean_of(-1.57079633f-o.w0,orbit_e(i,0));o.accent_until=-1;o.motif=0;o.gate_n=0;o.moon_t0=-100;stats.motif_at[i]=0;
   stats.moon_t0[i]=-100;stats.moon_hit[i]=0;stats.orbit_hit_gate[i]=-1;stats.orbit_hit_pos[i]=-100;stats.orbit_hit_skip[i]=0;}
  comet_M0=ORBIT_PI;stats.comet_M=ORBIT_PI;comet_target=0; // the comet starts far away
  memset(conj_cool,0,sizeof conj_cool);memset(conj_seen,0,sizeof conj_seen);stats.conj_a=stats.conj_b=-1;stats.conj_pos=-100;stats.orbit_pos=0;
@@ -98,6 +98,32 @@ static float orbit_triad_above(float src){
  for(int k=1;k<=12;k++){const int n=(int)floorf(src+.5f)+k;for(int j=0;j<3;j++)if(n%12==pcs[j])return (float)n;}
  return src+12;
 }
+// Real systems. Periods: indices of orbit_steps_of; eccentricities in thousandths, as measured. Sources: JPL (Galilean
+// moons; Neptune and Pluto), Mills et al. 2016, Nature 533 (Kepler-223), Agol et al. 2021, PSJ 2:1 (TRAPPIST-1).
+struct OrbitBody { int8_t period,gates; int16_t ecc; int8_t moons,moon_spin,moon_interval; };
+struct OrbitSystem { const char *name,*brief,*about; int8_t prec,n; OrbitBody body[4]; };
+static const OrbitSystem orbit_systems[MD_ORBIT_SYSTEMS]={
+ {"OWN","OWN","TURN TO LOAD A REAL SYSTEM",0,0,{}},
+ {"JUPITER","JUPITER","IO EUROPA GANYMEDE 1:2:4, CALLISTO",0,4,{{3,4,4},{5,4,9},{7,4,1},{10,4,7}}}, // 1.77, 3.55, 7.15, 16.69 days
+ {"KEPLER-223","K-223","FOUR PLANETS IN 3:4:6:8",0,4,{{7,4,78},{8,4,150},{9,4,37},{11,4,51}}}, // 7.38, 9.85, 14.79, 19.73 days
+ {"TRAPPIST-1","TRAP-1","PLANETS E F G H, 2:3:4:6",0,4,{{6,4,5},{7,4,10},{8,4,3},{9,4,4}}}, // 6.10, 9.21, 12.36, 18.78 days
+ {"PLUTO","PLUTO","NEPTUNE 3 TURNS, PLUTO 2, CHARON",5,2,{{8,4,9},{9,4,249,1,3,MD_MOON_THIRDS_UP}}}, // 164.8, 247.9 years
+};
+static void orbit_load_system(int s){
+ if(!drift_on&&!patch.orbit_system)previous=patch; // ENV: back to your own orbits, however many systems were browsed
+ patch.orbit_system=s;if(!s)return;
+ const OrbitSystem &y=orbit_systems[s];unsigned order[6],n=0;
+ const float pos=orbit_pos_now()<0?0:orbit_pos_now();float M[6],w[6]; // the bodies carry on from where they are
+ for(unsigned i=0;i<6;i++){M[i]=orbit_M(i,pos);w[i]=orbit_w(i,pos);}
+ for(int pass=0;pass<3;pass++)for(unsigned i=0;i<6;i++){const md_track &t=patch.track[i];
+  if((pass==0&&!t.mute&&t.model>=MD_FM)||(pass==1&&!t.mute&&t.model<MD_FM)||(pass==2&&t.mute))order[n++]=i;}
+ for(unsigned i=0;i<6;i++)patch.orbit[i].gates=0;
+ for(int b=0;b<y.n;b++){md_orbit &o=patch.orbit[order[b]];const OrbitBody &d=y.body[b];
+  o.period=d.period;o.gates=d.gates;o.ecc=d.ecc;o.phase=0;o.moons=d.moons;o.moon_spin=d.moons?d.moon_spin:o.moon_spin;o.moon_interval=d.moons?d.moon_interval:o.moon_interval;}
+ patch.orbit_prec=y.prec;patch.orbit_pert=0;
+ for(unsigned i=0;i<6;i++){orbits[i].M0=M[i]-ORBIT_TAU*pos/orbit_steps(i);orbits[i].w0=w[i]-orbit_rate()*pos;}
+ orbit_prepared=-1;
+}
 // A conjunction as a chord: both bodies strike now. The second takes the note of the first's triad (a third, fifth or
 // octave in the scale) nearest its own, so each keeps its register.
 static void orbit_chord(unsigned a,unsigned b){
@@ -119,7 +145,7 @@ static void orbit_fire(unsigned i,int gate,float pos){
  if(t.model>=MD_FM){
   if(c.pitch==MD_PITCH_MOTIF){const int32_t *ph=patch.ext[i].notes;int found=-1;
    for(int k=0;k<16&&found<0;k++){const int at=(o.motif+k)%16;if(ph[at]>=0)found=at;}
-   if(found<0)return;o.motif=found+1;pitch+=ph[found];}
+   if(found<0)return;o.motif=stats.motif_at[i]=(found+1)%16;pitch+=ph[found];}
   else if(c.pitch==MD_PITCH_ECHO){const float src=stats.last_pitch[(i+5)%6];if(src<=0)return;pitch=orbit_triad_above(src);}
   else{int deg=(int)floorf((1-rn)*6+.5f); // near the star: high
    if((r>>10)%1000<(unsigned)(pert*500))deg+=(r>>20)&1?1:-1;

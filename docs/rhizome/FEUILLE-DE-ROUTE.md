@@ -78,14 +78,27 @@ Le séquenceur orbital couvre ce qu'ils apportaient, donc on ne les fait pas :
 - **Libre** : périodes en secondes, pour une dérive organique sans pulsation (le plus « ambient »).
 - Les orbites repartent ensemble avec PLAY, comme une conjonction générale au départ.
 
-### Systèmes réels comme presets
-Des rapports d'orbites mesurés, qui sonnent très bien parce qu'ils sont en résonance :
-- **Io, Europe, Ganymède** : 1:2:4 (la résonance de Laplace) ;
-- **Kepler-223** : quatre planètes en chaîne de résonances ;
-- **TRAPPIST-1** : sept planètes en chaîne proche de 8:5:3:2 ;
-- **Pluton et Neptune** : 2:3.
+### Systèmes réels comme presets (dans le firmware depuis le 2 novembre 2026)
+Des rapports d'orbites mesurés, qui sonnent bien parce qu'ils sont en résonance. Vérifiés le 2 novembre 2026 dans les données publiées. Les périodes sont ramenées aux valeurs les plus proches du séquenceur, en gardant les rapports.
 
-À vérifier dans les données publiées avant de les figer. Chaque preset affiche son nom et ses rapports.
+| Preset | Corps | Périodes réelles | Dans Rhizome | Excentricités |
+|---|---|---|---|---|
+| **JUPITER** | Io, Europe, Ganymède, Callisto | 1,77 / 3,55 / 7,15 / 16,69 jours | 3 temps, 1,5 mesure, 3 mesures, 7 mesures (1:2:4, et 9,3 au lieu de 9,4) | 0,004 / 0,009 / 0,001 / 0,007 |
+| **KEPLER-223** | les planètes b, c, d, e | 7,38 / 9,85 / 14,79 / 19,73 jours | 3, 4, 6, 8 mesures (3:4:6:8) | 0,078 / 0,15 / 0,037 / 0,051 |
+| **TRAPPIST-1** | les planètes e, f, g, h | 6,10 / 9,21 / 12,36 / 18,78 jours | 2, 3, 4, 6 mesures (2:3:4:6) | 0,005 / 0,010 / 0,003 / 0,004 |
+| **PLUTO** | Neptune, Pluton (et Charon) | 164,8 / 247,9 ans | 4 et 6 mesures (3 tours contre 2) | 0,009 / 0,249 |
+
+Comment ça marche :
+- **chaque corps a 4 portes.** Les rapports des périodes s'entendent donc comme une polyrythmie : sur Kepler-223, en 24 mesures, b joue 32 notes, c 24, d 16 et e 12 ;
+- les corps vont d'abord sur les pistes mélodiques non coupées, dans l'ordre. Les autres pistes perdent leur orbite et reprennent leur rythme euclidien ;
+- le son, la gamme, la source des notes, la comète et les conjonctions ne changent pas ;
+- Charon est une lune de Pluton, qui joue une tierce au-dessus de lui ;
+- dès qu'on touche une orbite, le système redevient « OWN », le tien, et ENV revient aux orbites d'avant le premier système chargé.
+
+Sources :
+- [Mills et al. 2016, Nature](https://arxiv.org/abs/1612.07376), pour Kepler-223 ;
+- Agol et al. 2021, *Planetary Science Journal*, pour TRAPPIST-1 ;
+- les éphémérides du JPL, pour les lunes galiléennes, Neptune et Pluton.
 
 ### L'écran ORBIT : lisible et beau
 C'est la page principale de Rhizome. L'animation *est* le séquenceur. Ce qu'on voit, et ce que chaque élément dit :
@@ -112,7 +125,8 @@ SEQ ouvre **ORBIT**, puis **ORBIT / SYSTEM**, puis **ORBIT / MOONS**, puis **ORB
   - K4 PHASE : les portes tournent par pas de 15°.
 - **ORBIT / SYSTEM** :
   - K1 PRECESSION et K2 PERTURBATION, pour tout le système ;
-  - K3 PITCH (ORBIT / MOTIF / ECHO) et K4 NOTE (note de base), pour la piste choisie.
+  - K3 PITCH (ORBIT / MOTIF / ECHO), pour la piste choisie ;
+  - K4 SYSTEM : charge un système réel (JUPITER, KEPLER-223, TRAPPIST-1, PLUTO) ou montre OWN. La note de base de la piste reste sur MIX K2.
 - **ORBIT / MOONS** (piste choisie) :
   - K1 MOONS : de 0 à 3 lunes ;
   - K2 SPIN : le temps d'un tour, de 1/16 à une mesure, 8 valeurs ;
@@ -156,7 +170,9 @@ Mesuré dans le simulateur sur Quiet Lanterns, avec une comète de 8 mesures à 
 
 **L'accord sur une conjonction** : les deux corps rejouent tout de suite ensemble. Le second prend la note la plus proche de la sienne dans l'accord du premier (tierce, quinte ou octave dans la gamme), donc chacun garde son registre. Avec cinq corps, les conjonctions sont fréquentes : OFF permet de les rendre muettes.
 
-Prévus et pas encore faits : les notes du MOTIF écrites à côté des portes, les systèmes réels en presets.
+**Les notes du MOTIF à côté des portes** : quand la piste choisie joue un MOTIF, chaque porte que le corps va franchir porte le nom de la note qu'elle jouera, la prochaine en blanc. C'est le vrai parcours du moteur : il part de son curseur dans la phrase, saute les silences, et un MOTIF plus court ou plus long que le nombre de portes fait tourner les notes d'un tour à l'autre. Huit étiquettes au plus. Si la phrase est vide, l'écran l'indique.
+
+Prévu et pas encore fait : le tempo libre (des périodes en secondes, sans horloge).
 
 ### Coût
 L'équation de Kepler se résout avec une table (anomalie moyenne → position, 256 valeurs par excentricité) ou deux itérations de Newton, une fois par bloc de 64 échantillons (1,45 ms). La précision des coups est donc d'un bloc, comme dans Monades. Coût de calcul négligeable.
@@ -369,10 +385,10 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 1. **Banc d'essai du calcul** : chaque bloc mesuré sur le Mac, puis sur le FM-1. Il décide du nombre de voix et de la taille de Beads. **Sur le Mac, le 2 novembre 2026, Beads compris** : voir « Banc d'essai sur le Mac ». Reste la confirmation sur le FM-1.
 2. **Création du dépôt** à partir de Monades. **Fait le 2 novembre 2026** : dépôt privé `Dr-John-8bits/rhizome`, identité `FM-1_968`, noms USB et écrans Rhizome. Le préfixe `FM-1_976` prévu au départ était déjà pris par LSDj Burrito ; `FM-1_968` renvoie à *Différence et répétition* (Deleuze, 1968). Le grand nettoyage (retirer les 91 Mondes, les écrans et le site de Monades) se fera au moment où le moteur de Rhizome les remplacera : le moteur actuel en a besoin pour tourner.
 3. **Séquenceur orbital** dans le simulateur, puis sur le FM-1. **Première version dans le simulateur le 2 novembre 2026**, sur le moteur de Monades :
-   - moteur `app/dsp/orbit.inc` : patch v11 (1920 octets), 15 commandes, conjonctions (accent ou accord), lunes, comète ;
+   - moteur `app/dsp/orbit.inc` : patch v11 (1924 octets), 16 commandes, conjonctions (accent ou accord), lunes, comète, systèmes réels ;
    - pages ORBIT, ORBIT / SYSTEM, ORBIT / MOONS et ORBIT / COMET (`app/orbit_page.c`), dans le style prévu : grand dessin, bandeau fin, carte du potard ;
-   - tests : rythme euclidien exact pour une orbite ronde (à 0,05 pas près), rubato sur un cycle stable, MOTIF, conjonction, pas de rafale, lunes (moments exacts, notes, intervalles), comète (passages, durée, gel de la bande), accord, import des patchs et des emplacements de Monades, scénario `tests/orbit_ui.txt` ;
-   - captures dans `docs/rhizome/captures/`, trois écoutes de 45 s (Monde 61 Quiet Lanterns : cinq corps, puis avec des lunes, puis avec la comète et les accords) dans `M-VAVE FM1/ecoutes/` ;
+   - tests : rythme euclidien exact pour une orbite ronde (à 0,05 pas près), rubato sur un cycle stable, MOTIF, conjonction, pas de rafale, lunes (moments exacts, notes, intervalles), comète (passages, durée, gel de la bande), accord, systèmes réels (rapports, polyrythmie exacte sur 24 mesures, retour à OWN), curseur du MOTIF, import des patchs et des emplacements de Monades, scénario `tests/orbit_ui.txt` ;
+   - captures dans `docs/rhizome/captures/`, quatre écoutes de 45 s (Monde 61 Quiet Lanterns : cinq corps, puis avec des lunes, puis avec la comète et les accords, puis Kepler-223 en MOTIF) dans `M-VAVE FM1/ecoutes/` ;
    - le patch v11 n'est encore sorti nulle part : sa taille peut changer sans conversion jusqu'à la première version installée ;
    - remarque : avec cinq corps, les conjonctions sont fréquentes (18 en 12 s), donc moins « rares et précieuses » qu'avec deux ou trois. À régler à l'oreille ; K4 CONJUNCTION sur OFF les rend muettes ;
    - **reste à faire : le compiler pour le FM-1 et l'essayer sur l'appareil.**

@@ -60,7 +60,7 @@ static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob valu
 static uint16_t chorus_line[2048]; // ordinary RAM: the pool must keep 8 KB spare (base/tools/build.py)
 static int16_t diffuser[1210];static unsigned diffuser_head[4];static const unsigned diffuser_len[4]={150,214,319,527}; // Monades: 12 dB high-pass on the echo and room sends
 static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;memset(diffuser,0,sizeof diffuser);memset(diffuser_head,0,sizeof diffuser_head);fx_active=false;memset(echo,0,sizeof echo);memset(room,0,sizeof room);memset(room_head,0,sizeof room_head);memset(room_lp,0,sizeof room_lp);echo_head=0;echo_lp=fx_smooth=fx_highpass_in=fx_highpass_out=0;delay_smooth=8820;}
-static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;} // Rhizome: orbits off, one bar a turn
+static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;} // Rhizome: orbits off, one bar a turn
 static void v10_defaults(md_patch &p){p.motion_every=0;v11_defaults(p);}
 static void v9_defaults(md_patch &p){for(int i=0;i<6;i++){p.gamaka[i]=MD_GAMAKA_OFF;p.gamaka_amount[i]=500;}p.vadi=p.samvadi=-1;v10_defaults(p);}
 static void v8_defaults(md_patch &p){for(int i=0;i<6;i++)p.gen[i]={MD_GEN_OFF,500,8,12};p.form=0;p.form_bars=1;p.form_drops=2;v9_defaults(p);}
@@ -267,6 +267,7 @@ static void dice(int i,int page){
 #include "orbit.inc"
 static void apply_command(Command e) {
  int i=bound(e.t,0,5),v=e.v;md_track &t=patch.track[i];
+ if(e.c>=MD_ORBIT_GATES&&e.c<=MD_ORBIT_MOON_LEVEL&&e.c!=MD_ORBIT_PITCH)patch.orbit_system=0; // Rhizome: a real system, edited, is your own
  // Playback, preview notes and emergency silence do not change a preset.
  if(e.c!=MD_SCENE&&e.c!=MD_RETURN&&e.c!=MD_PLAY&&e.c!=MD_TRIGGER&&e.c!=MD_PANIC&&e.c!=MD_MUTATE&&e.c!=MD_DICE&&e.c!=MD_QUALITY&&(e.c<MD_MORPH_TO||e.c>MD_OVERLOAD))patch.edited_mask|=1u;
  if(e.c==MD_MODEL||e.c==MD_TONE||e.c==MD_HARM||e.c==MD_DECAY||e.c==MD_ATTACK||(e.c>=MD_SHAPE&&e.c<=MD_BREATHE))patch.edited_mask|=2u<<i;
@@ -322,6 +323,7 @@ static void apply_command(Command e) {
  case MD_ORBIT_COMET_EVENT:patch.comet_event=bound(v,0,MD_COMET_EVENTS-1);break;
  case MD_ORBIT_COMET_AMOUNT:patch.comet_amount=bound(v,0,100);break;
  case MD_ORBIT_CONJ:patch.orbit_conj=bound(v,0,MD_CONJ_MODES-1);break;
+ case MD_ORBIT_SYSTEM:orbit_load_system(bound(v,0,MD_ORBIT_SYSTEMS-1));break;
  case MD_ROOT:patch.root=bound(v,0,11);break;
  case MD_SCALE:patch.scale=bound(v,0,SCALE_COUNT-1);break;
  case MD_TRANSPOSE:patch.transpose=bound(v,-24,24);break;
@@ -728,6 +730,8 @@ static void quantum(float *lr,unsigned n) {
 extern "C" {
 int md_hit(unsigned s,unsigned h,unsigned l,unsigned r) {if(!l||l>32)return 0;h=h>l?l:h;return (((s+r)%l)*h)%l<h;}
 int md_orbit_steps(int period){return orbit_steps_of[bound(period,0,MD_ORBIT_PERIODS-1)];}
+const char *md_orbit_system_name(int s,int brief){const OrbitSystem &y=orbit_systems[bound(s,0,MD_ORBIT_SYSTEMS-1)];return brief?y.brief:y.name;}
+const char *md_orbit_system_about(int s){return orbit_systems[bound(s,0,MD_ORBIT_SYSTEMS-1)].about;}
 int md_orbit_comet_steps(int comet){return orbit_comet_steps_of[bound(comet,0,MD_COMETS-1)];}
 int md_orbit_moon_steps(int spin){return orbit_moon_steps_of[bound(spin,0,MD_MOON_SPINS-1)];}
 // The gates of a track: its turn's steps, the euclidean hits among them, each as a direction (top = -pi/2, clockwise).
@@ -856,7 +860,7 @@ int md_validate(const md_patch *p) {
  if(p->motion_every<0||p->motion_every>4)return 0;
  for(int i=0;i<6;i++){const md_orbit &o=p->orbit[i];if(o.gates<0||o.gates>MD_ORBIT_GATES_MAX||o.period<0||o.period>=MD_ORBIT_PERIODS||o.ecc<0||o.ecc>MD_ORBIT_ECC_MAX||o.phase<0||o.phase>=MD_ORBIT_PHASES||o.pitch<0||o.pitch>=MD_PITCH_SOURCES||
   o.moons<0||o.moons>MD_MOONS_MAX||o.moon_spin<0||o.moon_spin>=MD_MOON_SPINS||o.moon_interval<0||o.moon_interval>=MD_MOON_INTERVALS||o.moon_level<0||o.moon_level>100)return 0;}
- if(p->orbit_comet<0||p->orbit_comet>=MD_COMETS||p->comet_event<0||p->comet_event>=MD_COMET_EVENTS||p->comet_amount<0||p->comet_amount>100||p->orbit_conj<0||p->orbit_conj>=MD_CONJ_MODES)return 0;
+ if(p->orbit_comet<0||p->orbit_comet>=MD_COMETS||p->comet_event<0||p->comet_event>=MD_COMET_EVENTS||p->comet_amount<0||p->comet_amount>100||p->orbit_conj<0||p->orbit_conj>=MD_CONJ_MODES||p->orbit_system<0||p->orbit_system>=MD_ORBIT_SYSTEMS)return 0;
  if(p->orbit_prec<0||p->orbit_prec>100||p->orbit_pert<0||p->orbit_pert>100)return 0;
  if(p->vadi< -1||p->vadi>11||p->samvadi< -1||p->samvadi>11)return 0;
  if(p->form<0||p->form>1000||p->form_bars<0||p->form_bars>3||p->form_drops<0||p->form_drops>3)return 0;

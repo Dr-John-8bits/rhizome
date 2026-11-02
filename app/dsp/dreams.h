@@ -21,7 +21,7 @@ enum { MD_MODEL, MD_TONE, MD_HARM, MD_DECAY, MD_LEVEL, MD_SEND, MD_HITS,
  MD_OVERLOAD,
  MD_ORBIT_GATES,MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_PHASE,MD_ORBIT_PITCH,MD_ORBIT_PREC,MD_ORBIT_PERT,
  MD_ORBIT_MOONS,MD_ORBIT_MOON_SPIN,MD_ORBIT_MOON_INTERVAL,MD_ORBIT_MOON_LEVEL,
- MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
+ MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ,MD_ORBIT_SYSTEM, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
  MD_COMMAND_COUNT }; /* OVERLOAD: the audio ran late; FULL drops to ECO, ECO sheds chorus and room diffusion until the next Monde */ /* CLEAR_PHRASE: all 16 steps rest, cursor on step 1 */ /* LFO commands: track argument = track + 6 * slot (A, B) */
 typedef struct { int32_t model,tone,harm,decay,level,send,hits,length,rotate,prob,note,pan,mute,speed,attack,ratchet,accent,shape,cutoff,resonance,filter,breathe; } md_track;
 typedef struct { int32_t delay_send,reverb_send,bass_mode,pattern,glide,marbles,tides,tides_rate,warps,edit_step; int32_t notes[16]; } md_extension;
@@ -64,6 +64,10 @@ enum { MD_PITCH_ORBIT, MD_PITCH_MOTIF, MD_PITCH_ECHO, MD_PITCH_SOURCES };
  * orbit_conj: what a conjunction does: nothing, accent both bodies' next beat, or strike them together as a chord. */
 enum { MD_COMETS=6, MD_COMET_SWELL=0, MD_COMET_FREEZE, MD_COMET_BOTH, MD_COMET_EVENTS };
 enum { MD_CONJ_OFF, MD_CONJ_ACCENT, MD_CONJ_CHORD, MD_CONJ_MODES };
+/* Real systems (orbit_system 1..4, 0 = your own): MD_ORBIT_SYSTEM loads one onto the tracks (unmuted melodic ones
+ * first): measured period ratios and eccentricities, the same number of gates on each body so the ratios are heard as
+ * a polyrhythm. Any later change to an orbit makes the system your own again (0). ENV undoes the load. */
+enum { MD_ORBIT_SYSTEMS=5 };
 enum { MD_MOON_REPEAT, MD_MOON_UP, MD_MOON_DOWN, MD_MOON_THIRDS_UP, MD_MOON_THIRDS_DOWN, MD_MOON_HARMONICS, MD_MOON_INTERVALS };
 typedef struct { int32_t gates,period,ecc,phase,pitch,moons,moon_spin,moon_interval,moon_level; } md_orbit;
 typedef struct {
@@ -81,7 +85,7 @@ typedef struct {
  int32_t gamaka[6],gamaka_amount[6],vadi,samvadi;
  int32_t motion_every; /* v10: K2 Motion holds its variation for 1, 2, 4, 8 or 16 steps (0..4); 0 = every step, as 1.1 */
  /* Rhizome v11: the orbits; precession 0..100 (100 = each ellipse turns once in 16 bars), perturbation 0..100. */
- md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj;
+ md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj,orbit_system;
 } md_patch;
 typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; float peak; uint32_t grain_writes,voice_quanta,skipped_quanta; int32_t last_note[6]; uint32_t quality_reductions,element_modes; float track_peak[6];
  /* Monades meters, output-referred like the final mix: grain/delay/room returns, master L/R, pre-limiter peak. */
@@ -108,7 +112,8 @@ typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; floa
  int32_t conj_a,conj_b;float conj_pos;uint32_t conj_count;
  float moon_t0[6],moon_note[6][3];int32_t moon_hit[6];uint32_t moon_hits[6];
  /* The comet: its mean anomaly (0 = at the star), how strongly its passage acts now (0..1), passages so far. */
- float comet_M,comet_now;uint32_t comet_passes; } md_stats;
+ float comet_M,comet_now;uint32_t comet_passes;
+ int32_t motif_at[6]; /* MOTIF: the phrase step each body looks from for its next note */ } md_stats;
 /* Monades granular view: tape overview (256 columns, oldest wraps at the write head), grains as samples behind the head. */
 typedef struct { uint8_t peak[256]; uint32_t head,valid,length; int32_t freeze; float zone,zone_len; struct { float behind,len,env; int32_t active; } grain[4]; } md_tape;
 void md_tape_view(md_tape *view);
@@ -142,6 +147,8 @@ int md_cutoff_hz(int value);
 int md_hit(unsigned step,unsigned hits,unsigned length,unsigned rotate);
 int md_orbit_steps(int period); /* one turn, in sixteenths */
 int md_orbit_moon_steps(int spin); /* one spin of the moons, in sixteenths */
+const char *md_orbit_system_name(int system,int brief); /* JUPITER, KEPLER-223...; 0: OWN */
+const char *md_orbit_system_about(int system); /* its bodies and ratios, a line */
 int md_orbit_comet_steps(int comet); /* one turn of the comet, in sixteenths (0: none) */
 enum { MD_COMET_ECC_MILLI=900 }; /* its eccentricity; its periapsis points down and to the left */
 int md_orbit_gate_angles(const md_patch *p,int track,float *phi); /* directions of its gates (radians), returns the count */

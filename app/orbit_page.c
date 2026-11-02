@@ -100,7 +100,7 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
   else if(k==2){*label="PITCH";ov_append(value,ov_pitch_name(o->pitch));
    if(o->pitch==MD_PITCH_ECHO){char b[4]={'T',(char)('1'+(tr+5)%6),0};ov_append(info,"TRIAD NOTE ABOVE ");ov_append(info,b);}
    else ov_append(info,o->pitch==MD_PITCH_MOTIF?"THE PHRASE, IN ORDER":"NEAR THE STAR = HIGHER");}
-  else{*label="NOTE";const int n=p->track[tr].note;ov_append(value,md_pitch_names[n%12]);char b[4];md_num(n/12-1,b);ov_append(value,b);ov_append(info,"BASE NOTE OF THE TRACK");}
+  else{*label="SYSTEM";ov_append(value,md_orbit_system_name(p->orbit_system,brief));ov_append(info,md_orbit_system_about(p->orbit_system));}
  }else if(page==ORBIT_MOONS){
   const int n=o->moons,spin=md_orbit_moon_steps(o->moon_spin);
   if(k==0){*label="MOONS";if(!n){ov_append(value,"OFF");ov_append(info,"NO ORNAMENT");}
@@ -151,6 +151,21 @@ static void ov_closeup(const md_patch *p,int tr,int hk,uint32_t now){
   if(ov_band(y-4,y+4))md_circle((int)(x+.5f),(int)(y+.5f),on?4:3,on?MD_INK:md_tint(MD_BG,MD_INK,hk==0?30u:24u),1);
   char s[8];ov_note_name(spun?ms->moon_note[tr][k]:0,s);ov_label(MC_X+(MC_R+14)*fm_cosf(a),MC_Y+(MC_R+12)*fm_sinf(a),s,on?MD_INK:hk==2?c:MD_DIM);}
 }
+// The gates in the order the body will cross them (from where it is; stopped, from the top, gate there included), each
+// with the phrase's next note: the engine's walk, from its cursor, rests skipped.
+static int ov_motif_ok(const md_patch *p,int tr){const md_orbit *o=&p->orbit[tr];return o->gates&&o->pitch==MD_PITCH_MOTIF&&p->track[tr].model>=MD_FM;}
+static int ov_motif_empty(const md_patch *p,int tr){for(int k=0;k<16;k++)if(p->ext[tr].notes[k]>=0)return 0;return 1;}
+static void ov_motif_labels(const md_patch *p,int tr,uint16_t col){
+ const OrbitView *o=&ov[tr];if(!o->on||!ov_motif_ok(p,tr)||ov_motif_empty(p,tr))return;
+ float phi[MD_ORBIT_GATES_MAX],delta[MD_ORBIT_GATES_MAX];int order[MD_ORBIT_GATES_MAX];const int n=md_orbit_gate_angles(p,tr,phi),playing=md_playing();
+ for(int g=0;g<n;g++){float d=phi[g]-o->out+(playing?0:.02f);d-=6.2831853f*fm_floorf(d/6.2831853f);delta[g]=d-(playing?0:.02f);order[g]=g;}
+ for(int a=1;a<n;a++)for(int b=a;b>0&&delta[order[b]]<delta[order[b-1]];b--){int t=order[b];order[b]=order[b-1];order[b-1]=t;}
+ int at=playing?md_status()->motif_at[tr]:0;const int shown=n<8?n:8;
+ for(int k=0;k<shown;k++){int found=-1;for(int j=0;j<16&&found<0;j++)if(p->ext[tr].notes[(at+j)%16]>=0)found=(at+j)%16;at=(found+1)%16;
+  const float f=phi[order[k]],r=o->a*(1-o->e*o->e)/(1+o->e*fm_cosf(f-o->w))+11,x=OV_CX+r*fm_cosf(f),y=OV_CY+r*fm_sinf(f);if(y<48||y>192)continue;
+  char s[8];ov_note_name(md_quantize_pitch((float)(p->track[tr].note+p->ext[tr].notes[found]+p->transpose),p->root,p->scale),s);
+  ov_label(x,y,s,k==0?MD_INK:md_tint(MD_BG,col,(unsigned)(28-k*2)));}
+}
 static void md_orbit_page(const md_patch *p,uint16_t col){
  const int tr=dream_ui.track,page=dream_ui.page;const uint32_t now=plat_ms();
  const int touched=ov_touch>=0&&ov_touch_page==page&&now-ov_touch_ms<1500;const int hk=touched?ov_touch:-1;
@@ -172,6 +187,8 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
    const int on=lit_ms&&g==ov_hit_gate[i],big=i==tr&&page==ORBIT&&(hk==2||hk==3);const float d=big?5:3.5f;
    const uint16_t ink=on?(ov_hit_skip[i]?MD_EDGE:MD_INK):md_tint(MD_BG,dream_colors[i],i==tr?30u:16u);
    ov_seg(OV_CX+(r-d)*c,OV_CY+(r-d)*s,OV_CX+(r+d)*c,OV_CY+(r+d)*s,ink);if(on||big)ov_seg(OV_CX+(r-d)*c+s*.7f,OV_CY+(r-d)*s-c*.7f,OV_CX+(r+d)*c+s*.7f,OV_CY+(r+d)*s-c*.7f,ink);}}
+ // MOTIF: the notes the selected body will play, written by the gates it will cross next, in order (the next brightest).
+ if(page!=ORBIT_COMET)ov_motif_labels(p,tr,col);
  // A conjunction: the line from the star through both bodies, fading over 1.2 s.
  if(ov_conj_a>=0&&now-ov_conj_ms<1200){const OrbitView *a=&ov[ov_conj_a],*b=&ov[ov_conj_b];const OrbitView *far=(a->x-OV_CX)*(a->x-OV_CX)+(a->y-OV_CY)*(a->y-OV_CY)>(b->x-OV_CX)*(b->x-OV_CX)+(b->y-OV_CY)*(b->y-OV_CY)?a:b;
   ov_seg(OV_CX,OV_CY,far->x,far->y,md_tint(MD_BG,MD_INK,(unsigned)(32-(now-ov_conj_ms)*26/1200)));}
@@ -206,6 +223,7 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  // Words only where they help.
  if(page==ORBIT_COMET){if(!p->orbit_comet)md_text(10,44,"K1 COMET: A RARE PASSAGE",MD_DIM);else if(!md_playing())md_text(10,44,"PLAY: IT STARTS FAR AWAY",MD_DIM);}
  else if(!p->orbit[tr].gates)md_text(10,44,page==ORBIT?"K3 GATES STARTS THIS ORBIT":"NO ORBIT: ORBIT PAGE, K3 GATES",MD_DIM);
+ else if(page!=ORBIT_MOONS&&p->orbit[tr].pitch==MD_PITCH_MOTIF&&p->track[tr].model>=MD_FM&&ov_motif_empty(p,tr))md_text(10,44,"MOTIF EMPTY: KEYS ON GENERATOR",MD_DIM);
  else if(page==ORBIT_MOONS&&!p->orbit[tr].moons)md_text(10,44,"K1 MOONS: ORNAMENTS AFTER NOTES",MD_DIM);
  else if(!md_playing())md_text(10,44,page==ORBIT_MOONS?"EACH NOTE SPINS ITS MOONS ONCE":"PLAY: ALL START FROM THE TOP",MD_DIM);
  // The strip: four knobs, value and a short gauge.
@@ -216,7 +234,7 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  // The card of the knob being turned, in the corner opposite the body it changes.
  // A full-width card, on the half of the screen away from the body, with a thread to it.
  if(touched){const char *label;char value[24]={0},info[48];ov_knob(p,page,hk,&label,value,info,0);
-  const OrbitView *o=&ov[tr];const int body=page==ORBIT||(page==ORBIT_SYS&&hk>=2),y=page==ORBIT_MOONS||(body&&o->y<OV_CY)||(page==ORBIT_COMET&&ov_comet.on&&ov_comet.y<OV_CY)?164:42;
+  const OrbitView *o=&ov[tr];const int body=page==ORBIT||(page==ORBIT_SYS&&hk==2),y=page==ORBIT_MOONS||(body&&o->y<OV_CY)||(page==ORBIT_COMET&&ov_comet.on&&ov_comet.y<OV_CY)?164:42;
   char head[24]={'K',(char)('1'+hk),' ',0};ov_append(head,label);
   cv_rect(6,y,228,33,MD_CARD);cv_rect(6,y,228,1,col);cv_text(12,y+3,&FONT_XS,head,MD_DIM);
   cv_text(228-text_w(&FONT_B,value),y+2,&FONT_B,value,col);cv_text(12,y+18,&FONT_XS,info,MD_INK);
