@@ -58,6 +58,7 @@ tap FX
 wait 100
 shot grain.png
 tap FX
+tap FX
 expect page 8
 wait 100
 shot tape.png

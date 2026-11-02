@@ -23,7 +23,8 @@ enum { MD_MODEL, MD_TONE, MD_HARM, MD_DECAY, MD_LEVEL, MD_SEND, MD_HITS,
  MD_ORBIT_MOONS,MD_ORBIT_MOON_SPIN,MD_ORBIT_MOON_INTERVAL,MD_ORBIT_MOON_LEVEL,
  MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ,MD_ORBIT_SYSTEM,
  MD_TAPE_HEADS,MD_TAPE_WOW,MD_TAPE_DRIVE,MD_TAPE_AGE,MD_TAPE_TRANSPORT,
- MD_HALL_SIZE,MD_HALL_PREDELAY,MD_HALL_BASS,MD_HALL_MOD,MD_HALL_VINTAGE, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
+ MD_HALL_SIZE,MD_HALL_PREDELAY,MD_HALL_BASS,MD_HALL_MOD,MD_HALL_VINTAGE,
+ MD_BEADS_SHAPE,MD_BEADS_DENSITY,MD_BEADS_RANDOM,MD_BEADS_MEDIA, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
  MD_COMMAND_COUNT }; /* OVERLOAD: the audio ran late; FULL drops to ECO, ECO sheds chorus and room diffusion until the next Monde */ /* CLEAR_PHRASE: all 16 steps rest, cursor on step 1 */ /* LFO commands: track argument = track + 6 * slot (A, B) */
 typedef struct { int32_t model,tone,harm,decay,level,send,hits,length,rotate,prob,note,pan,mute,speed,attack,ratchet,accent,shape,cutoff,resonance,filter,breathe; } md_track;
 typedef struct { int32_t delay_send,reverb_send,bass_mode,pattern,glide,marbles,tides,tides_rate,warps,edit_step; int32_t notes[16]; } md_extension;
@@ -84,7 +85,14 @@ void md_reel_view(md_reel *view);
  * the tail's energy in those bands now. */
 typedef struct { float rt60[3],energy[3],predelay_ms,size; int32_t vintage,infinite; } md_hall;
 void md_hall_view(md_hall *view);
-float md_hall_rt60(int decay); /* seconds for a DECAY value, -1: infinite */ /* speed: 1 = the slowest tape that still gives 1.43 s on head 3 */
+float md_hall_rt60(int decay); /* seconds for a DECAY value, -1: infinite */
+/* Rhizome's granular bus is Beads (Mutable Instruments): beads_density 0..1000 (below 480 regular grains, faster toward 0;
+ * above 520 random grains, more toward 1000; between, none), beads_shape and beads_random 0..1000, beads_media
+ * MD_BEADS_DIRTY_TAPE .. MD_BEADS_DIGITAL (the memory's grain and length). */
+enum { MD_BEADS_DIRTY_TAPE, MD_BEADS_CLEAN_TAPE, MD_BEADS_VINTAGE, MD_BEADS_DIGITAL, MD_BEADS_MEDIAS };
+float md_beads_seconds(void); /* the memory's length now, for the media in use */
+float md_beads_rate(int density); /* new grains a second asked for (regular below the middle, an average above) */
+float md_beads_envelope(float shape,float t); /* the grain envelope SHAPE gives, at t (0..1 of the grain) */ /* speed: 1 = the slowest tape that still gives 1.43 s on head 3 */
 enum { MD_MOON_REPEAT, MD_MOON_UP, MD_MOON_DOWN, MD_MOON_THIRDS_UP, MD_MOON_THIRDS_DOWN, MD_MOON_HARMONICS, MD_MOON_INTERVALS };
 typedef struct { int32_t gates,period,ecc,phase,pitch,moons,moon_spin,moon_interval,moon_level; } md_orbit;
 typedef struct {
@@ -102,7 +110,7 @@ typedef struct {
  int32_t gamaka[6],gamaka_amount[6],vadi,samvadi;
  int32_t motion_every; /* v10: K2 Motion holds its variation for 1, 2, 4, 8 or 16 steps (0..4); 0 = every step, as 1.1 */
  /* Rhizome v11: the orbits; precession 0..100 (100 = each ellipse turns once in 16 bars), perturbation 0..100. */
- md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj,orbit_system,tape_heads,tape_wow,tape_drive,tape_age,hall_size,hall_predelay,hall_bass,hall_mod,hall_vintage;
+ md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj,orbit_system,tape_heads,tape_wow,tape_drive,tape_age,hall_size,hall_predelay,hall_bass,hall_mod,hall_vintage,beads_shape,beads_density,beads_random,beads_media;
 } md_patch;
 typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; float peak; uint32_t grain_writes,voice_quanta,skipped_quanta; int32_t last_note[6]; uint32_t quality_reductions,element_modes; float track_peak[6];
  /* Monades meters, output-referred like the final mix: grain/delay/room returns, master L/R, pre-limiter peak. */
@@ -132,7 +140,8 @@ typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; floa
  float comet_M,comet_now;uint32_t comet_passes;
  int32_t motif_at[6]; /* MOTIF: the phrase step each body looks from for its next note */ } md_stats;
 /* Monades granular view: tape overview (256 columns, oldest wraps at the write head), grains as samples behind the head. */
-typedef struct { uint8_t peak[256]; uint32_t head,valid,length; int32_t freeze; float zone,zone_len; struct { float behind,len,env; int32_t active; } grain[4]; } md_tape;
+enum { MD_TAPE_GRAINS=8 }; /* Rhizome: Beads' grains (behind: samples behind the write head, which moves toward lower indices; len: samples left) */
+typedef struct { uint8_t peak[256]; uint32_t head,valid,length; int32_t freeze; float zone,zone_len; struct { float behind,len,env; int32_t active; } grain[MD_TAPE_GRAINS]; } md_tape;
 void md_tape_view(md_tape *view);
 /* Monades MIDI out. Generated notes (sequencer and repeats, never notes received over MIDI) go out by track
  * (mode 1: each track on its out channel, md_set_midi_channels) or by note zones (mode 2: every zone holding the note, channel 1-16, 0 = zone off;

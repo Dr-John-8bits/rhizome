@@ -47,6 +47,7 @@ tap FX
 tap FX
 tap FX
 tap FX
+tap FX
 expect page 14
 spin K4 25
 wait 100
@@ -86,6 +87,7 @@ tap SAVE
 wait 100
 tap HOME
 wait 100
+tap FX
 tap FX
 tap FX
 tap FX

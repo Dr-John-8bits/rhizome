@@ -479,7 +479,15 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
    - **reste à faire : le compiler pour le FM-1 et l'essayer sur l'appareil.**
 4. **Delay à bande** et son animation. **Dans le simulateur le 2 novembre 2026** (voir « Dans le firmware » plus haut). Tests : temps de chaque tête, FREEZE qui boucle, STOP qui freine, PANIC silencieux, scénario `tests/tape_ui.txt`. Une écoute dans `M-VAVE FM1/ecoutes/`.
 5. **Réverbe HALL**. **Dans le simulateur le 2 novembre 2026** (voir « Dans le firmware » dans la section HALL). Tests : RT60 mesuré, VINTAGE, INFINITE, bornes, scénario `tests/hall_ui.txt`. Une écoute dans `M-VAVE FM1/ecoutes/`.
-6. **Granulaire Beads**.
+6. **Granulaire Beads**. **En cours, dans le simulateur, le 2 novembre 2026.** C'est le cœur de Beads (MIT), dans `app/third_party/beads` ; ce qui a été changé pour le FM-1 est listé dans son `NOTICE.md`.
+   - **Mémoire** : les 128 Ko du granulaire de Monades, qu'il remplace. Elle reste en mono, donc sa durée dépend du média : DIGITAL 1,4 s, VINTAGE 1,9 s, CLEAN TAPE 3,8 s, DIRTY TAPE 5,8 s.
+   - **Grains** : 6 au plus. Ils sont générés en continu, comme avec le bouton SEED verrouillé sur le module. **Avec SEED sur OFF, Beads ne lance aucun grain.**
+   - **Réglages** : POSITION, SIZE, PITCH, FEEDBACK et FREEZE gardent les champs de Monades ; la comète peut aussi figer la mémoire. DIRECTION REVERSE passe par le tiers bas de SIZE, où Beads joue ses grains à l'envers.
+   - **Nouvelle page BEADS** (FX, après GRANULAR BUS) : DENSITY, SHAPE, RANDOM, MEDIA. L'écran montre la mémoire et les grains vivants, et l'enveloppe de grain que SHAPE dessine vraiment.
+   - Quand SPACE est à 0, Beads se repose et ne calcule rien.
+   - **Niveau** : le même que les grains de Monades, à 1,7 dB près, sur six Mondes.
+   - **Calcul, à surveiller** : d'après la mesure sur le Mac, Beads coûte environ 1,4 à 2,3 ms par seconde de son de plus que les grains de Monades, soit **+6 à +9 % du FM-1** quand SPACE est ouvert. Avec la bande et la HALL, les Mondes les plus lourds de Monades pourraient dépasser le plafond de 85 %. Pistes : moins de grains en ECO, le second cœur, et le grand nettoyage (les voix de Rhizome sont plus légères).
+   - **Reste à faire** : l'écoute et les captures, les tests propres à Beads (médias, densité, gel), le commit de cette étape, puis la mesure sur l'appareil.
 7. **Voix Plaits 1.2 et Rings.**
 
 Chaque étape se développe d'abord sur le Mac (`tools/build_local.py host`), puis dans le navigateur, puis sur le FM-1.

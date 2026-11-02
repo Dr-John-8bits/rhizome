@@ -18,6 +18,7 @@
 #include "plaits/dsp/oscillator/sine_oscillator.h"
 #include "stmlib/dsp/filter.h"
 #include "stmlib/utils/random.h"
+#include "beads/dsp/processor.h" // Rhizome: the granular bus
 // The Rings chorus lives in chorus.cpp: its resources.h redefines Plaits' LUT_* macros.
 extern "C" { void md_chorus_reset(uint16_t *line); void md_chorus_process(float *left,float *right,unsigned n,float amount,float depth); }
 #ifndef PLAT_HOST
@@ -28,7 +29,7 @@ extern "C" { void md_chorus_reset(uint16_t *line); void md_chorus_process(float 
 namespace {
 #include "satin_tables.inc"
 #include "scale_table.inc"
-constexpr unsigned Q=64, GN=65536, GM=GN-1; // Rhizome: 1.49 s (was 2.97 s), its other half holds the HALL
+constexpr unsigned Q=64;
 struct Voice {
  plaits::AdditiveEngine additive; plaits::SineOscillator choir[3]; stmlib::Svf filter1,filter2;
  plaits::FMEngine fm; plaits::VirtualAnalogEngine va;
@@ -47,36 +48,32 @@ static Voice *voices;
 // Strike resonators use ordinary RAM; the large tape/effect pool stays bounded.
 static elements::Resonator element_body[6];
 static elements::Exciter element_strike[6];
-static int16_t tape[GN] POOL;
 static void reel_reset(); // Rhizome's tape echo (tape_echo.inc) holds the echo's 32 KiB
 static bool fx_active;
 static float fx_smooth,fx_highpass_in,fx_highpass_out;
 static void hall_reset(); // Rhizome's HALL (hall.inc)
+static void beads_reset(); // Rhizome's granular bus (beads_bus.inc)
 static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob value the coefficients were computed for
 // Monades: Rings chorus on the dry mix (4 KiB line), and Dattorro / Griesinger input diffusion before the room
 // (four allpasses, 1210 samples). Both are skipped entirely at 0.
 static uint16_t chorus_line[2048]; // ordinary RAM: the pool must keep 8 KB spare (base/tools/build.py)
 // Monades: 12 dB high-pass on the echo and room sends
 static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;fx_active=false;reel_reset();hall_reset();fx_smooth=fx_highpass_in=fx_highpass_out=0;}
-static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;p.tape_heads=1;p.tape_wow=p.tape_drive=p.tape_age=0;p.hall_size=700;p.hall_predelay=20;p.hall_bass=550;p.hall_mod=300;p.hall_vintage=0;} // the echo: head 1 alone (40 ms to 0.95 s), a clean tape // Rhizome: orbits off, one bar a turn
+static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;p.tape_heads=1;p.tape_wow=p.tape_drive=p.tape_age=0;p.hall_size=700;p.hall_predelay=20;p.hall_bass=550;p.hall_mod=300;p.hall_vintage=0;p.beads_shape=500;p.beads_density=800;p.beads_random=200;p.beads_media=MD_BEADS_DIGITAL;} // Beads: frequent random grains // the echo: head 1 alone (40 ms to 0.95 s), a clean tape // Rhizome: orbits off, one bar a turn
 static void v10_defaults(md_patch &p){p.motion_every=0;v11_defaults(p);}
 static void v9_defaults(md_patch &p){for(int i=0;i<6;i++){p.gamaka[i]=MD_GAMAKA_OFF;p.gamaka_amount[i]=500;}p.vadi=p.samvadi=-1;v10_defaults(p);}
 static void v8_defaults(md_patch &p){for(int i=0;i<6;i++)p.gen[i]={MD_GEN_OFF,500,8,12};p.form=0;p.form_bars=1;p.form_drops=2;v9_defaults(p);}
 static void v7_defaults(md_patch &p){p.send_hp=0;p.echo_tone=p.room_tone=500;p.echo_sync=p.room_diffusion=p.chorus=0;p.chorus_depth=500;v8_defaults(p);for(int i=0;i<6;i++)for(int s=0;s<2;s++)p.lfo[i][s]={3,MD_LFO_SINE,s?MD_TO_PAN:MD_TO_CUTOFF,0};}
 static void extension_defaults(md_patch &p){v7_defaults(p);p.delay_ms=200;p.delay_fb=300;p.reverb_time=450;p.fx_level=0;memset(p.ext,0,sizeof p.ext);for(int i=0;i<6;i++){p.ext[i].tides_rate=250;for(int j=0;j<16;j++)p.ext[i].notes[j]=(j%4==0?0:j%4==2?7:-1);}}
 
-struct Grain { float pos,phase,inc,pan,rate,gain; unsigned life,age; };
 struct Repeat { float left,spacing,note,velocity; unsigned remaining; };
 static Repeat repeats[6];
-static Grain grains[4];
 static md_patch patch,previous;
 #include "tape_echo.inc"
 static md_stats stats;
-static unsigned writehead,grainclock,tape_valid;
-static uint8_t tape_peak[256];static unsigned tape_peak_col;
 // Display-only scope per voice: 128 points after the filter, stride chosen so about two periods fit 64 points.
 static int16_t scope_buf[6][128];static unsigned scope_pos[6],scope_phase[6],scope_track; // only the track the screen reads is recorded; // display-only overview of the tape, 512 samples a column
-static float feedback_lp,dcx[2],dcy[2],smooth[4];
+static float dcx[2],dcy[2],smooth[4];
 static unsigned rng,seqrng,step;
 static float untilstep,duckenv;
 static int playing;
@@ -125,14 +122,6 @@ static float clip(float x) { float a=fabsf(x);if(a<=.8f)return x;float y=.8f+.2f
 // Keep existing warm settings up to 90%; open the final tenth to 18 kHz.
 static float filter_q(float resonance) { return .707f+2.0f*resonance*resonance; }
 static float cutoff_hz(float u) { return 60.0f*stmlib::SemitonesToRatio(u*84.0f+fmaxf(0.0f,u-.9f)*147.458f); }
-static float tape_at(unsigned i){i&=GM;return (i<tape_valid?tape[i]:0)*(1.0f/32768.0f);}
-static float tape_read(float pos){
- unsigned a=(unsigned)pos;float t=pos-a;
- float xm=tape_at(a-1),x0=tape_at(a),x1=tape_at(a+1),x2=tape_at(a+2);
- // Four-point Hermite interpolation: exact at stored samples, no linear droop.
- float c=.5f*(x1-xm),b=xm-2.5f*x0+2*x1-.5f*x2,d=.5f*(x2-xm)+1.5f*(x0-x1);
- return ((d*t+b)*t+c)*t+x0;
-}
 static void reset_voice(unsigned i) {
  memset(static_cast<void*>(&voices[i]),0,sizeof(Voice));
  Voice *v=new (&voices[i]) Voice();
@@ -148,9 +137,9 @@ static void reset_voice(unsigned i) {
 }
 #include "preset_bank.inc"
 static void clear_audio() {
- reset_fx();tape_valid=0;writehead=grainclock=0;memset(tape_peak,0,sizeof tape_peak);tape_peak_col=0;
- memset(grains,0,sizeof grains);memset(repeats,0,sizeof repeats);
- memset(dcx,0,sizeof dcx);memset(dcy,0,sizeof dcy);feedback_lp=duckenv=0;
+ reset_fx();beads_reset();
+ memset(repeats,0,sizeof repeats);
+ memset(dcx,0,sizeof dcx);memset(dcy,0,sizeof dcy);duckenv=0;
 }
 static void gen_reset();
 static int morph_on,drift_on,drift_slow,fx_shed; /* a morph is under way (morph.inc), driven by DERIVE (drift.inc); a new Monde ends both */
@@ -266,6 +255,7 @@ static void dice(int i,int page){
 }
 #include "orbit.inc"
 #include "hall.inc"
+#include "beads_bus.inc"
 static void apply_command(Command e) {
  int i=bound(e.t,0,5),v=e.v;md_track &t=patch.track[i];
  if(e.c>=MD_ORBIT_GATES&&e.c<=MD_ORBIT_MOON_LEVEL&&e.c!=MD_ORBIT_PITCH)patch.orbit_system=0; // Rhizome: a real system, edited, is your own
@@ -348,6 +338,10 @@ static void apply_command(Command e) {
  case MD_HALL_BASS:patch.hall_bass=bound(v,0,1000);break;
  case MD_HALL_MOD:patch.hall_mod=bound(v,0,1000);break;
  case MD_HALL_VINTAGE:patch.hall_vintage=!!v;break;
+ case MD_BEADS_SHAPE:patch.beads_shape=bound(v,0,1000);break;
+ case MD_BEADS_DENSITY:patch.beads_density=bound(v,0,1000);break;
+ case MD_BEADS_RANDOM:patch.beads_random=bound(v,0,1000);break;
+ case MD_BEADS_MEDIA:patch.beads_media=bound(v,0,MD_BEADS_MEDIAS-1);break;
  case MD_FX_LEVEL:patch.fx_level=bound(v,0,1000);break;
  case MD_CLOCK_SOURCE: // leaving the internal clock stops the sequence: tell the MPC, release the notes out
   if(bound(v,0,2)==clock_source)break; // the same source (a knob at its end): nothing changes, nothing stops
@@ -495,8 +489,6 @@ static void quantum(float *lr,unsigned n) {
  float duckdec=1.0f-1.0f/(MD_RATE*(.04f+unit(patch.duck_release)*1.46f));
  for(unsigned k=0;k<n;k++){duck[k]=1-duckenv*unit(patch.duck_amount)*.9f;duckenv*=duckdec;}
  stats.duck_gain=n?duck[n-1]:1;
- float grainrate=stmlib::SemitonesToRatio((float)patch.grain_pitch)*(patch.reverse?-1:1);
- float fb=unit(patch.feedback);
  for(unsigned i=0;i<6;i++) {
   md_track &t=patch.track[i];Voice &v=voices[i];bool trig=v.trigger;v.trigger=0;
   if(trig) {v.active=1;v.attacking=t.attack>0; if(!v.attacking)v.env=1;v.excite=1;v.lpg=1;}
@@ -663,46 +655,11 @@ static void quantum(float *lr,unsigned n) {
   md_chorus_process(out,aux,n,patch.chorus*.001f,patch.chorus_depth*.001f);
   for(unsigned k=0;k<n;k++){lr[2*k]=out[k];lr[2*k+1]=aux[k];}
  }
- unsigned maxgrains=patch.quality?4:2;const bool frozen=patch.freeze||orbit_comet_frozen(); // Rhizome: the comet can freeze the tape
+ const bool frozen=patch.freeze||orbit_comet_frozen(); // Rhizome: the comet can freeze the tape
+ float bead_l[Q],bead_r[Q];beads_block(send,n,bead_l,bead_r,frozen); // Rhizome: Beads, on the grain sends
  float fx_peak[3]={stats.fx_peak[0],stats.fx_peak[1],stats.fx_peak[2]},out_peak[2]={stats.out_peak[0],stats.out_peak[1]},limit_peak=stats.limit_peak;
  for(unsigned k=0;k<n;k++) {
-  float wet[2]={};
-  if(!grainclock){
-   unsigned active=0;int slot=-1;
-   for(unsigned j=0;j<4;j++){if(grains[j].life&&grains[j].age<grains[j].life)active++;else if(slot<0)slot=(int)j;}
-   grainclock=32; // Defer rather than truncate a grain after a size/quality change.
-   if(slot>=0&&active<maxgrains){
-    unsigned life=2205+(unsigned)(clamp01(unit(patch.grain_size)+lfo_grain_size*.5f)*11025);
-    float travel=((frozen?0.0f:1.0f)-grainrate)*life;
-    float lo=260+fmaxf(0.0f,-travel),hi=(float)tape_valid-260-fmaxf(0.0f,travel);
-    if(hi>lo){
-     Grain &g=grains[slot];g.life=life;g.age=0;g.phase=0;g.inc=1.0f/life;
-     float delay=lo+clamp01(unit(patch.grain_pos)+lfo_grain_pos*.5f)*(hi-lo);
-     delay=fminf(hi,fmaxf(lo,delay+noise()*250));
-     g.pos=(float)writehead-delay;while(g.pos<0)g.pos+=GN;
-     g.pan=.5f+noise()*.4f;g.rate=grainrate;g.gain=2.0f/maxgrains;
-     grainclock=(life+maxgrains-1)/maxgrains;
-    }
-   }
-  }
-  --grainclock;
-  // Finish existing FULL grains when entering ECO; never silence a live slot.
-  for(unsigned j=0;j<4;j++){Grain &g=grains[j];if(!g.life||g.age>=g.life)continue;
-   float distance=(float)writehead-g.pos;if(distance<0)distance+=GN;
-   float edge=fminf(1.0f,fmaxf(0.0f,fminf(distance,(float)tape_valid-distance))*(1.0f/256));
-   float x=tape_read(g.pos),w=plaits::Sine(g.phase*.5f);w=w*w*g.gain*edge;
-   wet[0]+=x*w*(1-g.pan);wet[1]+=x*w*g.pan;
-   g.pos+=g.rate;if(g.pos>=GN)g.pos-=GN;if(g.pos<0)g.pos+=GN;
-   g.age++;g.phase=g.age*g.inc;
-  }
-  float w=(wet[0]+wet[1])*.5f;feedback_lp+=(w-feedback_lp)*.65f;
-  // Full-rate tape preserves the dry send's bandwidth; 131072 PCM16 samples.
-  // Same 256 KiB memory footprint, now 2.97 s at 44.1 kHz rather than 5.94 s.
-  if(!frozen){float input=clip(send[k]+feedback_lp*fb);
-   tape[writehead]=int16_t(input*32767);
-   {unsigned col=writehead>>8;uint8_t a=(uint8_t)(fabsf(input)*254.9f);if(col!=tape_peak_col){tape_peak_col=col;tape_peak[col]=0;}if(a>tape_peak[col])tape_peak[col]=a;}
-   writehead=(writehead+1)&GM;if(tape_valid<GN)tape_valid++;stats.grain_writes++;
-  }
+  const float wet[2]={bead_l[k],bead_r[k]};
   float effect[2]={};
   if(patch.fx_level||comet_swell>.001f)fx_active=true;
   if(fx_active){
@@ -747,11 +704,11 @@ int md_orbit_gate_angles(const md_patch *p,int track,float *phi){
 float md_orbit_eccentric(float mean,float e){return orbit_E(mean,e);}
 float md_atan2(float y,float x){return orbit_atan2(y,x);}
 void md_init() {
- voices=reinterpret_cast<Voice*>(voices_raw);memset(voices_raw,0,sizeof voices_raw);memset(tape,0,sizeof tape);memset(grains,0,sizeof grains);
+ voices=reinterpret_cast<Voice*>(voices_raw);memset(voices_raw,0,sizeof voices_raw);
  memset(&stats,0,sizeof stats);memset(smooth,0,sizeof smooth);memset(dcx,0,sizeof dcx);memset(dcy,0,sizeof dcy);
  out_r=out_w=owed_n=0;memset(&routing,0,sizeof routing);clock_left=0;memset(chan_bend,0,sizeof chan_bend);for(int i=0;i<6;i++)in_chan[i]=out_chan[i]=i+1;
  for(int i=0;i<6;i++)last_generated[i]=60;
- memset(midi_bank,0,sizeof midi_bank);qread=qwrite=writehead=grainclock=tape_valid=0;feedback_lp=0;rng=0x88888;stmlib::Random::Seed(rng);scene(0);orbit_reset();playing=0;clock_source=midi_quantize=clock_pulse=0;clock_age=clock_last=0;clock_interval=0;
+ memset(midi_bank,0,sizeof midi_bank);qread=qwrite=0;rng=0x88888;stmlib::Random::Seed(rng);scene(0);orbit_reset();playing=0;clock_source=midi_quantize=clock_pulse=0;clock_age=clock_last=0;clock_interval=0;
 }
 void md_set_midi_routing(const md_midi_routing *r){
  // Turning output off (or changing the routing) first releases every note still owed on the old routing.
@@ -776,16 +733,24 @@ unsigned md_scope(int track,float *dst){
  for(unsigned k=0;k<128;k++)dst[k]=scope_buf[track][(ps+k)&127]*(1.0f/8192);
  return 128;
 }
+float md_beads_rate(int density){ // as Beads' trigger generator (kMaxGrainFrequency at its 48 kHz, run at 44.1)
+ const float d=density*.001f,top=130.81278f*MD_RATE/48000.0f; // kMaxGrainFrequency (trigger_generator.cc)
+ return d<.48f?top*stmlib::SemitonesToRatio(-d*192):d>.52f?.5f*top*stmlib::SemitonesToRatio(-(1-d)*192):0;
+}
+float md_beads_envelope(float shape,float t){ // as Beads' GrainEnvelope::Start and Render, without the minimum lengths
+ const float sustain=fmaxf(1-3*shape,0.0f);float a=(shape-.33333333f)*1.5f;a=a<0?0:a<.5f?a*a*a*4:a;
+ const float release=(1-a)*(1-sustain),smooth=a<.5f?2*a:2-2*a;
+ float x;if(t<a)x=t/a;else if(t<a+sustain)return 1;else x=release>0?1-(t-a-sustain)/release:0;
+ x=x<0?0:x>1?1:x;const float base=t<a?x:(x*x)*(x*x),ss=x*x*(3-2*x);return base+(ss-base)*smooth;
+}
+float md_beads_seconds(void){return (float)beads_line_length()*beads_proc->ratio()/MD_RATE;}
 void md_tape_view(md_tape *v){
- // Same placement rule as new grains in quantum(), so the screen shows where the next ones start.
- memcpy(v->peak,tape_peak,sizeof v->peak);v->head=writehead;v->valid=tape_valid;v->length=GN;v->freeze=patch.freeze||orbit_comet_frozen();
- float rate=stmlib::SemitonesToRatio((float)patch.grain_pitch)*(patch.reverse?-1:1);
- float life=2205+(unsigned)(unit(patch.grain_size)*11025),travel=((patch.freeze||orbit_comet_frozen()?0.0f:1.0f)-rate)*life;
- float lo=260+fmaxf(0.0f,-travel),hi=(float)tape_valid-260-fmaxf(0.0f,travel);
- v->zone=hi>lo?lo+unit(patch.grain_pos)*(hi-lo):-1;v->zone_len=life;
- for(unsigned j=0;j<4;j++){const Grain &g=grains[j];int on=g.life&&g.age<g.life;v->grain[j].active=on;if(!on)continue;
-  float d=(float)writehead-g.pos;if(d<0)d+=GN;float w=plaits::Sine(g.phase*.5f);
-  v->grain[j].behind=d;v->grain[j].len=(float)g.life;v->grain[j].env=w*w;}
+ // Rhizome: Beads' memory: the level written along it, the write head, where the next grains start (TIME), the live
+ // grains (how far behind the head they read, how long they have left).
+ const int len=beads_line_length();memcpy(v->peak,tape_peak,sizeof v->peak);v->head=(uint32_t)*beads_proc->mutable_delay_write_ptr();v->valid=v->length=(uint32_t)len;
+ v->freeze=patch.freeze||orbit_comet_frozen();v->zone=unit(patch.grain_pos)*(float)len;v->zone_len=(float)len*.04f;
+ int32_t delay[MD_TAPE_GRAINS];int left[MD_TAPE_GRAINS];const int n=beads_proc->grains(delay,left,MD_TAPE_GRAINS);
+ for(int j=0;j<MD_TAPE_GRAINS;j++){v->grain[j].active=j<n;if(j>=n)continue;v->grain[j].behind=(float)delay[j];v->grain[j].len=(float)left[j];v->grain[j].env=fminf(1,left[j]/2000.0f);}
 }
 int md_clock_source(void){return clock_source;}
 int md_midi_quantize(void){return midi_quantize;}
@@ -867,6 +832,7 @@ int md_validate(const md_patch *p) {
  if(p->orbit_comet<0||p->orbit_comet>=MD_COMETS||p->comet_event<0||p->comet_event>=MD_COMET_EVENTS||p->comet_amount<0||p->comet_amount>100||p->orbit_conj<0||p->orbit_conj>=MD_CONJ_MODES||p->orbit_system<0||p->orbit_system>=MD_ORBIT_SYSTEMS)return 0;
  if(p->tape_heads<1||p->tape_heads>7||p->tape_wow<0||p->tape_wow>1000||p->tape_drive<0||p->tape_drive>1000||p->tape_age<0||p->tape_age>1000)return 0;
  if(p->hall_size<0||p->hall_size>1000||p->hall_predelay<0||p->hall_predelay>250||p->hall_bass<0||p->hall_bass>1000||p->hall_mod<0||p->hall_mod>1000||p->hall_vintage<0||p->hall_vintage>1)return 0;
+ if(p->beads_shape<0||p->beads_shape>1000||p->beads_density<0||p->beads_density>1000||p->beads_random<0||p->beads_random>1000||p->beads_media<0||p->beads_media>=MD_BEADS_MEDIAS)return 0;
  if(p->orbit_prec<0||p->orbit_prec>100||p->orbit_pert<0||p->orbit_pert>100)return 0;
  if(p->vadi< -1||p->vadi>11||p->samvadi< -1||p->samvadi>11)return 0;
  if(p->form<0||p->form>1000||p->form_bars<0||p->form_bars>3||p->form_drops<0||p->form_drops>3)return 0;
@@ -875,7 +841,7 @@ int md_validate(const md_patch *p) {
  return 1;
 }
 int md_load(const md_patch *p){if(playing||!md_validate(p))return 0;patch=*p;orbit_prepared=-1;previous=patch;returnable=0;morph_on=0;drift_on=0;drift_slow=0;morph_span=0;fx_shed=0;seqrng=patch.seed;clear_audio();for(int j=0;j<4;j++)smooth[j]=unit(patch.macro[j]);for(int i=0;i<6;i++)reset_voice(i);mark_saved();return 1;}
-unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof hall_buf+sizeof element_body+sizeof element_strike+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof voices_raw+sizeof tape+sizeof grains+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
+unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof hall_buf+sizeof element_body+sizeof element_strike+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof voices_raw+sizeof beads_mem+sizeof beads_raw+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
 int md_decode(md_patch *out,const void *data,unsigned bytes){
  if(!out||!data)return 0;
  if(bytes==sizeof(md_patch)){md_patch p;memcpy(&p,data,sizeof p);if(!md_validate(&p))return 0;*out=p;return 1;}

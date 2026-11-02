@@ -32,6 +32,7 @@ tap FX
 tap FX
 tap FX
 tap FX
+tap FX
 expect page 36
 spin K1 100
 wait 50
