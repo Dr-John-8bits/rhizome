@@ -103,10 +103,19 @@ C'est la page principale de Rhizome. L'animation *est* le séquenceur. Ce qu'on 
 
 Chaque élément porte une information, donc la règle « rien de décoratif » est respectée d'office. La version sans animation montre la même chose, à l'arrêt (orbites, portes, positions).
 
-### Réglages (idée, K1 à K4)
-- **Page ORBIT** (par corps) : PERIOD (rapport ou division), ECCENTRICITY, GATES (nombre de portes), PHASE.
-- **Page SYSTEM** : PRECESSION, PERTURBATION, MOONS, COMET.
-- **Page PITCH** : SOURCE (ORBIT / MOTIF / ÉCHO), gamme, registre, conjonction → accord.
+### Réglages (dans le firmware depuis le 2 novembre 2026)
+SEQ ouvre **ORBIT**, puis **ORBIT / SYSTEM**, puis les pages de Monades (RHYTHM, GROOVE, BASS, PHRASE, GENERATOR, FORM). SELECT choisit la piste.
+- **ORBIT** (piste choisie) :
+  - K1 PERIOD : de 1 temps à 12 mesures, 13 valeurs ;
+  - K2 ECCENTRICITY : de 0 à 0,85 ;
+  - K3 GATES : de 0 à 16 ; 0 = orbite coupée, la piste reprend son rythme euclidien de RHYTHM ;
+  - K4 PHASE : les portes tournent par pas de 15°.
+- **ORBIT / SYSTEM** :
+  - K1 PRECESSION et K2 PERTURBATION, pour tout le système ;
+  - K3 PITCH (ORBIT / MOTIF / ECHO) et K4 NOTE (note de base), pour la piste choisie.
+- La gamme et la tonalité restent sur HARMONY (GLO). Le MOTIF s'écrit au clavier sur GENERATOR, comme dans Monades.
+
+Prévus et pas encore faits : les lunes (ornements), la comète, l'accord sur une conjonction (aujourd'hui c'est un accent), les notes du MOTIF écrites à côté des portes, les systèmes réels en presets.
 
 ### Coût
 L'équation de Kepler se résout avec une table (anomalie moyenne → position, 256 valeurs par excentricité) ou deux itérations de Newton, une fois par bloc de 64 échantillons (1,45 ms). La précision des coups est donc d'un bloc, comme dans Monades. Coût de calcul négligeable.
@@ -318,7 +327,13 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 0. **Maquette jouable de l'écran ORBIT dans le navigateur** (240 × 240, avec le son) : valider la lisibilité et l'envie de jouer avant d'écrire le firmware. **Faite le 2 novembre 2026** : `docs/rhizome/maquette/orbite.html`, publiée sur [claude.ai](https://claude.ai/artifact/2Q3b1BXKckoXwbATJbcFHZ) (privée). La mécanique est la vraie : équation de Kepler, portes euclidiennes, précession, lunes, comète, conjonctions. Le son n'est qu'une esquisse dans le navigateur. Six systèmes : Kepler-223, Io-Europe-Ganymède, TRAPPIST-1, Pluton-Neptune, Euclidien, Dérive.
 1. **Banc d'essai du calcul** : chaque bloc mesuré sur le Mac, puis sur le FM-1. Il décide du nombre de voix et de la taille de Beads. **Sur le Mac, le 2 novembre 2026, Beads compris** : voir « Banc d'essai sur le Mac ». Reste la confirmation sur le FM-1.
 2. **Création du dépôt** à partir de Monades. **Fait le 2 novembre 2026** : dépôt privé `Dr-John-8bits/rhizome`, identité `FM-1_968`, noms USB et écrans Rhizome. Le préfixe `FM-1_976` prévu au départ était déjà pris par LSDj Burrito ; `FM-1_968` renvoie à *Différence et répétition* (Deleuze, 1968). Le grand nettoyage (retirer les 91 Mondes, les écrans et le site de Monades) se fera au moment où le moteur de Rhizome les remplacera : le moteur actuel en a besoin pour tourner.
-3. **Séquenceur orbital** dans le simulateur, puis sur le FM-1.
+3. **Séquenceur orbital** dans le simulateur, puis sur le FM-1. **Première version dans le simulateur le 2 novembre 2026**, sur le moteur de Monades :
+   - moteur `app/dsp/orbit.inc` : patch v11, 7 commandes, conjonctions qui accentuent ;
+   - pages ORBIT et ORBIT / SYSTEM (`app/orbit_page.c`), dans le style prévu : grand dessin, bandeau fin, carte du potard ;
+   - tests : rythme euclidien exact pour une orbite ronde (à 0,05 pas près), rubato sur un cycle stable, MOTIF, conjonction, pas de rafale, import des patchs et des emplacements de Monades, scénario `tests/orbit_ui.txt` ;
+   - captures dans `docs/rhizome/captures/`, écoute de 45 s (Monde 61 Quiet Lanterns, cinq corps) dans `M-VAVE FM1/ecoutes/` ;
+   - remarque : avec cinq corps, les conjonctions sont fréquentes (18 en 12 s), donc moins « rares et précieuses » qu'avec deux ou trois. À régler à l'oreille, par exemple en ne comptant que les corps aux périodes éloignées ;
+   - **reste à faire : le compiler pour le FM-1 et l'essayer sur l'appareil.**
 4. **Delay à bande** et son animation.
 5. **Réverbe HALL**.
 6. **Granulaire Beads**.

@@ -1,0 +1,45 @@
+wait 3400
+tap HOME
+turn PRESET 61
+wait 50
+expect biome 61
+tap SEQ
+expect page 30
+spin K1 1
+spin K2 6
+spin K3 3
+wait 50
+expect orbit_gates 3
+turn SELECT 1
+spin K1 2
+spin K2 18
+spin K3 4
+turn SELECT 1
+spin K1 4
+spin K3 1
+turn SELECT 1
+spin K1 3
+spin K2 12
+spin K3 5
+turn SELECT 1
+spin K1 4
+spin K2 24
+spin K3 2
+tap SEQ
+expect page 31
+spin K1 4
+spin K2 2
+turn SELECT -1
+spin K3 2
+wait 50
+expect orbit_pitch 2
+tap SEQ
+expect page 2
+tap PLAY
+peakreset
+wait 12000
+expect orbit_hits >20
+expect conjunctions >0
+expect peak_db_max >-30
+expect invalid 0
+expect queue_drops 0

@@ -868,6 +868,8 @@ tap HOME
 expect help -1
 tap HOME
 tap SEQ
+tap SEQ
+tap SEQ
 expect page 2
 press FX
 wait 900
@@ -1012,6 +1014,8 @@ expect help -1
 tap HOME
 tap SEQ
 tap SEQ
+tap SEQ
+tap SEQ
 expect page 7
 press FX
 wait 900
@@ -1154,6 +1158,8 @@ expect playing 0
 tap HOME
 expect help -1
 tap HOME
+tap SEQ
+tap SEQ
 tap SEQ
 tap SEQ
 tap SEQ
@@ -1299,6 +1305,8 @@ expect playing 0
 tap HOME
 expect help -1
 tap HOME
+tap SEQ
+tap SEQ
 tap SEQ
 tap SEQ
 tap SEQ
