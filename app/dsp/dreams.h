@@ -22,7 +22,8 @@ enum { MD_MODEL, MD_TONE, MD_HARM, MD_DECAY, MD_LEVEL, MD_SEND, MD_HITS,
  MD_ORBIT_GATES,MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_PHASE,MD_ORBIT_PITCH,MD_ORBIT_PREC,MD_ORBIT_PERT,
  MD_ORBIT_MOONS,MD_ORBIT_MOON_SPIN,MD_ORBIT_MOON_INTERVAL,MD_ORBIT_MOON_LEVEL,
  MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ,MD_ORBIT_SYSTEM,
- MD_TAPE_HEADS,MD_TAPE_WOW,MD_TAPE_DRIVE,MD_TAPE_AGE,MD_TAPE_TRANSPORT, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
+ MD_TAPE_HEADS,MD_TAPE_WOW,MD_TAPE_DRIVE,MD_TAPE_AGE,MD_TAPE_TRANSPORT,
+ MD_HALL_SIZE,MD_HALL_PREDELAY,MD_HALL_BASS,MD_HALL_MOD,MD_HALL_VINTAGE, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
  MD_COMMAND_COUNT }; /* OVERLOAD: the audio ran late; FULL drops to ECO, ECO sheds chorus and room diffusion until the next Monde */ /* CLEAR_PHRASE: all 16 steps rest, cursor on step 1 */ /* LFO commands: track argument = track + 6 * slot (A, B) */
 typedef struct { int32_t model,tone,harm,decay,level,send,hits,length,rotate,prob,note,pan,mute,speed,attack,ratchet,accent,shape,cutoff,resonance,filter,breathe; } md_track;
 typedef struct { int32_t delay_send,reverb_send,bass_mode,pattern,glide,marbles,tides,tides_rate,warps,edit_step; int32_t notes[16]; } md_extension;
@@ -75,7 +76,15 @@ enum { MD_ORBIT_SYSTEMS=5 };
  * MD_TAPE_TRANSPORT (not stored): RUN, FREEZE (the loop repeats, nothing recorded), STOP (the tape brakes). */
 enum { MD_TAPE_RUN, MD_TAPE_FREEZE, MD_TAPE_STOP, MD_TAPE_TRANSPORTS, MD_TAPE_MS_MAX=2860 };
 typedef struct { float speed,wow,path,head_peak[3],rec_peak; uint32_t pos,length; int32_t heads,transport; uint8_t trace[128]; } md_reel;
-void md_reel_view(md_reel *view); /* speed: 1 = the slowest tape that still gives 1.43 s on head 3 */
+void md_reel_view(md_reel *view);
+/* Rhizome's HALL (in place of the room; reverb_time, room_tone, room_diffusion and the sends keep their roles):
+ * reverb_time 0..999 = DECAY 0.5 s to 20 s, 1000 = infinite; room_tone = TREBLE (1.5 to 18 kHz); room_diffusion =
+ * DIFFUSION. hall_size 0..1000, hall_predelay 0..250 ms, hall_bass 0..1000 (0.5x to 2x the decay, 500 = 1x),
+ * hall_mod 0..1000, hall_vintage 0/1 (22.05 kHz). The view: RT60 of the low, middle and high tail (-1: infinite) and
+ * the tail's energy in those bands now. */
+typedef struct { float rt60[3],energy[3],predelay_ms,size; int32_t vintage,infinite; } md_hall;
+void md_hall_view(md_hall *view);
+float md_hall_rt60(int decay); /* seconds for a DECAY value, -1: infinite */ /* speed: 1 = the slowest tape that still gives 1.43 s on head 3 */
 enum { MD_MOON_REPEAT, MD_MOON_UP, MD_MOON_DOWN, MD_MOON_THIRDS_UP, MD_MOON_THIRDS_DOWN, MD_MOON_HARMONICS, MD_MOON_INTERVALS };
 typedef struct { int32_t gates,period,ecc,phase,pitch,moons,moon_spin,moon_interval,moon_level; } md_orbit;
 typedef struct {
@@ -93,7 +102,7 @@ typedef struct {
  int32_t gamaka[6],gamaka_amount[6],vadi,samvadi;
  int32_t motion_every; /* v10: K2 Motion holds its variation for 1, 2, 4, 8 or 16 steps (0..4); 0 = every step, as 1.1 */
  /* Rhizome v11: the orbits; precession 0..100 (100 = each ellipse turns once in 16 bars), perturbation 0..100. */
- md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj,orbit_system,tape_heads,tape_wow,tape_drive,tape_age;
+ md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj,orbit_system,tape_heads,tape_wow,tape_drive,tape_age,hall_size,hall_predelay,hall_bass,hall_mod,hall_vintage;
 } md_patch;
 typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; float peak; uint32_t grain_writes,voice_quanta,skipped_quanta; int32_t last_note[6]; uint32_t quality_reductions,element_modes; float track_peak[6];
  /* Monades meters, output-referred like the final mix: grain/delay/room returns, master L/R, pre-limiter peak. */

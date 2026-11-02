@@ -219,6 +219,48 @@ Monades n'utilise de Plaits que trois moteurs (FM, VA, additif) et les batteries
 - **Écran** : les courbes de décroissance des graves, des médiums et des aigus, avec l'énergie réelle de la queue qui glisse le long des courbes.
 - Pas de nom de marque à l'écran.
 
+### Dans le firmware (2 novembre 2026)
+La HALL **remplace la petite salle de Monades** (quatre lignes courtes et ses diffuseurs).
+
+**L'algorithme**
+- La boucle en huit de Griesinger, avec les longueurs de la réverbe de Rings et Clouds (licence MIT) : un pré-délai, quatre passe-tout de diffusion, puis deux moitiés de boucle qui s'alimentent l'une l'autre.
+- Une seule mémoire de 64 Ko en 16 bits, lignes bout à bout derrière un pointeur commun, comme le FxEngine de Mutable Instruments.
+- La décroissance est calculée à partir du RT60 demandé et de la vraie longueur de la boucle. **Mesurée avec du bruit : 2,11 s pour 2 s demandées, 2,43 s en VINTAGE.**
+- Une mesure avec une note tenue donnerait autre chose : les passe-tout retardent différemment selon la fréquence.
+- Les écritures sont arrondies, sans quoi la troncature en 16 bits coupe net la toute fin de la queue.
+
+**Pages** (FX, après la bande) :
+- **HALL** :
+  - K1 DECAY, de 0,5 à 20 s, puis INFINITE (la boucle tient, plus rien n'entre) ;
+  - K2 SIZE ;
+  - K3 PRE-DELAY, de 0 à 250 ms ;
+  - K4 MOD.
+- **HALL / COLOR** :
+  - K1 BASS, de ×0,5 à ×2 ;
+  - K2 TREBLE ;
+  - K3 DIFFUSION ;
+  - K4 VINTAGE (22 kHz).
+- DECAY, TREBLE et DIFFUSION gardent les champs de la salle de Monades (`reverb_time`, `room_tone`, `room_diffusion`), donc les pages SPACE les règlent aussi.
+
+**L'écran**, comme prévu :
+- trois droites, pour la chute de 60 dB des graves, des médiums et des aigus après le pré-délai, plates en INFINITE ;
+- sur chacune, un point qui donne l'énergie réelle de la queue dans cette bande, et qui glisse le long de la droite à mesure que la queue s'éteint.
+
+**La comète** agit maintenant sur la HALL : la queue s'allonge jusqu'à ×4 et l'entrée double au passage. Quand le processeur est surchargé, l'ancien abandon de la diffusion devient un passage en VINTAGE, qui divise par deux le calcul de la réverbe.
+
+**Mémoire**
+- La mémoire granulaire de Monades passe de 2,97 s à 1,49 s, ce qui libère 128 Ko : 64 Ko pour la HALL, et 64 Ko d'avance pour Beads et la bande longue.
+- La part du moteur passe de 352 à 275 Ko.
+
+**Niveau** : avant et après sur les mêmes Mondes, le retour de la HALL est à −1,3 à +1,8 dB de celui de la salle. La queue est plus longue.
+
+**Calcul**
+- La HALL ajoute environ +0,6 à +1,1 ms par seconde de son, soit **+2,5 à +4,5 % du FM-1**, moins que la salle retirée.
+- Avec la bande, les Mondes les plus lourds de Monades arriveraient vers 77 et 83 %, sous le plafond de 85 % mais de peu.
+- VINTAGE divise le coût de la HALL par deux, et Beads remplacera la mémoire granulaire de Monades.
+
+**Pas fait** : Oliverb comme second algorithme.
+
 ## Le delay à bande et son animation reel-to-reel
 
 ### Le son
@@ -436,7 +478,7 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
    - remarque : avec cinq corps, les conjonctions sont fréquentes (18 en 12 s), donc moins « rares et précieuses » qu'avec deux ou trois. À régler à l'oreille ; K4 CONJUNCTION sur OFF les rend muettes ;
    - **reste à faire : le compiler pour le FM-1 et l'essayer sur l'appareil.**
 4. **Delay à bande** et son animation. **Dans le simulateur le 2 novembre 2026** (voir « Dans le firmware » plus haut). Tests : temps de chaque tête, FREEZE qui boucle, STOP qui freine, PANIC silencieux, scénario `tests/tape_ui.txt`. Une écoute dans `M-VAVE FM1/ecoutes/`.
-5. **Réverbe HALL**.
+5. **Réverbe HALL**. **Dans le simulateur le 2 novembre 2026** (voir « Dans le firmware » dans la section HALL). Tests : RT60 mesuré, VINTAGE, INFINITE, bornes, scénario `tests/hall_ui.txt`. Une écoute dans `M-VAVE FM1/ecoutes/`.
 6. **Granulaire Beads**.
 7. **Voix Plaits 1.2 et Rings.**
 

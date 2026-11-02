@@ -14,7 +14,7 @@ static void cmd(int c,int t,int v){assert(md_command(c,t,v));run(1);}
 static md_patch blank(int model){md_init();cmd(MD_SCENE,0,64);md_patch p=*md_state();p.track[0].mute=0;p.track[0].model=model;p.track[0].note=36;p.track[0].level=650;p.track[0].decay=200;p.track[0].attack=0;p.track[0].hits=16;p.track[0].length=16;p.track[0].prob=1000;p.macro[0]=500;p.macro[1]=0;p.macro[2]=500;p.macro[3]=0;return p;}
 static uint64_t hash(const md_patch &p){md_init();assert(md_load(&p));cmd(MD_PLAY,0,1);uint64_t h=1469598103934665603ull;for(int b=0;b<2200;b++){md_render(audio,128);for(float x:audio){uint32_t u;memcpy(&u,&x,4);h=(h^u)*1099511628211ull;}}return h;}
 int main(){
- static_assert(sizeof(md_patch)==1940,"Browser patch size must match");
+ static_assert(sizeof(md_patch)==1960,"Browser patch size must match");
  auto p=blank(MD_BASS);assert(md_load(&p));cmd(MD_TRIGGER,0,36);assert(run(300)>1);puts("PASS round bass audible");
  uint8_t legacy[652];memcpy(legacy,&p,652);uint32_t v=4;memcpy(legacy+4,&v,4);assert(md_import(legacy,sizeof legacy));assert(md_state()->version==11&&md_state()->fx_level==0);puts("PASS 1.0 migration retains old fields and disables additions");
  p=*md_state();p.fx_level=1001;assert(!md_load(&p));p=*md_state();p.ext[0].notes[15]=25;assert(!md_load(&p));
@@ -456,6 +456,22 @@ int main(){
    assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_STOP));energy(3000);md_reel r;md_reel_view(&r);assert(r.speed<.01f&&r.transport==MD_TAPE_STOP&&energy(700)<1e-6);
    assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_RUN));energy(3000);md_reel_view(&r);assert(fabsf(r.speed-10500/(500*22.05f))<.05f);
    md_patch bad=q;bad.tape_heads=0;assert(!md_validate(&bad));bad=q;bad.delay_ms=MD_TAPE_MS_MAX+1;assert(!md_validate(&bad));}
+  // The HALL: the tail falls 60 dB in the time DECAY asks for (measured between -10 and -40 dB), at 44.1 kHz and in
+  // VINTAGE; at the top it holds.
+  {assert(fabsf(md_hall_rt60(376)-2.0f)<.02f&&md_hall_rt60(1000)<0);
+   auto tail=[](int decay,int vintage,int seconds,std::vector<double> &e){md_patch q=blank(MD_SNARE); // noise: all frequencies (a tone sits on the allpasses' combs)
+    q.track[0].decay=0;q.ext[0].delay_send=0;q.ext[0].reverb_send=1000;
+    q.fx_level=1000;q.reverb_time=decay;q.hall_bass=500;q.room_tone=1000;q.hall_predelay=0;q.hall_vintage=vintage;md_init();assert(md_load(&q));float buf[128];
+    assert(md_command(MD_TRIGGER,0,48));for(int b=0;b<seconds*44100/(64*20);b++){double s=0;for(int j=0;j<20;j++){md_render(buf,64);for(float x:buf)s+=x*x;}e.push_back(s);}}; // 29 ms windows
+   for(int vintage=0;vintage<2;vintage++){std::vector<double> e;tail(376,vintage,4,e);
+    auto at=[&](double t){size_t k=(size_t)(t*44100/1280);double s=0;for(size_t j=k;j<k+4;j++)s+=e[j];return s;};
+    const double rt=60/(10*log10(at(.3)/at(1.0))*(1/.7)); // the tail alone (the dry note is gone), above the 16-bit floor
+    printf("HALL decay 2.0 s%s: RT60 measured %.2f s\n",vintage?" (vintage)":"",rt);assert(rt>1.5&&rt<2.6);}
+   std::vector<double> e;tail(1000,0,0,e);md_patch q=*md_state();q.reverb_time=700;e.clear();tail(700,0,2,e);
+   assert(md_command(MD_REVERB_TIME,0,1000));float buf[128];double s1=0,s2=0;for(int b=0;b<700;b++)md_render(buf,64);
+   for(int b=0;b<700;b++){md_render(buf,64);for(float x:buf)s1+=x*x;}for(int b=0;b<2000;b++)md_render(buf,64);for(int b=0;b<700;b++){md_render(buf,64);for(float x:buf)s2+=x*x;}
+   assert(s1>1e-6&&s2>s1*.5); // infinite: three seconds on, the tail is still there
+   md_patch bad=*md_state();bad.hall_predelay=251;assert(!md_validate(&bad));bad=*md_state();bad.reverb_time=1001;assert(!md_validate(&bad));}
   // A new period while playing keeps the body where it is: no burst of gates.
   p.orbit[1].gates=0;p.orbit[0]={16,4,300,0,MD_PITCH_ORBIT};
   {md_init();assert(md_load(&p));assert(md_command(MD_PLAY,0,1));float buf[128];for(int b=0;b<400;b++)md_render(buf,64);
@@ -483,7 +499,7 @@ int main(){
   {md_init();md_patch q=*md_state();q.version=10;assert(md_import(&q,offsetof(md_patch,orbit)));assert(md_state()->version==11);
    for(int i=0;i<6;i++)assert(md_state()->orbit[i].gates==0);
    md_patch bad=*md_state();bad.orbit[2].ecc=MD_ORBIT_ECC_MAX+1;assert(!md_validate(&bad));}
-  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, comet, chord, real systems, tape echo heads / freeze / stop, v10 import");
+  puts("PASS orbits: round = euclidean, eccentric = rubato on the same loop, MOTIF order, conjunction, no burst, moons, comet, chord, real systems, tape echo heads / freeze / stop, hall RT60 / vintage / infinite, v10 import");
  }
  puts("ALL NEXT FEATURE TESTS PASSED; no hardware-performance claim");
 }

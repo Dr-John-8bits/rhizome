@@ -1464,6 +1464,8 @@ tap HOME
 tap FX
 tap FX
 tap FX
+tap FX
+tap FX
 expect page 3
 press FX
 wait 900
@@ -1610,6 +1612,8 @@ tap FX
 tap FX
 tap FX
 tap FX
+tap FX
+tap FX
 expect page 8
 press FX
 wait 900
@@ -1752,6 +1756,8 @@ expect playing 0
 tap HOME
 expect help -1
 tap HOME
+tap FX
+tap FX
 tap FX
 tap FX
 tap FX
@@ -1899,6 +1905,8 @@ expect playing 0
 tap HOME
 expect help -1
 tap HOME
+tap FX
+tap FX
 tap FX
 tap FX
 tap FX

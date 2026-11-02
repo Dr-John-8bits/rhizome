@@ -28,7 +28,7 @@ extern "C" { void md_chorus_reset(uint16_t *line); void md_chorus_process(float 
 namespace {
 #include "satin_tables.inc"
 #include "scale_table.inc"
-constexpr unsigned Q=64, GN=131072, GM=GN-1;
+constexpr unsigned Q=64, GN=65536, GM=GN-1; // Rhizome: 1.49 s (was 2.97 s), its other half holds the HALL
 struct Voice {
  plaits::AdditiveEngine additive; plaits::SineOscillator choir[3]; stmlib::Svf filter1,filter2;
  plaits::FMEngine fm; plaits::VirtualAnalogEngine va;
@@ -49,17 +49,16 @@ static elements::Resonator element_body[6];
 static elements::Exciter element_strike[6];
 static int16_t tape[GN] POOL;
 static void reel_reset(); // Rhizome's tape echo (tape_echo.inc) holds the echo's 32 KiB
-static int16_t room[4][1201];
 static bool fx_active;
-static unsigned room_head[4];
-static float room_lp[4],fx_smooth,fx_highpass_in,fx_highpass_out;
+static float fx_smooth,fx_highpass_in,fx_highpass_out;
+static void hall_reset(); // Rhizome's HALL (hall.inc)
 static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob value the coefficients were computed for
 // Monades: Rings chorus on the dry mix (4 KiB line), and Dattorro / Griesinger input diffusion before the room
 // (four allpasses, 1210 samples). Both are skipped entirely at 0.
 static uint16_t chorus_line[2048]; // ordinary RAM: the pool must keep 8 KB spare (base/tools/build.py)
-static int16_t diffuser[1210];static unsigned diffuser_head[4];static const unsigned diffuser_len[4]={150,214,319,527}; // Monades: 12 dB high-pass on the echo and room sends
-static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;memset(diffuser,0,sizeof diffuser);memset(diffuser_head,0,sizeof diffuser_head);fx_active=false;reel_reset();memset(room,0,sizeof room);memset(room_head,0,sizeof room_head);memset(room_lp,0,sizeof room_lp);fx_smooth=fx_highpass_in=fx_highpass_out=0;}
-static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;p.tape_heads=1;p.tape_wow=p.tape_drive=p.tape_age=0;} // the echo: head 1 alone (40 ms to 0.95 s), a clean tape // Rhizome: orbits off, one bar a turn
+// Monades: 12 dB high-pass on the echo and room sends
+static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;fx_active=false;reel_reset();hall_reset();fx_smooth=fx_highpass_in=fx_highpass_out=0;}
+static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;p.tape_heads=1;p.tape_wow=p.tape_drive=p.tape_age=0;p.hall_size=700;p.hall_predelay=20;p.hall_bass=550;p.hall_mod=300;p.hall_vintage=0;} // the echo: head 1 alone (40 ms to 0.95 s), a clean tape // Rhizome: orbits off, one bar a turn
 static void v10_defaults(md_patch &p){p.motion_every=0;v11_defaults(p);}
 static void v9_defaults(md_patch &p){for(int i=0;i<6;i++){p.gamaka[i]=MD_GAMAKA_OFF;p.gamaka_amount[i]=500;}p.vadi=p.samvadi=-1;v10_defaults(p);}
 static void v8_defaults(md_patch &p){for(int i=0;i<6;i++)p.gen[i]={MD_GEN_OFF,500,8,12};p.form=0;p.form_bars=1;p.form_drops=2;v9_defaults(p);}
@@ -266,6 +265,7 @@ static void dice(int i,int page){
  if(page<=MD_DICE_ENVELOPE){patch.tone_preset[i]=-1;patch.edited_mask|=2u<<i;}
 }
 #include "orbit.inc"
+#include "hall.inc"
 static void apply_command(Command e) {
  int i=bound(e.t,0,5),v=e.v;md_track &t=patch.track[i];
  if(e.c>=MD_ORBIT_GATES&&e.c<=MD_ORBIT_MOON_LEVEL&&e.c!=MD_ORBIT_PITCH)patch.orbit_system=0; // Rhizome: a real system, edited, is your own
@@ -342,7 +342,12 @@ static void apply_command(Command e) {
  case MD_TAPE_AGE:patch.tape_age=bound(v,0,1000);break;
  case MD_TAPE_TRANSPORT:reel_transport=bound(v,0,MD_TAPE_TRANSPORTS-1);break;
  case MD_DELAY_FB:patch.delay_fb=bound(v,0,800);break;
- case MD_REVERB_TIME:patch.reverb_time=bound(v,0,850);break;
+ case MD_REVERB_TIME:patch.reverb_time=bound(v,0,1000);break;
+ case MD_HALL_SIZE:patch.hall_size=bound(v,0,1000);break;
+ case MD_HALL_PREDELAY:patch.hall_predelay=bound(v,0,250);break;
+ case MD_HALL_BASS:patch.hall_bass=bound(v,0,1000);break;
+ case MD_HALL_MOD:patch.hall_mod=bound(v,0,1000);break;
+ case MD_HALL_VINTAGE:patch.hall_vintage=!!v;break;
  case MD_FX_LEVEL:patch.fx_level=bound(v,0,1000);break;
  case MD_CLOCK_SOURCE: // leaving the internal clock stops the sequence: tell the MPC, release the notes out
   if(bound(v,0,2)==clock_source)break; // the same source (a knob at its end): nothing changes, nothing stops
@@ -648,10 +653,10 @@ static void quantum(float *lr,unsigned n) {
   stats.env_now[i]=melodic?v.env:0;stats.env_attacking[i]=melodic&&v.attacking;
   if(melodic&&!v.attacking&&v.env<.000001f)v.active=0;
  }
- const float echo_feedback=lfo_echo_fb?fminf(.8f,clamp01(unit(patch.delay_fb)+lfo_echo_fb*.5f)):unit(patch.delay_fb),room_decay=.45f+.5f*unit(patch.reverb_time)+(.49f-.5f*unit(patch.reverb_time))*comet_swell,effect_return=unit(patch.fx_level)+(1.4f-unit(patch.fx_level))*comet_swell;
+ const float echo_feedback=lfo_echo_fb?fminf(.8f,clamp01(unit(patch.delay_fb)+lfo_echo_fb*.5f)):unit(patch.delay_fb),effect_return=unit(patch.fx_level)+(1.4f-unit(patch.fx_level))*comet_swell;
  reel_block(n,echo_ms_now()*(1+lfo_echo_time*.5f),lfo_echo_time?.002f:.00005f); // Rhizome: the tape's speed, wow, dropouts
- const float echo_tone=tone_coef(patch.echo_tone,.04f,.25f,.9f),room_tone=tone_coef(patch.room_tone,.05f,.3f,.85f);
- const float diffusion=fx_shed?0:patch.room_diffusion*.0007f; // up to 0.7, Dattorro uses 0.625-0.75
+ const float echo_tone=tone_coef(patch.echo_tone,.04f,.25f,.9f);
+ hall_block(n); // Rhizome: the HALL's settings for this block
  const bool send_hp=patch.send_hp>0;if(send_hp&&patch.send_hp!=send_hp_set){send_hp_set=patch.send_hp;float fc=md_send_hp_hz(patch.send_hp)/(float)MD_RATE;send_hp_filter[0].set_f_q<stmlib::FREQUENCY_ACCURATE>(fc,.707f);send_hp_filter[1].set_f_q<stmlib::FREQUENCY_ACCURATE>(fc,.707f);}
  if(patch.chorus&&!fx_shed){ // de-interleave in place through the scratch buffers: no extra memory
   for(unsigned k=0;k<n;k++){out[k]=lr[2*k];aux[k]=lr[2*k+1];}
@@ -695,7 +700,7 @@ static void quantum(float *lr,unsigned n) {
   // Same 256 KiB memory footprint, now 2.97 s at 44.1 kHz rather than 5.94 s.
   if(!frozen){float input=clip(send[k]+feedback_lp*fb);
    tape[writehead]=int16_t(input*32767);
-   {unsigned col=writehead>>9;uint8_t a=(uint8_t)(fabsf(input)*254.9f);if(col!=tape_peak_col){tape_peak_col=col;tape_peak[col]=0;}if(a>tape_peak[col])tape_peak[col]=a;}
+   {unsigned col=writehead>>8;uint8_t a=(uint8_t)(fabsf(input)*254.9f);if(col!=tape_peak_col){tape_peak_col=col;tape_peak[col]=0;}if(a>tape_peak[col])tape_peak[col]=a;}
    writehead=(writehead+1)&GM;if(tape_valid<GN)tape_valid++;stats.grain_writes++;
   }
   float effect[2]={};
@@ -705,14 +710,11 @@ static void quantum(float *lr,unsigned n) {
   if(send_hp){echo_in=send_hp_filter[0].Process<stmlib::FILTER_MODE_HIGH_PASS>(echo_in);room_input=send_hp_filter[1].Process<stmlib::FILTER_MODE_HIGH_PASS>(room_input);}
   float tape_l,tape_r;reel_sample(echo_in,echo_feedback,echo_tone,&tape_l,&tape_r); // Rhizome: the tape echo
   float hp=room_input-fx_highpass_in+.985f*fx_highpass_out;fx_highpass_in=room_input;fx_highpass_out=hp;
-  if(diffusion>0){float x=hp;unsigned base=0;for(unsigned j=0;j<4;j++){int16_t &cell=diffuser[base+diffuser_head[j]];float d=cell*(1.0f/32768.0f),y=d-diffusion*x;cell=int16_t(clip(x+diffusion*y)*32767);if(++diffuser_head[j]>=diffuser_len[j])diffuser_head[j]=0;base+=diffuser_len[j];x=y;}hp=x;} // smears the room's attack
-  static const unsigned lens[4]={887,1013,1151,1201};float rv[4],sum=0;
-  for(unsigned j=0;j<4;j++){rv[j]=room[j][room_head[j]]/32768.0f;room_lp[j]+=(rv[j]-room_lp[j])*room_tone;sum+=room_lp[j];}
-  for(unsigned j=0;j<4;j++){float value=hp*.3f*(1+comet_swell)+(sum*.5f-room_lp[j])*room_decay;room[j][room_head[j]]=int16_t(clip(value)*32767);if(++room_head[j]>=lens[j])room_head[j]=0;}
+  float hall_l,hall_r;hall_sample(hp,&hall_l,&hall_r); // Rhizome: the HALL
   fx_smooth+=(effect_return-fx_smooth)*.002f;
-  effect[0]=fx_smooth*(tape_l+(rv[0]+rv[2])*.35f);effect[1]=fx_smooth*(tape_r+(rv[1]+rv[3])*.35f);
+  effect[0]=fx_smooth*(tape_l+hall_l*HALL_OUT);effect[1]=fx_smooth*(tape_r+hall_r*HALL_OUT);
   // Meters only: the returns as they reach the final 1.9x mix stage.
-  fx_peak[1]=fmaxf(fx_peak[1],fabsf(fx_smooth*(tape_l+tape_r))*.95f);fx_peak[2]=fmaxf(fx_peak[2],fx_smooth*fmaxf(fabsf(rv[0]+rv[2]),fabsf(rv[1]+rv[3]))*.665f);
+  fx_peak[1]=fmaxf(fx_peak[1],fabsf(fx_smooth*(tape_l+tape_r))*.95f);fx_peak[2]=fmaxf(fx_peak[2],fx_smooth*fmaxf(fabsf(hall_l),fabsf(hall_r))*HALL_OUT*.95f);
   }
   fx_peak[0]=fmaxf(fx_peak[0],fmaxf(fabsf(wet[0]),fabsf(wet[1]))*smooth[3]*3.23f*duck[k]);
   for(unsigned c=0;c<2;c++) {
@@ -855,7 +857,7 @@ int md_validate(const md_patch *p) {
  for(int i=0;i<6;i++){const md_track &t=p->track[i];if(t.attack<0||t.attack>1000||t.ratchet<1||t.ratchet>4||t.accent<0||t.accent>1000)return 0;if(t.model<0||t.model>=MD_MODELS||t.length<1||t.length>32||t.hits<0||t.hits>t.length||t.rotate<0||t.rotate>=t.length||t.note<24||t.note>96||t.mute<0||t.mute>1||t.speed<1||t.speed>8)return 0;
  if(t.filter<0||t.filter>=MD_FILTER_MODES)return 0;const int q[]={t.tone,t.harm,t.decay,t.level,t.send,t.shape,t.cutoff,t.resonance,t.breathe};for(int j=0;j<9;j++)if(q[j]<0||q[j]>1000)return 0;if(t.prob<0||t.prob>1000||t.pan<0||t.pan>1000)return 0;}
  for(int i=0;i<6;i++){const md_extension &e=p->ext[i];const int values[]={e.delay_send,e.reverb_send,e.glide,e.marbles,e.tides,e.tides_rate,e.warps};for(int v:values)if(v<0||v>1000)return 0;if(e.bass_mode<0||e.bass_mode>2||e.pattern<0||e.pattern>3||e.edit_step<0||e.edit_step>15)return 0;for(int v:e.notes)if(v< -1||v>24)return 0;}
- if(p->delay_ms<40||p->delay_ms>MD_TAPE_MS_MAX||p->delay_fb<0||p->delay_fb>800||p->reverb_time<0||p->reverb_time>850||p->fx_level<0||p->fx_level>1000)return 0;
+ if(p->delay_ms<40||p->delay_ms>MD_TAPE_MS_MAX||p->delay_fb<0||p->delay_fb>800||p->reverb_time<0||p->reverb_time>1000||p->fx_level<0||p->fx_level>1000)return 0;
  if(p->send_hp<0||p->send_hp>1000||p->echo_tone<0||p->echo_tone>1000||p->room_tone<0||p->room_tone>1000)return 0;
  for(int i=0;i<6;i++){const md_gen &g=p->gen[i];if(g.source<0||g.source>=MD_GEN_SOURCES||g.dejavu<0||g.dejavu>1000||g.loop<1||g.loop>16||g.spread<0||g.spread>24)return 0;}
  for(int i=0;i<6;i++)if(p->gamaka[i]<0||p->gamaka[i]>=MD_GAMAKAS||p->gamaka_amount[i]<0||p->gamaka_amount[i]>1000)return 0;
@@ -864,6 +866,7 @@ int md_validate(const md_patch *p) {
   o.moons<0||o.moons>MD_MOONS_MAX||o.moon_spin<0||o.moon_spin>=MD_MOON_SPINS||o.moon_interval<0||o.moon_interval>=MD_MOON_INTERVALS||o.moon_level<0||o.moon_level>100)return 0;}
  if(p->orbit_comet<0||p->orbit_comet>=MD_COMETS||p->comet_event<0||p->comet_event>=MD_COMET_EVENTS||p->comet_amount<0||p->comet_amount>100||p->orbit_conj<0||p->orbit_conj>=MD_CONJ_MODES||p->orbit_system<0||p->orbit_system>=MD_ORBIT_SYSTEMS)return 0;
  if(p->tape_heads<1||p->tape_heads>7||p->tape_wow<0||p->tape_wow>1000||p->tape_drive<0||p->tape_drive>1000||p->tape_age<0||p->tape_age>1000)return 0;
+ if(p->hall_size<0||p->hall_size>1000||p->hall_predelay<0||p->hall_predelay>250||p->hall_bass<0||p->hall_bass>1000||p->hall_mod<0||p->hall_mod>1000||p->hall_vintage<0||p->hall_vintage>1)return 0;
  if(p->orbit_prec<0||p->orbit_prec>100||p->orbit_pert<0||p->orbit_pert>100)return 0;
  if(p->vadi< -1||p->vadi>11||p->samvadi< -1||p->samvadi>11)return 0;
  if(p->form<0||p->form>1000||p->form_bars<0||p->form_bars>3||p->form_drops<0||p->form_drops>3)return 0;
@@ -872,7 +875,7 @@ int md_validate(const md_patch *p) {
  return 1;
 }
 int md_load(const md_patch *p){if(playing||!md_validate(p))return 0;patch=*p;orbit_prepared=-1;previous=patch;returnable=0;morph_on=0;drift_on=0;drift_slow=0;morph_span=0;fx_shed=0;seqrng=patch.seed;clear_audio();for(int j=0;j<4;j++)smooth[j]=unit(patch.macro[j]);for(int i=0;i<6;i++)reset_voice(i);mark_saved();return 1;}
-unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof diffuser+sizeof element_body+sizeof element_strike+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof room+sizeof voices_raw+sizeof tape+sizeof grains+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
+unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof hall_buf+sizeof element_body+sizeof element_strike+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof voices_raw+sizeof tape+sizeof grains+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
 int md_decode(md_patch *out,const void *data,unsigned bytes){
  if(!out||!data)return 0;
  if(bytes==sizeof(md_patch)){md_patch p;memcpy(&p,data,sizeof p);if(!md_validate(&p))return 0;*out=p;return 1;}
@@ -943,6 +946,10 @@ const char *md_lfo_rate_name(int rate){rate=bound(rate,0,MD_LFO_RATES-1);return 
 const char *md_lfo_shape_name(int s){static const char *const n[MD_LFO_SHAPES]={"SINE","TRIANGLE","RAMP UP","RAMP DOWN","SQUARE","SAMPLE & HOLD","SMOOTH RANDOM"};return n[bound(s,0,MD_LFO_SHAPES-1)];}
 const char *md_lfo_target_name(int t){static const char *const n[MD_LFO_TARGETS]={"CUTOFF","RESONANCE","LEVEL","PAN","PITCH","TONE","HARMONICS","SHAPE","ECHO SEND","ROOM SEND","GRAIN SEND","ECHO TIME","GRAIN POS","ATTACK","DECAY","ECHO FEEDBACK","GRAIN SIZE","NOTES IN SCALE","HITS","ROTATE"};return n[bound(t,0,MD_LFO_TARGETS-1)];}
 float md_echo_ms(void){return echo_ms_now();}
+void md_hall_view(md_hall *v){
+ hall_rt60s(v->rt60);for(int k=0;k<3;k++)v->energy[k]=hall_env[k]*HALL_OUT*HALL_OUT;v->predelay_ms=(float)patch.hall_predelay;v->size=hall_set.size;v->vintage=hall_set.vintage;v->infinite=v->rt60[1]<0;
+}
+float md_hall_rt60(int decay){return hall_rt60(bound(decay,0,1000));}
 void md_reel_view(md_reel *v){
  v->speed=reel_speed*reel_mod;v->wow=reel_wow_now*patch.tape_wow*.001f;v->path=REEL_PATH;v->pos=(uint32_t)reel_pos;v->length=REEL_N;v->heads=reel_heads();v->transport=reel_transport;
  for(int k=0;k<3;k++){v->head_peak[k]=reel_head_peak[k];reel_head_peak[k]*=.5f;}v->rec_peak=reel_rec_peak;reel_rec_peak*=.5f;memcpy(v->trace,reel_trace,sizeof v->trace);

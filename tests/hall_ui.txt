@@ -1,0 +1,44 @@
+wait 3400
+tap HOME
+turn PRESET 61
+wait 50
+expect biome 61
+tap FX
+tap FX
+tap FX
+expect page 36
+spin K1 30
+spin K2 10
+spin K3 6
+spin K4 10
+wait 50
+tap FX
+expect page 37
+spin K1 3
+spin K4 1
+wait 50
+expect hall_vintage 1
+tap PLAY
+peakreset
+wait 5000
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+tap FX
+expect page 36
+spin K1 100
+wait 50
+expect reverb_time 1000
+wait 3000
+spin K1 -40
+wait 3000
+expect peak_db_max >-30
+expect invalid 0
+expect queue_drops 0

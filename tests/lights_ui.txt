@@ -20,6 +20,8 @@ expect lights 18
 tap FX
 tap FX
 tap FX
+tap FX
+tap FX
 expect lights 3
 tap SEL
 wait 30
