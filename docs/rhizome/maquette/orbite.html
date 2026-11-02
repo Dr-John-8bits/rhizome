@@ -1,0 +1,936 @@
+<title>Rhizome Orbit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Chakra+Petch:wght@500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the FM-1 as an object on the left (screen at real 240 px, doubled), what the screen shows on the right. One deliberate dark world: the device's own. */
+:root {
+  --night: #0a0e18;      /* page */
+  --shell: #171b24;      /* FM-1 casing */
+  --rubber: #262c38;     /* buttons */
+  --line: #2b3448;
+  --ink: #e3e8f2;
+  --muted: #8d98b0;
+  --salmon: #f2866f;     /* Monades' title colour, kept */
+  --v1: #ff9f6e; --v2: #f2d06b; --v3: #6fe3b4; --v4: #8db4ff;
+  --display: "Chakra Petch", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+html, body { height: auto; }
+body { background: var(--night); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-bottom: 22px; }
+.top h1 { font-family: var(--display); font-weight: 600; font-size: 30px; letter-spacing: .04em; margin: 0; }
+.top h1 span { color: var(--salmon); }
+.top p { margin: 0; color: var(--muted); max-width: 62ch; }
+.layout { display: grid; grid-template-columns: minmax(0, 540px) minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+/* the FM-1 */
+.device { background: var(--shell); border: 1px solid #222837; border-radius: 22px; padding: 22px; display: grid; gap: 16px;
+  box-shadow: 0 1px 0 #2a3040 inset, 0 24px 60px -30px #000; }
+.screen-wrap { position: relative; width: 100%; max-width: 480px; margin: 0 auto; aspect-ratio: 1; background: #000; border-radius: 6px; padding: 0; overflow: hidden;
+  box-shadow: 0 0 0 6px #0c0f15, 0 0 0 7px #2a3040; }
+#scr { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.listen { position: absolute; inset: auto 0 18% 0; margin: 0 auto; width: max-content; font-family: var(--display); font-weight: 600; font-size: 16px; letter-spacing: .08em;
+  color: #10131a; background: var(--salmon); border: 0; border-radius: 999px; padding: 10px 22px; cursor: pointer; box-shadow: 0 6px 24px -6px #000; }
+.listen:focus-visible, button:focus-visible, select:focus-visible, .knob:focus-visible { outline: 2px solid var(--salmon); outline-offset: 2px; }
+
+.knobs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.knob { display: grid; justify-items: center; gap: 4px; cursor: ns-resize; touch-action: none; user-select: none; border-radius: 10px; padding: 4px 0; }
+.knob svg { width: 58px; height: 58px; }
+.knob .kn { font-family: var(--display); font-size: 12px; color: var(--muted); letter-spacing: .06em; text-align: center; line-height: 1.2; }
+.knob .kn b { color: var(--ink); font-weight: 600; display: block; }
+
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row .lab { font-family: var(--display); font-size: 11px; color: var(--muted); letter-spacing: .1em; min-width: 58px; }
+.btn { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .06em; color: var(--ink); background: var(--rubber); border: 1px solid #323a4b;
+  border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+.btn[aria-pressed="true"] { background: #33405a; border-color: var(--salmon); color: #fff; box-shadow: 0 0 10px -2px var(--salmon); }
+.btn.v { min-width: 44px; }
+.btn.v[aria-pressed="true"] { border-color: var(--c); box-shadow: 0 0 10px -2px var(--c); color: var(--c); }
+.btn.v .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-right: 6px; vertical-align: 1px; }
+.bpm { font-family: var(--mono); font-size: 14px; min-width: 64px; text-align: center; }
+select { font-family: var(--body); font-size: 14px; color: var(--ink); background: var(--rubber); border: 1px solid #323a4b; border-radius: 8px; padding: 7px 10px; max-width: 100%; }
+.caption { color: var(--muted); font-size: 13px; margin: -6px 0 0; }
+
+.keys { display: grid; gap: 8px; }
+.keys[hidden] { display: none !important; }
+.keyrow { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 3px; }
+.key { font-family: var(--mono); font-size: 11px; padding: 14px 0 6px; border-radius: 0 0 6px 6px; border: 1px solid #3a4356; background: #d9dee8; color: #1a1f2a; cursor: pointer; }
+.key.blk { background: #2a3040; color: #c9cfdb; }
+.key.out { opacity: .38; }
+.motifline { font-family: var(--mono); font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.motifline strong { color: var(--ink); font-weight: 500; }
+
+/* reading notes */
+.notes h2 { font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: .12em; color: var(--salmon); margin: 0 0 10px; text-transform: uppercase; }
+.notes section + section { margin-top: 26px; }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.legend li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start; }
+.legend svg { width: 26px; height: 22px; margin-top: 2px; }
+.legend b { font-weight: 500; color: var(--ink); }
+.legend span { color: var(--muted); }
+.notes p { color: var(--muted); margin: 0 0 8px; max-width: 64ch; }
+kbd { font-family: var(--mono); font-size: 12px; background: var(--rubber); border: 1px solid #323a4b; border-radius: 4px; padding: 1px 5px; color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .btn, .knob { transition: none; } }
+</style>
+
+<main class="wrap">
+  <header class="top">
+    <h1>Rhizome <span>ORBIT</span></h1>
+    <p>Maquette jouable de la page principale de Rhizome : un séquenceur où chaque voix est un corps en orbite. L'écran est dessiné en vraie taille, 240 × 240 pixels, agrandi deux fois.</p>
+  </header>
+
+  <div class="layout">
+    <section class="device" aria-label="Le FM-1">
+      <div class="screen-wrap">
+        <canvas id="scr" width="240" height="240" aria-label="Écran du FM-1 : la page ORBIT"></canvas>
+        <button class="listen" id="listen" type="button">▶ ÉCOUTER</button>
+      </div>
+
+      <div class="knobs" id="knobs"></div>
+
+      <div class="row" role="group" aria-label="Pages">
+        <span class="lab">PAGE</span>
+        <button class="btn pg" type="button" data-page="ORBIT" aria-pressed="true">ORBIT</button>
+        <button class="btn pg" type="button" data-page="SYSTEM" aria-pressed="false">SYSTEM</button>
+        <button class="btn pg" type="button" data-page="PITCH" aria-pressed="false">PITCH</button>
+      </div>
+      <div class="row" role="group" aria-label="Voix">
+        <span class="lab">VOIX</span>
+        <button class="btn v" type="button" data-v="0" style="--c:var(--v1)" aria-pressed="false"><span class="dot"></span>1</button>
+        <button class="btn v" type="button" data-v="1" style="--c:var(--v2)" aria-pressed="true"><span class="dot"></span>2</button>
+        <button class="btn v" type="button" data-v="2" style="--c:var(--v3)" aria-pressed="false"><span class="dot"></span>3</button>
+        <button class="btn v" type="button" data-v="3" style="--c:var(--v4)" aria-pressed="false"><span class="dot"></span>4</button>
+      </div>
+      <div class="row">
+        <span class="lab">TEMPO</span>
+        <button class="btn" type="button" id="play" aria-pressed="false">▶ PLAY</button>
+        <button class="btn" type="button" id="bpmDown" aria-label="Tempo plus lent">−</button>
+        <span class="bpm" id="bpm">72 BPM</span>
+        <button class="btn" type="button" id="bpmUp" aria-label="Tempo plus rapide">+</button>
+        <button class="btn" type="button" id="sync" aria-pressed="true">SYNC</button>
+        <button class="btn" type="button" id="still" aria-pressed="false">SANS ANIMATION</button>
+      </div>
+      <div class="row">
+        <span class="lab">SYSTÈME</span>
+        <select id="preset" aria-label="Système"></select>
+      </div>
+      <p class="caption" id="presetNote"></p>
+
+      <div class="keys" id="keys" hidden>
+        <div class="motifline"><span>MOTIF de la voix <strong id="motifVoice">2</strong> :</span><strong id="motifNotes">—</strong>
+          <button class="btn" type="button" id="motifClear">EFFACER</button></div>
+        <div class="keyrow" id="keyrow"></div>
+      </div>
+    </section>
+
+    <aside class="notes">
+      <section>
+        <h2>Ce que montre l'écran</h2>
+        <ul class="legend" id="legend"></ul>
+      </section>
+      <section>
+        <h2>Jouer</h2>
+        <p><b>K1 à K4</b> : glisser vers le haut ou le bas, la molette, ou les flèches au clavier. La carte du réglage apparaît sur l'écran, à côté de ce qu'il change.</p>
+        <p><b>ORBIT</b> règle la voix choisie (période, excentricité, portes, phase). <b>SYSTEM</b> règle tout le système (précession, perturbation, lunes, comète). <b>PITCH</b> choisit d'où viennent les notes ; sur cette page, le clavier écrit un MOTIF.</p>
+        <p><kbd>Espace</kbd> lecture et arrêt, <kbd>1</kbd> à <kbd>4</kbd> choisir la voix. PLAY fait repartir les quatre corps ensemble, du haut de l'écran.</p>
+      </section>
+      <section>
+        <h2>Ce que la maquette n'est pas</h2>
+        <p>Le son est une esquisse dans le navigateur (cloche, nappe, corde, basse, avec un écho et une réverbe), pas les moteurs de Rhizome. La mécanique des orbites, elle, est la vraie : équation de Kepler, portes en rythme euclidien, précession.</p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script>
+(() => {
+'use strict';
+const TAU = Math.PI * 2;
+const CX = 120, CY = 113;               // the star
+const RING = 97;                        // the bar ring
+const VOICES = [
+  { name: 'BELL',   col: '#ff9f6e', pan: -0.35, dly: 0.35, rev: 0.5,  ripple: 1.5 },
+  { name: 'PAD',    col: '#f2d06b', pan:  0.3,  dly: 0.2,  rev: 0.75, ripple: 2.0 },
+  { name: 'STRING', col: '#6fe3b4', pan:  0.5,  dly: 0.45, rev: 0.45, ripple: 0.8 },
+  { name: 'BASS',   col: '#8db4ff', pan:  0.0,  dly: 0.1,  rev: 0.25, ripple: 1.2 },
+];
+const SCALES = [
+  { name: 'E DORIAN',      root: 64, iv: [0, 2, 3, 5, 7, 9, 10] },
+  { name: 'A MINOR PENTA', root: 57, iv: [0, 3, 5, 7, 10] },
+  { name: 'D HIRAJOSHI',   root: 62, iv: [0, 2, 3, 7, 8] },
+  { name: 'F LYDIAN',      root: 65, iv: [0, 2, 4, 6, 7, 9, 11] },
+  { name: 'C BHAIRAV',     root: 60, iv: [0, 1, 4, 5, 7, 8, 11] },
+  { name: 'C WHOLE TONE',  root: 60, iv: [0, 2, 4, 6, 8, 10] },
+];
+const NOTE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const PERIODS_B = [1, 1.5, 2, 3, 4, 6, 8, 12, 16, 24, 28, 32, 48];   // in beats (4 to the bar)
+const PERIODS_S = [2, 3, 4, 5, 6, 7, 8, 10, 11, 13, 17, 19, 23, 29]; // in seconds, free mode
+const COMETS = [0, 8, 16, 32];                                       // bars
+
+/* ---------- state ---------- */
+const sys = { bpm: 72, sync: true, prec: 20, pert: 10, moons: 1, comet: 16, scale: 0, chord: true };
+const mkBody = () => ({ pB: 4, pS: 7, ecc: 0, gates: 1, phase: 0, w: -90, src: 'ORBIT', reg: 0, motif: [], mIdx: 0,
+  M0: 0, w0: 0, t0: 0, last: null, accentUntil: -1 });
+const bodies = [mkBody(), mkBody(), mkBody(), mkBody()];
+const comet = { pB: 64, pS: 60, ecc: 0.92, w: 35, M0: Math.PI, w0: 0, t0: 0, isComet: true };
+let sel = 1, page = 'ORBIT', still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const PRESETS = [
+  { name: 'Kepler-223 · 3:4:6:8', note: 'Quatre planètes réelles en chaîne de résonance : leurs périodes sont dans les rapports 3:4:6:8. Excentricités exagérées pour entendre le rubato.',
+    sys: { sync: true, bpm: 72, prec: 20, pert: 10, moons: 1, comet: 16, scale: 0, chord: true },
+    b: [ { pB: 6, ecc: 0.15, gates: 3, phase: 0, w: -60, src: 'ORBIT', reg: 0 },
+         { pB: 8, ecc: 0.45, gates: 4, phase: 0, w: 20, src: 'MOTIF', reg: 0, motif: [64, 67, 71, 69, 74] },
+         { pB: 12, ecc: 0.3, gates: 5, phase: 20, w: 140, src: 'ECHO', reg: 0 },
+         { pB: 16, ecc: 0.6, gates: 2, phase: 0, w: 230, src: 'ORBIT', reg: 0 } ] },
+  { name: 'Io · Europe · Ganymède · 1:2:4', note: 'La résonance de Laplace des lunes de Jupiter (1:2:4), et Callisto, hors résonance (environ 9,4 fois Io). Orbites presque rondes, comme en vrai : une horlogerie.',
+    sys: { sync: true, bpm: 80, prec: 0, pert: 0, moons: 0, comet: 0, scale: 3, chord: false },
+    b: [ { pB: 3, ecc: 0.004, gates: 4, phase: 0, w: 0, src: 'ORBIT', reg: 0 },
+         { pB: 6, ecc: 0.009, gates: 3, phase: 0, w: 90, src: 'ORBIT', reg: 0 },
+         { pB: 12, ecc: 0.001, gates: 3, phase: 0, w: 180, src: 'ECHO', reg: 0 },
+         { pB: 28, ecc: 0.007, gates: 2, phase: 0, w: 270, src: 'ORBIT', reg: 0 } ] },
+  { name: 'TRAPPIST-1 e · f · g · h · 2:3:4:6', note: 'Quatre des sept planètes de TRAPPIST-1 : leurs périodes (6,1 ; 9,2 ; 12,4 ; 18,8 jours) sont très proches de 2:3:4:6.',
+    sys: { sync: true, bpm: 66, prec: 10, pert: 15, moons: 0, comet: 32, scale: 2, chord: true },
+    b: [ { pB: 4, ecc: 0.2, gates: 2, phase: 0, w: 0, src: 'ORBIT', reg: 1 },
+         { pB: 6, ecc: 0.1, gates: 3, phase: 30, w: 100, src: 'ORBIT', reg: 0 },
+         { pB: 8, ecc: 0.25, gates: 3, phase: 0, w: 200, src: 'MOTIF', reg: 0, motif: [62, 65, 69, 70] },
+         { pB: 12, ecc: 0.35, gates: 5, phase: 0, w: 300, src: 'ORBIT', reg: 0 } ] },
+  { name: 'Pluton · Neptune · 2:3', note: 'Neptune fait trois tours pendant que Pluton en fait deux. Pluton a sa vraie excentricité (0,25) et sa lune Charon : une lune = un ornement. Les voix 1 et 2 se taisent (0 porte).',
+    sys: { sync: true, bpm: 60, prec: 5, pert: 0, moons: 1, comet: 0, scale: 1, chord: true },
+    b: [ { pB: 3, ecc: 0, gates: 0, phase: 0, w: 0, src: 'ORBIT', reg: 0 },
+         { pB: 4, ecc: 0, gates: 0, phase: 0, w: 0, src: 'ORBIT', reg: 0 },
+         { pB: 24, ecc: 0.25, gates: 6, phase: 0, w: 110, src: 'ORBIT', reg: 0 },
+         { pB: 16, ecc: 0.009, gates: 4, phase: 0, w: 0, src: 'ORBIT', reg: 0 } ] },
+  { name: 'Euclidien · orbites rondes', note: 'Excentricité 0, une mesure par tour : chaque voix joue exactement un rythme euclidien E(3,16), E(5,16), E(7,16), E(2,16). L\'euclidien est un cas particulier.',
+    sys: { sync: true, bpm: 96, prec: 0, pert: 0, moons: 0, comet: 0, scale: 1, chord: false },
+    b: [ { pB: 4, ecc: 0, gates: 3, phase: 0, w: 0, src: 'ORBIT', reg: 1 },
+         { pB: 4, ecc: 0, gates: 5, phase: 0, w: 0, src: 'ORBIT', reg: 0 },
+         { pB: 4, ecc: 0, gates: 7, phase: 0, w: 0, src: 'ORBIT', reg: 0 },
+         { pB: 4, ecc: 0, gates: 2, phase: 0, w: 0, src: 'ORBIT', reg: 0 } ] },
+  { name: 'Dérive · libre', note: 'Sans pulsation : périodes de 7, 11, 13 et 17 secondes, qui ne se réalignent presque jamais. Perturbation et comète pour que le système vive.',
+    sys: { sync: false, bpm: 72, prec: 30, pert: 30, moons: 2, comet: 16, scale: 4, chord: true },
+    b: [ { pS: 7, ecc: 0.3, gates: 2, phase: 0, w: 30, src: 'ORBIT', reg: 1 },
+         { pS: 11, ecc: 0.5, gates: 3, phase: 0, w: 150, src: 'ORBIT', reg: 0 },
+         { pS: 13, ecc: 0.2, gates: 2, phase: 40, w: 250, src: 'ECHO', reg: 0 },
+         { pS: 17, ecc: 0.65, gates: 1, phase: 0, w: 320, src: 'ORBIT', reg: 0 } ] },
+];
+
+/* ---------- clock ---------- */
+let ctx = null, audioOn = false, running = true, simOffset = 0;
+let simBase = 0, perfBase = performance.now() / 1000, simHold = 0;
+const simNow = () => !running ? simHold : audioOn ? ctx.currentTime + simOffset : simBase + (performance.now() / 1000 - perfBase);
+let beat0 = 0, beatT0 = 0;
+const beatSec = () => 60 / sys.bpm;
+const beatsAt = t => beat0 + (t - beatT0) / beatSec();
+
+/* ---------- Kepler ---------- */
+const wrap = x => ((x % TAU) + TAU) % TAU;
+function solveE(M, e) {
+  M = wrap(M);
+  let E = e < 0.8 ? M : Math.PI;
+  for (let i = 0; i < 10; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  return E;
+}
+const trueFromE = (E, e) => 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+function meanFromTrue(th, e) {
+  const E = 2 * Math.atan2(Math.sqrt(1 - e) * Math.sin(th / 2), Math.sqrt(1 + e) * Math.cos(th / 2));
+  return E - e * Math.sin(E);
+}
+const periodSec = o => sys.sync ? o.pB * beatSec() : o.pS;
+const nOf = o => TAU / periodSec(o);
+const precRate = () => sys.prec / 100 * TAU / (16 * 4 * beatSec());           // 100 = one turn every 16 bars
+const Mof = (o, t) => o.M0 + nOf(o) * (t - o.t0);
+const Wof = (o, t) => o.w0 + (o.isComet ? 0 : precRate()) * (t - o.t0);
+const eOf = (o, t, i) => o.isComet ? o.ecc :
+  Math.min(0.9, Math.max(0, o.ecc + (o.ecc > 0.02 ? sys.pert / 100 * 0.08 * Math.sin(TAU * t / (periodSec(o) * 7.3) + i * 1.7) : 0)));
+function rebase(o, t) { o.M0 = Mof(o, t); o.w0 = Wof(o, t); o.t0 = t; }
+function rebaseAll() {
+  const t = simNow();
+  bodies.forEach(b => rebase(b, t)); rebase(comet, t);
+  beat0 = beatsAt(t); beatT0 = t;
+}
+function restart() {                   // PLAY: every body starts from the top, together
+  const t = simNow();
+  bodies.forEach((b, i) => { b.w0 = b.w * Math.PI / 180; b.t0 = t; b.M0 = meanFromTrue(-Math.PI / 2 - b.w0, eOf(b, t, i)); b.mIdx = 0; b.last = null; });
+  comet.w0 = comet.w * Math.PI / 180; comet.t0 = t; comet.M0 = Math.PI;
+  beat0 = 0; beatT0 = t; schedT = t - 0.002; events.length = 0; lastDiff = {}; conjCool = {};
+}
+
+/* ---------- geometry for drawing ---------- */
+let radii = [40, 55, 70, 85], cometA = 200;
+function layout(t) {
+  const p23 = bodies.map(b => Math.pow(periodSec(b), 2 / 3));
+  const lo = Math.min(...p23), hi = Math.max(...p23);
+  let a = p23.map(v => hi - lo < 1e-6 ? 62 : 28 + 54 * (v - lo) / (hi - lo));
+  const ext = Math.max(...a.map((r, i) => r * (1 + eOf(bodies[i], t, i))));
+  const s = Math.min(1.25, 90 / ext);
+  radii = a.map(r => r * s);
+  cometA = 15 / (1 - comet.ecc);
+}
+function pos(o, t, i) {
+  const e = eOf(o, t, i), E = solveE(Mof(o, t), e), th = trueFromE(E, e);
+  const a = o.isComet ? cometA : radii[i];
+  const r = a * (1 - e * Math.cos(E)), phi = th + Wof(o, t);
+  return { x: CX + r * Math.cos(phi), y: CY + r * Math.sin(phi), r, phi, rn: e < 0.01 ? 0.5 : (r / a - (1 - e)) / (2 * e) };
+}
+function euclid(k, n) { const out = []; for (let i = 0; i < n; i++) if ((i * k) % n < k) out.push(i); return out; }
+function steps(b) { return sys.sync ? Math.max(1, Math.round(b.pB * 4)) : 16; }
+function gateAngles(b) {
+  const n = steps(b), k = Math.min(b.gates, n);
+  return euclid(k, n).map((s, gi) => ({ gi, phi: -Math.PI / 2 + b.phase * Math.PI / 180 + TAU * s / n }));
+}
+
+/* ---------- pitch ---------- */
+const sc = () => SCALES[sys.scale];
+function degMidi(d, base) {
+  const iv = sc().iv, n = iv.length, o = Math.floor(d / n);
+  return base + 12 * o + iv[((d % n) + n) % n];
+}
+const BASE_OCT = [12, 0, 0, -24];
+function pitchFor(b, i, t, rn) {
+  const base = sc().root + BASE_OCT[i] + 12 * b.reg;
+  if (b.src === 'MOTIF') {
+    if (!b.motif.length) return null;
+    const m = b.motif[b.mIdx % b.motif.length]; b.mIdx++;
+    return m + BASE_OCT[i] + 12 * b.reg;
+  }
+  if (b.src === 'ECHO') {
+    const src = bodies[(i + 3) % 4].last;
+    if (src == null) return null;
+    const triad = [0, 2, 4].map(d => sc().root + sc().iv[d % sc().iv.length]);
+    for (let o = -48; o <= 48; o += 12) for (const n of triad) { const c = n + o; if (c > src) { return Math.min(c, c) + 12 * b.reg; } }
+    return null;
+  }
+  let d = Math.round((1 - rn) * 6);
+  if (Math.random() < sys.pert / 100 * 0.5) d += Math.random() < 0.5 ? -1 : 1;
+  return degMidi(d, base);
+}
+const nameOf = m => NOTE[((m % 12) + 12) % 12];
+
+/* ---------- scheduler ---------- */
+const LOOK = 0.15;
+let schedT = 0, events = [], lastDiff = {}, conjCool = {};
+const gateHit = bodies.map(() => ({}));
+function tick() {
+  if (!running) return;
+  const now = simNow();
+  if (schedT < now - 0.5) schedT = now;
+  const end = now + LOOK;
+  if (end <= schedT) return;
+  const t1 = schedT, t2 = end, tm = (t1 + t2) / 2, found = [];
+  bodies.forEach((b, i) => {
+    if (!b.gates) return;
+    const e = eOf(b, tm, i), w = Wof(b, tm), M1 = Mof(b, t1), M2 = Mof(b, t2), n = nOf(b);
+    for (const g of gateAngles(b)) {
+      const Mg = meanFromTrue(g.phi - w, e);
+      let m = Mg + Math.ceil((M1 - Mg) / TAU) * TAU;
+      if (m <= M1) m += TAU;
+      while (m <= M2) { found.push({ t: t1 + (m - M1) / n, b, i, g }); m += TAU; }
+    }
+  });
+  found.sort((x, y) => x.t - y.t);
+  for (const f of found) noteEvent(f);
+  // conjunctions: sample the angles
+  for (let t = t1; t <= t2; t += 0.03) {
+    const ph = bodies.map((b, i) => pos(b, t, i).phi);
+    for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
+      if (!bodies[i].gates && !bodies[j].gates) continue;
+      let d = ph[i] - ph[j]; d = Math.atan2(Math.sin(d), Math.cos(d));
+      const k = i + '-' + j, prev = lastDiff[k];
+      lastDiff[k] = d;
+      if (prev !== undefined && Math.sign(prev) !== Math.sign(d) && Math.abs(d) < 0.5 && Math.abs(prev) < 0.5 && !(conjCool[k] > t)) {
+        conjCool[k] = t + 2 * beatSec();
+        conjEvent(t, i, j);
+      }
+    }
+  }
+  // the comet's perihelion
+  if (sys.comet) {
+    const M1 = Mof(comet, t1), M2 = Mof(comet, t2);
+    let m = Math.ceil(M1 / TAU) * TAU; if (m <= M1) m += TAU;
+    if (m <= M2) cometEvent(t1 + (m - M1) / nOf(comet));
+  }
+  schedT = t2;
+}
+function noteEvent({ t, b, i, g }) {
+  const p = sys.pert / 100;
+  if (Math.random() < p * 0.25) { events.push({ t, type: 'skip', i, gi: g.gi }); return; }
+  t += (Math.random() - 0.5) * p * 0.12 * beatSec();
+  const rn = pos(b, t, i).rn;
+  const midi = pitchFor(b, i, t, rn);
+  if (midi == null) { events.push({ t, type: 'skip', i, gi: g.gi }); return; }
+  let vel = 0.55 + 0.15 * (1 - rn);
+  if (b.accentUntil > t) vel = 1;
+  b.last = midi;
+  events.push({ t, type: 'note', i, gi: g.gi, vel, midi });
+  play(i, midi, vel, t);
+  for (let k = 1; k <= sys.moons; k++) {
+    const tm = t + k * beatSec() / 4, mm = degMidi(k, midi) - degMidi(0, midi) + midi;
+    events.push({ t: tm, type: 'moon', i, k });
+    play(i, mm, 0.28, tm);
+  }
+}
+function conjEvent(t, i, j) {
+  events.push({ t, type: 'conj', i, j });
+  if (sys.chord) {
+    const a = bodies[i].last, b = bodies[j].last;
+    const notes = [a, b].filter(x => x != null);
+    if (notes.length) {
+      const lo = Math.min(...notes);
+      notes.push(lo + (sc().iv[2 % sc().iv.length] || 4));
+      notes.forEach(n => play(1, n, 0.5, t, true));
+    }
+  } else {
+    bodies[i].accentUntil = bodies[j].accentUntil = t + beatSec();
+  }
+}
+function cometEvent(t) {
+  events.push({ t, type: 'comet' });
+  if (!audioOn) return;
+  const at = t - simOffset;
+  if (at < ctx.currentTime) return;
+  const r = fx.revSend.gain;
+  r.cancelScheduledValues(at); r.setValueAtTime(r.value, at);
+  r.linearRampToValueAtTime(1.6, at + 2); r.linearRampToValueAtTime(1, at + 8);
+  [sc().root - 24, degMidi(4, sc().root - 24)].forEach(n => play(1, n, 0.7, t, true, 7));
+}
+
+/* ---------- sound sketch ---------- */
+let fx = null;
+function initAudio() {
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const master = ctx.createGain(); master.gain.value = 0.8;
+  const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3;
+  master.connect(comp).connect(ctx.destination);
+  const delay = ctx.createDelay(3), dlp = ctx.createBiquadFilter(), fb = ctx.createGain(), dWet = ctx.createGain();
+  delay.delayTime.value = 0.75 * beatSec(); dlp.type = 'lowpass'; dlp.frequency.value = 2200; fb.gain.value = 0.42; dWet.gain.value = 0.3;
+  delay.connect(dlp).connect(fb).connect(delay); dlp.connect(dWet).connect(master);
+  const conv = ctx.createConvolver(), rWet = ctx.createGain(), revSend = ctx.createGain();
+  conv.buffer = impulse(5.5); rWet.gain.value = 0.5; revSend.gain.value = 1;
+  revSend.connect(conv).connect(rWet).connect(master);
+  const buses = VOICES.map(v => {
+    const pan = ctx.createStereoPanner(); pan.pan.value = v.pan;
+    const ds = ctx.createGain(); ds.gain.value = v.dly;
+    const rs = ctx.createGain(); rs.gain.value = v.rev;
+    pan.connect(master); pan.connect(ds).connect(delay); pan.connect(rs).connect(revSend);
+    return pan;
+  });
+  fx = { master, delay, revSend, buses };
+}
+function impulse(sec) {
+  const len = Math.floor(ctx.sampleRate * sec), buf = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c); let y = 0;
+    for (let i = 0; i < len; i++) { y += 0.35 * ((Math.random() * 2 - 1) - y); d[i] = y * Math.pow(1 - i / len, 2.4) * (i < 400 ? i / 400 : 1); }
+  }
+  return buf;
+}
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+function play(v, midi, vel, t, soft, long) {
+  if (!audioOn || !running) return;
+  const at = t - simOffset;
+  if (at < ctx.currentTime - 0.005) return;
+  const out = fx.buses[v], f = hz(midi), amp = ctx.createGain();
+  amp.connect(out);
+  const ex = (g, a, peak, dec) => { g.setValueAtTime(0.0001, at); g.exponentialRampToValueAtTime(peak, at + a); g.exponentialRampToValueAtTime(0.0001, at + a + dec); };
+  const osc = (type, fr) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = fr; return o; };
+  let stopAt;
+  if (soft || v === 1) {                               // pad
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; lp.Q.value = 0.6; lp.connect(amp);
+    const dur = long || 3.2;
+    [-6, 6].forEach(c => { const o = osc('triangle', f); o.detune.value = c; o.connect(lp); o.start(at); o.stop(at + dur + 0.2); });
+    amp.gain.setValueAtTime(0.0001, at); amp.gain.exponentialRampToValueAtTime(0.13 * vel, at + Math.min(0.5, dur / 3));
+    amp.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    return;
+  }
+  if (v === 0) {                                       // bell (2-op FM)
+    const c = osc('sine', f), m = osc('sine', f * 3.5), mg = ctx.createGain();
+    m.connect(mg).connect(c.frequency); c.connect(amp);
+    ex(mg.gain, 0.003, f * 1.6 * vel + 1, 0.9); ex(amp.gain, 0.004, 0.22 * vel, 2.4);
+    stopAt = at + 2.6; c.start(at); m.start(at); c.stop(stopAt); m.stop(stopAt);
+  } else if (v === 2) {                                // plucked string
+    const o = osc('sawtooth', f), lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(800 + 3000 * vel, at); lp.frequency.exponentialRampToValueAtTime(300, at + 0.6);
+    o.connect(lp).connect(amp); ex(amp.gain, 0.004, 0.16 * vel, 0.9);
+    o.start(at); o.stop(at + 1.1);
+  } else {                                             // bass
+    const o = osc('sine', f), h = osc('triangle', f * 2), hg = ctx.createGain(); hg.gain.value = 0.2;
+    o.connect(amp); h.connect(hg).connect(amp); ex(amp.gain, 0.01, 0.38 * vel, 1.6);
+    o.start(at); h.start(at); o.stop(at + 1.8); h.stop(at + 1.8);
+  }
+}
+
+/* ---------- parameters and knobs ---------- */
+const B = () => bodies[sel];
+const fmt2 = x => x.toFixed(2);
+function ratioText() {
+  if (!sys.sync) return bodies.map(b => b.pS + 's').join(' ');
+  const v = bodies.map(b => Math.round(b.pB * 2));
+  const g = v.reduce((a, b) => { while (b) [a, b] = [b, a % b]; return a; });
+  return v.map(x => x / g).join(':');
+}
+function periodLabel(b) {
+  if (!sys.sync) return b.pS + ' S';
+  const x = b.pB;
+  if (x < 4) return x + (x === 1 ? ' BEAT' : ' BEATS');
+  const bars = x / 4;
+  return (Number.isInteger(bars) ? bars : bars.toFixed(1)) + (bars === 1 ? ' BAR' : ' BARS');
+}
+const list = (arr, get, set) => ({ kind: 'list', n: arr.length, idx: () => Math.max(0, arr.indexOf(get())), setIdx: k => set(arr[k]) });
+const range = (min, max, step, get, set) => ({ kind: 'range', min, max, step, get, set });
+const PARAMS = {
+  ORBIT: [
+    { key: 'K1', label: 'PERIOD', scope: 'body', hl: 'orbit',
+      ...(() => ({
+        kind: 'list',
+        get n() { return sys.sync ? PERIODS_B.length : PERIODS_S.length; },
+        idx: () => sys.sync ? Math.max(0, PERIODS_B.indexOf(B().pB)) : Math.max(0, PERIODS_S.indexOf(B().pS)),
+        setIdx: k => { rebaseAll(); if (sys.sync) B().pB = PERIODS_B[k]; else B().pS = PERIODS_S[k]; } }))(),
+      val: () => periodLabel(B()), sub: () => 'RATIO ' + ratioText() },
+    { key: 'K2', label: 'ECCENTR.', scope: 'body', hl: 'orbit',
+      ...range(0, 0.85, 0.01, () => B().ecc, v => { B().ecc = v; }),
+      val: () => fmt2(B().ecc),
+      sub: () => { const e = B().ecc; return e < 0.01 ? 'CIRCLE: EVEN TIME' : '×' + Math.pow((1 + e) / (1 - e), 2).toFixed(1) + ' FASTER AT STAR'; } },
+    { key: 'K3', label: 'GATES', scope: 'body', hl: 'gates',
+      ...range(0, 16, 1, () => B().gates, v => { B().gates = v; }),
+      val: () => B().gates ? String(B().gates) : 'MUTE', sub: () => B().gates ? 'E(' + Math.min(B().gates, steps(B())) + ',' + steps(B()) + ')' : 'ORBITS IN SILENCE' },
+    { key: 'K4', label: 'PHASE', scope: 'body', hl: 'gates',
+      ...range(0, 345, 15, () => B().phase, v => { B().phase = v; }),
+      val: () => B().phase + '°', sub: () => 'GATES TURN' },
+  ],
+  SYSTEM: [
+    { key: 'K1', label: 'PRECESS.', scope: 'sys', hl: 'prec',
+      ...range(0, 100, 5, () => sys.prec, v => { rebaseAll(); sys.prec = v; }),
+      val: () => sys.prec ? sys.prec + '%' : 'OFF', sub: () => sys.prec ? '1 TURN / ' + Math.round(1600 / sys.prec) + ' BARS' : 'ORBITS FIXED' },
+    { key: 'K2', label: 'PERTURB', scope: 'sys', hl: 'pert',
+      ...range(0, 100, 5, () => sys.pert, v => { sys.pert = v; }),
+      val: () => sys.pert + '%', sub: () => sys.pert ? 'TIME, NOTES AND ORBITS DRIFT' : 'PERFECT CLOCKWORK' },
+    { key: 'K3', label: 'MOONS', scope: 'sys', hl: 'moons',
+      ...range(0, 3, 1, () => sys.moons, v => { sys.moons = v; }),
+      val: () => String(sys.moons), sub: () => sys.moons ? sys.moons + ' ORNAMENT' + (sys.moons > 1 ? 'S' : '') + ' PER NOTE' : 'NO ORNAMENT' },
+    { key: 'K4', label: 'COMET', scope: 'sys', hl: 'comet',
+      ...list(COMETS, () => sys.comet, v => { rebaseAll(); sys.comet = v; comet.pB = v * 4; comet.pS = v * 4 * beatSec(); }),
+      val: () => sys.comet ? sys.comet + ' BARS' : 'OFF', sub: () => sys.comet ? 'SWELL AT PERIHELION' : 'NO RARE EVENT' },
+  ],
+  PITCH: [
+    { key: 'K1', label: 'SOURCE', scope: 'body', hl: 'source',
+      ...list(['ORBIT', 'MOTIF', 'ECHO'], () => B().src, v => { B().src = v; }),
+      val: () => B().src, sub: () => B().src === 'ORBIT' ? 'NEAR STAR = HIGH' : B().src === 'MOTIF' ? (B().motif.length ? B().motif.length + ' NOTES TYPED' : 'TYPE NOTES ON THE KEYS') : 'TRIAD ABOVE VOICE ' + (((sel + 3) % 4) + 1) },
+    { key: 'K2', label: 'SCALE', scope: 'sys', hl: 'scale',
+      ...range(0, SCALES.length - 1, 1, () => sys.scale, v => { sys.scale = v; }),
+      val: () => sc().name, sub: () => sc().iv.length + ' NOTES, ROOT ' + nameOf(sc().root) },
+    { key: 'K3', label: 'REGISTER', scope: 'body', hl: 'source',
+      ...range(-2, 2, 1, () => B().reg, v => { B().reg = v; }),
+      val: () => (B().reg > 0 ? '+' : '') + B().reg + ' OCT', sub: () => 'VOICE ' + (sel + 1) + ' ' + VOICES[sel].name },
+    { key: 'K4', label: 'CHORD', scope: 'sys', hl: 'conj',
+      ...list([false, true], () => sys.chord, v => { sys.chord = v; }),
+      val: () => sys.chord ? 'ON' : 'OFF', sub: () => sys.chord ? 'CONJUNCTION = CHORD' : 'CONJUNCTION = ACCENT' },
+  ],
+};
+function norm(p) { return p.kind === 'list' ? (p.n > 1 ? p.idx() / (p.n - 1) : 0) : (p.get() - p.min) / (p.max - p.min); }
+function nudge(p, dir) {
+  if (p.kind === 'list') { const k = Math.min(p.n - 1, Math.max(0, p.idx() + dir)); if (k !== p.idx()) p.setIdx(k); }
+  else { const v = Math.min(p.max, Math.max(p.min, +(p.get() + dir * p.step).toFixed(4))); p.set(v); }
+  touched(p);
+}
+let lastTurn = null;
+function touched(p) { lastTurn = { p, at: performance.now() }; renderKnobs(); syncKeys(); }
+
+const knobsEl = document.getElementById('knobs');
+function renderKnobs() {
+  const ps = PARAMS[page];
+  if (!knobsEl.children.length) {
+    for (let k = 0; k < 4; k++) {
+      const el = document.createElement('div');
+      el.className = 'knob'; el.tabIndex = 0; el.setAttribute('role', 'slider'); el.dataset.k = k;
+      el.innerHTML = '<svg viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="22" fill="#232835" stroke="#323a4b"/><path class="trk" fill="none" stroke="#323a4b" stroke-width="3" stroke-linecap="round"/><path class="arc" fill="none" stroke-width="3" stroke-linecap="round"/><line class="ptr" x1="29" y1="29" stroke="#e3e8f2" stroke-width="2.5" stroke-linecap="round"/></svg><div class="kn"></div>';
+      knobsEl.appendChild(el); bindKnob(el);
+    }
+  }
+  ps.forEach((p, k) => {
+    const el = knobsEl.children[k], v = norm(p), a0 = -225 * Math.PI / 180, a1 = 45 * Math.PI / 180;
+    const ang = a0 + (a1 - a0) * v, R = 25;
+    const pt = a => (29 + R * Math.cos(a)).toFixed(2) + ' ' + (29 + R * Math.sin(a)).toFixed(2);
+    const arc = (from, to) => `M ${pt(from)} A ${R} ${R} 0 ${to - from > Math.PI ? 1 : 0} 1 ${pt(to)}`;
+    el.querySelector('.trk').setAttribute('d', arc(a0, a1));
+    el.querySelector('.arc').setAttribute('d', v > 0.001 ? arc(a0, ang) : 'M 0 0');
+    el.querySelector('.arc').setAttribute('stroke', p.scope === 'body' ? VOICES[sel].col : '#f2866f');
+    el.querySelector('.ptr').setAttribute('x2', (29 + 14 * Math.cos(ang)).toFixed(2));
+    el.querySelector('.ptr').setAttribute('y2', (29 + 14 * Math.sin(ang)).toFixed(2));
+    el.querySelector('.kn').innerHTML = p.key + ' ' + p.label + '<b>' + p.val() + '</b>';
+    el.setAttribute('aria-label', p.key + ' ' + p.label);
+    el.setAttribute('aria-valuetext', p.val());
+  });
+}
+function bindKnob(el) {
+  const P = () => PARAMS[page][+el.dataset.k];
+  let y0 = null, acc = 0;
+  el.addEventListener('pointerdown', e => { y0 = e.clientY; acc = 0; el.setPointerCapture(e.pointerId); el.focus(); e.preventDefault(); });
+  el.addEventListener('pointermove', e => {
+    if (y0 == null) return;
+    const p = P(), dy = y0 - e.clientY; y0 = e.clientY;
+    const unit = p.kind === 'list' ? 16 : Math.max(3, 160 / ((p.max - p.min) / p.step));
+    acc += dy;
+    while (Math.abs(acc) >= unit) { nudge(p, Math.sign(acc)); acc -= Math.sign(acc) * unit; }
+  });
+  const up = () => { y0 = null; };
+  el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  el.addEventListener('wheel', e => { e.preventDefault(); nudge(P(), e.deltaY < 0 ? 1 : -1); }, { passive: false });
+  el.addEventListener('keydown', e => {
+    const d = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1 }[e.key];
+    if (d) { e.preventDefault(); nudge(P(), d); }
+  });
+}
+
+/* ---------- controls ---------- */
+const $ = id => document.getElementById(id);
+function setPage(p) {
+  page = p;
+  document.querySelectorAll('.pg').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.page === p)));
+  renderKnobs(); syncKeys();
+}
+function setSel(i) {
+  sel = i;
+  document.querySelectorAll('.btn.v').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.v === i)));
+  renderKnobs(); syncKeys();
+}
+document.querySelectorAll('.pg').forEach(b => b.addEventListener('click', () => setPage(b.dataset.page)));
+document.querySelectorAll('.btn.v').forEach(b => b.addEventListener('click', () => setSel(+b.dataset.v)));
+function setRunning(on) {
+  if (on === running) return;
+  if (!on) { simHold = simNow(); running = false; }
+  else {
+    if (audioOn) simOffset = simHold - ctx.currentTime; else { simBase = simHold; perfBase = performance.now() / 1000; }
+    running = true; restart();
+  }
+  syncTransport();
+}
+function startAudio() {
+  if (audioOn) return;
+  const t = simNow();
+  initAudio(); audioOn = true; running = true;
+  simOffset = t - ctx.currentTime;
+  if (ctx.state === 'suspended') ctx.resume();
+  restart(); syncTransport();
+}
+function syncTransport() {
+  const on = running && audioOn;
+  $('play').textContent = on ? '■ STOP' : '▶ PLAY';
+  $('play').setAttribute('aria-pressed', String(on));
+  $('listen').hidden = audioOn;
+}
+$('listen').addEventListener('click', startAudio);
+$('play').addEventListener('click', () => { if (!audioOn) startAudio(); else setRunning(!running); });
+function setBpm(v) {
+  rebaseAll(); sys.bpm = Math.max(40, Math.min(160, v));
+  comet.pS = sys.comet * 4 * beatSec();
+  $('bpm').textContent = sys.bpm + ' BPM';
+  if (fx) fx.delay.delayTime.setTargetAtTime(0.75 * beatSec(), ctx.currentTime, 0.2);
+}
+$('bpmDown').addEventListener('click', () => setBpm(sys.bpm - 4));
+$('bpmUp').addEventListener('click', () => setBpm(sys.bpm + 4));
+$('sync').addEventListener('click', () => {
+  rebaseAll(); sys.sync = !sys.sync;
+  $('sync').textContent = sys.sync ? 'SYNC' : 'FREE';
+  $('sync').setAttribute('aria-pressed', String(sys.sync));
+  renderKnobs();
+});
+$('still').addEventListener('click', () => { still = !still; $('still').setAttribute('aria-pressed', String(still)); });
+$('still').setAttribute('aria-pressed', String(still));
+
+const presetEl = $('preset');
+PRESETS.forEach((p, k) => { const o = document.createElement('option'); o.value = k; o.textContent = p.name; presetEl.appendChild(o); });
+function loadPreset(k) {
+  const P = PRESETS[k];
+  Object.assign(sys, P.sys);
+  P.b.forEach((d, i) => Object.assign(bodies[i], mkBody(), d, { motif: d.motif ? d.motif.slice() : [] }));
+  comet.pB = sys.comet * 4; comet.pS = sys.comet * 4 * beatSec();
+  $('bpm').textContent = sys.bpm + ' BPM';
+  $('sync').textContent = sys.sync ? 'SYNC' : 'FREE'; $('sync').setAttribute('aria-pressed', String(sys.sync));
+  $('presetNote').textContent = P.note;
+  if (fx) fx.delay.delayTime.setTargetAtTime(0.75 * beatSec(), ctx.currentTime, 0.1);
+  restart(); renderKnobs(); syncKeys();
+}
+presetEl.addEventListener('change', () => loadPreset(+presetEl.value));
+
+// the MOTIF keyboard (PITCH page)
+const keyrow = $('keyrow');
+function buildKeys() {
+  keyrow.innerHTML = '';
+  const root = sc().root, inScale = new Set(sc().iv.map(x => x % 12));
+  for (let s = 0; s <= 12; s++) {
+    const m = root + s, b = document.createElement('button');
+    b.type = 'button'; b.className = 'key' + (NOTE[m % 12].includes('#') ? ' blk' : '') + (inScale.has(s % 12) ? '' : ' out');
+    b.textContent = NOTE[m % 12]; b.setAttribute('aria-label', 'Écrire ' + NOTE[m % 12] + ' dans le motif');
+    b.addEventListener('click', () => {
+      const body = B();
+      if (body.motif.length >= 8) body.motif.shift();
+      body.motif.push(m); body.src = 'MOTIF';
+      if (audioOn) play(sel, m + BASE_OCT[sel] + 12 * body.reg, 0.6, simNow() + 0.01);
+      touched(PARAMS.PITCH[0]);
+    });
+    keyrow.appendChild(b);
+  }
+}
+let keysScale = -1;
+function syncKeys() {
+  $('keys').hidden = page !== 'PITCH';
+  if (keysScale !== sys.scale) { keysScale = sys.scale; buildKeys(); }
+  $('motifVoice').textContent = sel + 1;
+  $('motifNotes').textContent = B().motif.length ? B().motif.map(nameOf).join(' ') : '—';
+}
+$('motifClear').addEventListener('click', () => { B().motif = []; B().mIdx = 0; touched(PARAMS.PITCH[0]); });
+
+document.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('select, .knob')) return;
+  if (e.code === 'Space') { e.preventDefault(); if (!audioOn) startAudio(); else setRunning(!running); }
+  if (/^[1-4]$/.test(e.key)) setSel(+e.key - 1);
+});
+
+/* ---------- legend (drawn with the same colours) ---------- */
+const LEG = [
+  ['<circle cx="13" cy="11" r="4" fill="#fff4dc"/><circle cx="13" cy="11" r="8" fill="none" stroke="#fff4dc" stroke-opacity=".3"/>', 'L\'étoile', 'son éclat suit ce qui joue en ce moment.'],
+  ['<ellipse cx="13" cy="11" rx="11" ry="7" fill="none" stroke="#f2d06b"/>', 'L\'ellipse', 'l\'orbite réelle d\'une voix. Plus loin = plus lente (troisième loi de Kepler). La précession la fait tourner.'],
+  ['<line x1="13" y1="3" x2="13" y2="10" stroke="#f2d06b" stroke-width="2"/><ellipse cx="13" cy="13" rx="11" ry="6" fill="none" stroke="#f2d06b" stroke-opacity=".4"/>', 'Les portes', 'un trait = un coup. Réparties en rythme euclidien. En MOTIF, la note qui jouera est écrite à côté.'],
+  ['<path d="M3 15 Q 10 4 20 9" fill="none" stroke="#6fe3b4" stroke-width="2" stroke-opacity=".5"/><circle cx="20" cy="9" r="3.5" fill="#6fe3b4"/>', 'Le corps et sa traînée', 'la traînée est longue quand le corps va vite : près de l\'étoile, les coups se resserrent. C\'est le rubato.'],
+  ['<circle cx="13" cy="11" r="3" fill="#ff9f6e"/><circle cx="13" cy="11" r="8" fill="none" stroke="#ff9f6e" stroke-opacity=".5"/>', 'L\'onde', 'une note jouée. Taille = vélocité, durée = résonance du son.'],
+  ['<line x1="2" y1="18" x2="24" y2="4" stroke="#fff" stroke-opacity=".7"/><circle cx="9" cy="13.5" r="2.5" fill="#8db4ff"/><circle cx="19" cy="7" r="2.5" fill="#f2d06b"/>', 'La conjonction', 'deux corps alignés avec l\'étoile : un accord (CHORD ON) ou un accent.'],
+  ['<circle cx="13" cy="11" r="9" fill="none" stroke="#3a4560"/><circle cx="13" cy="2" r="2" fill="#f2866f"/>', 'L\'anneau extérieur', 'la mesure : un tour par mesure, quatre temps marqués.'],
+  ['<circle cx="12" cy="11" r="3.5" fill="#6fe3b4"/><circle cx="20" cy="8" r="1.6" fill="#cfd6e4"/>', 'Les lunes', 'les ornements : une petite note après chaque note, une par lune.'],
+  ['<line x1="4" y1="18" x2="16" y2="8" stroke="#bfe9ff" stroke-opacity=".5" stroke-width="3"/><circle cx="17" cy="7" r="2.5" fill="#e8f7ff"/>', 'La comète', 'un événement rare : à son passage près de l\'étoile, la réverbe monte et un bourdon s\'ouvre.'],
+];
+$('legend').innerHTML = LEG.map(([svg, b, s]) => `<li><svg viewBox="0 0 26 22" aria-hidden="true">${svg}</svg><div><b>${b}</b> <span>: ${s}</span></div></li>`).join('');
+
+/* ---------- the screen ---------- */
+const cv = $('scr'), g = cv.getContext('2d');
+const F = (w, px) => `${w} ${px}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+const C = { bg: '#0d1424', strip: '#121b2e', card: '#18233a', line: '#25304a', muted: '#7f8ba6', ink: '#e3e8f2', salmon: '#f2866f', star: '#fff4dc' };
+const STARS = (() => { let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; return Array.from({ length: 70 }, () => [r() * 240, 16 + r() * 194, 0.12 + r() * 0.3]); })();
+const alpha = (hex, a) => hex + Math.round(Math.max(0, Math.min(1, a)) * 255).toString(16).padStart(2, '0');
+
+function draw() {
+  const t = simNow();
+  layout(t);
+  const hlOn = lastTurn && performance.now() - lastTurn.at < 1500;
+  const hl = hlOn ? lastTurn.p.hl : null;
+  const hlScope = hlOn ? lastTurn.p.scope : null;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = C.bg; g.fillRect(0, 0, 240, 240);
+  for (const [x, y, a] of STARS) { g.fillStyle = `rgba(200,215,255,${a})`; g.fillRect(x | 0, y | 0, 1, 1); }
+
+  // bar ring
+  const beats = beatsAt(t);
+  g.lineWidth = 1; g.strokeStyle = C.line; g.beginPath(); g.arc(CX, CY, RING, 0, TAU); g.stroke();
+  if (sys.sync) {
+    for (let k = 0; k < 4; k++) {
+      const a = -Math.PI / 2 + k * TAU / 4;
+      g.strokeStyle = k ? '#3a4560' : '#56648a'; g.lineWidth = k ? 1 : 1.5;
+      g.beginPath(); g.moveTo(CX + (RING - 3) * Math.cos(a), CY + (RING - 3) * Math.sin(a)); g.lineTo(CX + (RING + 3) * Math.cos(a), CY + (RING + 3) * Math.sin(a)); g.stroke();
+    }
+    const a = -Math.PI / 2 + TAU * ((beats % 4 + 4) % 4) / 4;
+    g.fillStyle = C.salmon; g.beginPath(); g.arc(CX + RING * Math.cos(a), CY + RING * Math.sin(a), 2.2, 0, TAU); g.fill();
+  }
+
+  // comet orbit (while COMET is being turned)
+  if (hl === 'comet' && sys.comet) {
+    g.save(); g.setLineDash([2, 3]); g.strokeStyle = 'rgba(191,233,255,.35)';
+    const e = comet.ecc, a = cometA, b = a * Math.sqrt(1 - e * e), w = Wof(comet, t);
+    g.beginPath(); g.ellipse(CX - a * e * Math.cos(w), CY - a * e * Math.sin(w), a, b, w, 0, TAU); g.stroke(); g.restore();
+  }
+
+  // orbits
+  const order = [0, 1, 2, 3].filter(i => i !== sel).concat(sel);
+  for (const i of order) {
+    const b = bodies[i], e = eOf(b, t, i), a = radii[i], bb = a * Math.sqrt(1 - e * e), w = Wof(b, t), isSel = i === sel;
+    const emph = isSel && (hl === 'orbit' || hl === 'pert');
+    g.strokeStyle = alpha(VOICES[i].col, isSel ? (emph ? 1 : 0.75) : b.gates ? 0.3 : 0.14);
+    g.lineWidth = emph ? 2 : isSel ? 1.3 : 1;
+    if (!b.gates) g.setLineDash([2, 3]);
+    g.beginPath(); g.ellipse(CX - a * e * Math.cos(w), CY - a * e * Math.sin(w), a, bb, w, 0, TAU); g.stroke();
+    g.setLineDash([]);
+    if (hl === 'prec' && e > 0.01) {                      // perihelion marker: where the body is fastest
+      const px = CX + a * (1 - e) * Math.cos(w), py = CY + a * (1 - e) * Math.sin(w);
+      g.fillStyle = alpha(VOICES[i].col, 0.9); g.beginPath(); g.arc(px, py, 1.8, 0, TAU); g.fill();
+      g.strokeStyle = alpha(VOICES[i].col, 0.6); g.beginPath(); g.arc(px, py, 4.5, w + 0.9, w + 2.4); g.stroke();
+    }
+  }
+
+  // gates
+  const nextLabels = [];
+  for (const i of order) {
+    const b = bodies[i]; if (!b.gates) continue;
+    const e = eOf(b, t, i), a = radii[i], w = Wof(b, t), isSel = i === sel;
+    const gs = gateAngles(b);
+    for (const gt of gs) {
+      const r = a * (1 - e * e) / (1 + e * Math.cos(gt.phi - w));
+      const lit = gateHit[i][gt.gi] != null && t - gateHit[i][gt.gi].t < 0.28 && t >= gateHit[i][gt.gi].t;
+      const skipped = lit && gateHit[i][gt.gi].skip;
+      const big = isSel && hl === 'gates';
+      g.strokeStyle = lit ? (skipped ? '#56648a' : '#ffffff') : alpha(VOICES[i].col, isSel ? 0.95 : 0.45);
+      g.lineWidth = lit || big ? 2 : isSel ? 1.5 : 1;
+      const d0 = big ? 5 : 3;
+      g.beginPath(); g.moveTo(CX + (r - d0) * Math.cos(gt.phi), CY + (r - d0) * Math.sin(gt.phi)); g.lineTo(CX + (r + d0) * Math.cos(gt.phi), CY + (r + d0) * Math.sin(gt.phi)); g.stroke();
+    }
+    // MOTIF: which note each gate will play next (selected voice)
+    if (isSel && b.src === 'MOTIF' && b.motif.length && page === 'PITCH') {
+      const M = Mof(b, t), next = gs.map(gt => { const Mg = meanFromTrue(gt.phi - w, e); return { gt, d: wrap(Mg - M) }; }).sort((x, y) => x.d - y.d);
+      next.slice(0, Math.min(next.length, 8)).forEach((n, j) => {
+        const r = a * (1 - e * e) / (1 + e * Math.cos(n.gt.phi - w)) + 10;
+        nextLabels.push({ x: CX + r * Math.cos(n.gt.phi), y: CY + r * Math.sin(n.gt.phi), s: nameOf(b.motif[(b.mIdx + j) % b.motif.length]), c: VOICES[i].col });
+      });
+    }
+  }
+
+  // event-driven marks
+  const recent = events.filter(ev => ev.t <= t && t - ev.t < 3);
+  for (const ev of recent) {
+    if ((ev.type === 'note' || ev.type === 'skip') && (!gateHit[ev.i][ev.gi] || gateHit[ev.i][ev.gi].t < ev.t)) gateHit[ev.i][ev.gi] = { t: ev.t, skip: ev.type === 'skip' };
+  }
+  const P = bodies.map((b, i) => pos(b, t, i));
+  // conjunctions
+  for (const ev of recent) if (ev.type === 'conj') {
+    const age = t - ev.t; if (age > 1.3) continue;
+    const pa = P[ev.i], pb = P[ev.j], far = pa.r > pb.r ? pa : pb, ang = Math.atan2(far.y - CY, far.x - CX);
+    g.strokeStyle = `rgba(255,255,255,${0.75 * (1 - age / 1.3)})`; g.lineWidth = hl === 'conj' ? 1.6 : 1;
+    g.beginPath(); g.moveTo(CX, CY); g.lineTo(CX + (far.r + 6) * Math.cos(ang), CY + (far.r + 6) * Math.sin(ang)); g.stroke();
+  }
+  // echo links
+  bodies.forEach((b, i) => {
+    if (b.src !== 'ECHO' || !b.gates) return;
+    const s = (i + 3) % 4, last = recent.filter(ev => ev.type === 'note' && ev.i === i).pop();
+    const fresh = last ? Math.max(0, 1 - (t - last.t) / 0.8) : 0;
+    g.save(); g.setLineDash([1, 3]); g.strokeStyle = alpha(VOICES[i].col, 0.25 + 0.6 * fresh + (i === sel && hl === 'source' ? 0.3 : 0));
+    g.beginPath(); g.moveTo(P[i].x, P[i].y); g.lineTo(P[s].x, P[s].y); g.stroke(); g.restore();
+  });
+
+  // trails and bodies
+  bodies.forEach((b, i) => {
+    const p = P[i], col = VOICES[i].col, isSel = i === sel, dim = b.gates ? 1 : 0.4;
+    if (!still) {
+      const span = Math.min(periodSec(b) / 9, 2.5), N = 16;
+      let prev = p;
+      for (let k = 1; k <= N; k++) {
+        const q = pos(b, t - span * k / N, i);
+        g.strokeStyle = alpha(col, 0.55 * (1 - k / N) * dim); g.lineWidth = 2.6 * (1 - k / N) + 0.4;
+        g.beginPath(); g.moveTo(prev.x, prev.y); g.lineTo(q.x, q.y); g.stroke(); prev = q;
+      }
+    }
+    if (isSel) { g.strokeStyle = alpha(col, 0.9); g.lineWidth = 1; g.beginPath(); g.arc(p.x, p.y, 6.5, 0, TAU); g.stroke(); }
+    g.fillStyle = alpha(col, dim); g.beginPath(); g.arc(p.x, p.y, isSel ? 4 : 3.2, 0, TAU); g.fill();
+    // moons
+    if (sys.moons && b.gates) {
+      for (let k = 1; k <= sys.moons; k++) {
+        const flash = recent.some(ev => ev.type === 'moon' && ev.i === i && ev.k === k && t - ev.t < 0.2);
+        const ang = still ? -Math.PI / 2 + k * 0.8 : TAU * beats + k * TAU / sys.moons;
+        const mr = hl === 'moons' ? 9 : 8;
+        g.fillStyle = flash ? '#ffffff' : hl === 'moons' ? '#e3e8f2' : 'rgba(207,214,228,.75)';
+        g.beginPath(); g.arc(p.x + mr * Math.cos(ang), p.y + mr * Math.sin(ang), flash ? 1.8 : 1.2, 0, TAU); g.fill();
+      }
+    }
+    if (b.src === 'MOTIF' && !b.motif.length && b.gates) {
+      g.font = F(600, 8); g.fillStyle = alpha(col, 0.9); g.textAlign = 'center'; g.fillText('MOTIF EMPTY', p.x, p.y - 9);
+    }
+  });
+  // ripples
+  if (!still) for (const ev of recent) if (ev.type === 'note') {
+    const life = VOICES[ev.i].ripple, age = t - ev.t; if (age > life) continue;
+    const q = pos(bodies[ev.i], ev.t, ev.i), k = age / life;
+    g.strokeStyle = alpha(VOICES[ev.i].col, 0.75 * (1 - k)); g.lineWidth = 1.2;
+    g.beginPath(); g.arc(q.x, q.y, 4 + (6 + 14 * ev.vel) * Math.sqrt(k), 0, TAU); g.stroke();
+  }
+  // motif labels
+  g.font = F(600, 9); g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (const l of nextLabels) { g.fillStyle = l.c; g.fillText(l.s, Math.max(8, Math.min(232, l.x)), Math.max(22, Math.min(206, l.y))); }
+  g.textBaseline = 'alphabetic';
+
+  // comet
+  if (sys.comet) {
+    const c = pos(comet, t, -1);
+    if (c.x > -10 && c.x < 250 && c.y > 10 && c.y < 214) {
+      const ang = Math.atan2(c.y - CY, c.x - CX), tail = Math.min(34, 900 / c.r);
+      const grd = g.createLinearGradient(c.x, c.y, c.x + tail * Math.cos(ang), c.y + tail * Math.sin(ang));
+      grd.addColorStop(0, 'rgba(191,233,255,.7)'); grd.addColorStop(1, 'rgba(191,233,255,0)');
+      g.strokeStyle = grd; g.lineWidth = 3; g.beginPath(); g.moveTo(c.x, c.y); g.lineTo(c.x + tail * Math.cos(ang), c.y + tail * Math.sin(ang)); g.stroke();
+      g.fillStyle = '#e8f7ff'; g.beginPath(); g.arc(c.x, c.y, 2.2, 0, TAU); g.fill();
+    }
+  }
+
+  // the star: its glow follows what is playing
+  let lvl = 0;
+  for (const ev of recent) if (ev.type === 'note') lvl += ev.vel * Math.exp(-(t - ev.t) / 0.7);
+  const cometHot = recent.some(ev => ev.type === 'comet' && t - ev.t < 6);
+  const gr = 6 + Math.min(16, lvl * 7) + (cometHot ? 6 : 0);
+  const sg = g.createRadialGradient(CX, CY, 0, CX, CY, gr);
+  sg.addColorStop(0, 'rgba(255,244,220,.55)'); sg.addColorStop(1, 'rgba(255,244,220,0)');
+  g.fillStyle = sg; g.beginPath(); g.arc(CX, CY, gr, 0, TAU); g.fill();
+  if (hl === 'pert' && sys.pert) { g.strokeStyle = 'rgba(255,244,220,.35)'; g.setLineDash([1, 2]); g.beginPath(); g.arc(CX, CY, 9 + sys.pert / 10, 0, TAU); g.stroke(); g.setLineDash([]); }
+  g.fillStyle = C.star; g.beginPath(); g.arc(CX, CY, 3.5, 0, TAU); g.fill();
+
+  // header
+  g.fillStyle = 'rgba(13,20,36,.85)'; g.fillRect(0, 0, 240, 15);
+  g.font = F(600, 12); g.textAlign = 'left'; g.fillStyle = C.salmon; g.fillText(page, 5, 11);
+  const pw = g.measureText(page).width;
+  g.fillStyle = VOICES[sel].col; g.fillText('V' + (sel + 1) + ' ' + VOICES[sel].name, 5 + pw + 7, 11);
+  g.textAlign = 'right'; g.fillStyle = C.ink;
+  const bar = Math.floor(beats / 4) + 1, bt = Math.floor(((beats % 4) + 4) % 4) + 1;
+  g.fillText((running ? '▶ ' : '■ ') + (sys.sync ? sys.bpm + ' BPM  ' + bar + '.' + bt : 'FREE'), 235, 11);
+
+  // the strip: four small gauges
+  const ps = PARAMS[page];
+  g.fillStyle = C.strip; g.fillRect(0, 213, 240, 27);
+  g.fillStyle = C.line; g.fillRect(0, 213, 240, 1);
+  ps.forEach((p, k) => {
+    const x = k * 60 + 5, on = hlOn && lastTurn.p === p, col = p.scope === 'body' ? VOICES[sel].col : C.salmon;
+    g.textAlign = 'left'; g.font = F(500, 8); g.fillStyle = on ? C.ink : C.muted; g.fillText(p.key + ' ' + p.label, x, 222);
+    g.font = F(600, 11); g.fillStyle = on ? col : C.ink;
+    let v = p.val(); while (g.measureText(v).width > 52 && v.length > 2) v = v.slice(0, -1);
+    g.fillText(v, x, 234);
+    g.fillStyle = C.line; g.fillRect(x, 237, 50, 1.5);
+    g.fillStyle = col; g.fillRect(x, 237, 50 * norm(p), 1.5);
+  });
+
+  // the card of the knob being turned, next to what it changes
+  if (hlOn) {
+    const p = lastTurn.p, fade = Math.min(1, (1500 - (performance.now() - lastTurn.at)) / 300);
+    let ax = CX, ay = CY;
+    if (p.scope === 'body') { ax = P[sel].x; ay = P[sel].y; }
+    if (p.hl === 'comet') { const c = pos(comet, t, -1); if (c.x > 0 && c.x < 240 && c.y > 16 && c.y < 210) { ax = c.x; ay = c.y; } }
+    // the card sits in the corner opposite the element, so it never hides the orbits, with a thread to what it changes
+    const w = 112, h = 40, lead = p.scope === 'body' || p.hl === 'comet';
+    const x = ax < CX ? 237 - w : 3, y = ay < CY ? 209 - h : 18;
+    const col = p.scope === 'body' ? VOICES[sel].col : C.salmon;
+    g.globalAlpha = fade;
+    if (lead) {
+      const cx = ax < CX ? x : x + w, cy = ay < CY ? y : y + h;
+      g.strokeStyle = alpha(col, 0.6); g.lineWidth = 1; g.setLineDash([2, 2]);
+      g.beginPath(); g.moveTo(ax, ay); g.lineTo(cx, cy); g.stroke(); g.setLineDash([]);
+    }
+    g.fillStyle = 'rgba(24,35,58,.94)'; g.strokeStyle = col; g.lineWidth = 1;
+    g.beginPath(); g.roundRect ? g.roundRect(x + .5, y + .5, w, h, 5) : g.rect(x + .5, y + .5, w, h); g.fill(); g.stroke();
+    g.textAlign = 'left'; g.font = F(500, 8); g.fillStyle = C.muted; g.fillText(p.key + ' ' + p.label, x + 6, y + 11);
+    g.font = F(600, 14); g.fillStyle = col; g.fillText(p.val(), x + 6, y + 25);
+    g.font = F(500, 8); g.fillStyle = C.ink;
+    let s = p.sub(); while (g.measureText(s).width > w - 10 && s.length > 3) s = s.slice(0, -1);
+    g.fillText(s, x + 6, y + 36);
+    g.globalAlpha = 1;
+  }
+
+  if (events.length > 400) events = events.filter(ev => t - ev.t < 4 || ev.t > t);
+  requestAnimationFrame(draw);
+}
+
+/* ---------- go ---------- */
+loadPreset(0);
+setSel(1); setPage('ORBIT');
+syncTransport();
+setInterval(tick, 25);
+(document.fonts && document.fonts.load ? Promise.all([document.fonts.load(F(600, 12)), document.fonts.load(F(500, 8))]) : Promise.resolve()).finally(() => {});
+requestAnimationFrame(draw);
+})();
+</script>
