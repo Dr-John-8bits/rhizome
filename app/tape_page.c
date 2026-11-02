@@ -11,7 +11,7 @@ static uint32_t tp_ms;
 static void tape_view_update(void){
  const uint32_t now=plat_ms(),dt=tp_ms?now-tp_ms:0;tp_ms=now;md_reel_view(&tp);
  // Revolutions a second: 0.2 at the slowest tape, 0.3 at 1, about 1.4 at the fastest (under a sixth of a turn a frame).
- if(dream_prefs.motion&&dt<200){const float v=fmaxf(tp.speed,0),r=fm_sqrtf(v);tp_angle-=dt*.001f*6.2831853f*.3f*r*fm_sqrtf(fm_sqrtf(r));} // speed^0.625
+ if(dream_prefs.motion&&dt<200){const float v=fm_maxf(tp.speed,0),r=fm_sqrtf(v);tp_angle-=dt*.001f*6.2831853f*.3f*r*fm_sqrtf(fm_sqrtf(r));} // speed^0.625
  if(tp_angle<-6.2831853f)tp_angle+=6.2831853f;
 }
 static void tp_fmt_ms(float ms,char *s){
@@ -65,13 +65,13 @@ static void md_reel_page(const md_patch *p,uint16_t col){
  for(int x=TP_IN+4;x<TP_OUT-4;x++){
   const float behind=(x-TP_REC)*tp.path/TP_RUN;const int idx=((int)tp.pos-(int)behind)&(int)(tp.length-1);
   const float lv=tp.trace[idx>>8]*(1/255.0f);if(lv<.02f)continue;
-  const unsigned bright=x<TP_REC?(freeze?20u:7u):x>TP_REC+TP_RUN?12u:(unsigned)(14+14*fminf(1,lv*1.5f));
-  ov_seg((float)x,TP_Y-2,(float)x,TP_Y-2-24*fm_sqrtf(fminf(1,lv)),md_tint(MD_BG,col,bright));} // heights like a meter
+  const unsigned bright=x<TP_REC?(freeze?20u:7u):x>TP_REC+TP_RUN?12u:(unsigned)(14+14*fm_minf(1,lv*1.5f));
+  ov_seg((float)x,TP_Y-2,(float)x,TP_Y-2-24*fm_sqrtf(fm_minf(1,lv)),md_tint(MD_BG,col,bright));} // heights like a meter
  // Heads: the record head (lifted under FREEZE), then the three playback heads at their places on the path.
  {const int y=freeze?TP_Y+6:TP_Y+2;const uint16_t ink=freeze?MD_EDGE:tp.rec_peak>.05f?MD_INK:md_tint(MD_BG,col,26);
   cv_rect(TP_REC-4,y,9,10,ink);ov_label(TP_REC,TP_Y+24,freeze?"UP":"REC",freeze?MD_DIM:MD_EDGE);}
  for(int k=0;k<3;k++){const int x=TP_REC+TP_RUN*(k+1)/3,on=heads>>k&1;const float pk=tp.head_peak[k];
-  if(on)cv_rect(x-4,TP_Y+2,9,10,pk>.04f?MD_INK:md_tint(MD_BG,col,(unsigned)(18+10*fminf(1,pk*20))));
+  if(on)cv_rect(x-4,TP_Y+2,9,10,pk>.04f?MD_INK:md_tint(MD_BG,col,(unsigned)(18+10*fm_minf(1,pk*20))));
   else{ov_seg(x-4,TP_Y+2,x-4,TP_Y+11,MD_EDGE);ov_seg(x+4,TP_Y+2,x+4,TP_Y+11,MD_EDGE);ov_seg(x-4,TP_Y+11,x+4,TP_Y+11,MD_EDGE);}
   char s[12];if(on)tp_fmt_ms(tp_head_ms(k+1),s);else{s[0]=(char)('1'+k);s[1]=0;}
   ov_label(x,TP_Y+24,s,on?(page==TAPE_ECHO&&(hk==0||hk==2)?col:MD_DIM):MD_EDGE);}

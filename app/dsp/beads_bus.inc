@@ -2,7 +2,7 @@
  * Rhizome: Beads (Mutable Instruments, MIT) as the granular bus, in place of Monades' grains. Included by dreams.cpp.
  * The tracks' grain sends go in (mono: twice the memory), Beads' grains come out, the SPACE macro sets their level.
  * Its 128 KiB are those of Monades' grain tape. The media choose the memory's grain and length: DIGITAL (16 bits,
- * 1.4 s), VINTAGE (12 bits, 1.9 s), CLEAN TAPE (12 bits at half rate, 3.8 s), DIRTY TAPE (mu-law at half rate, with
+ * 1.4 s), CLEAN TAPE (12 bits at half rate, 3.8 s), DIRTY TAPE (mu-law at half rate, with
  * wow and flutter, 5.8 s). The knobs keep Monades' fields where they mean the same: POSITION is Beads' TIME, GRAIN SIZE
  * its SIZE (DIRECTION reverse uses Beads' reversed third), PITCH, FEEDBACK, FREEZE (the comet's too); new: DENSITY (below
  * the middle, regular grains; above, random ones; the middle, none), SHAPE, RANDOM, MEDIA. */
@@ -19,7 +19,7 @@ static void beads_reset(){memset(beads_mem,0,sizeof beads_mem);memset(tape_peak,
 static void beads_init(){
  beads_proc=new(beads_raw) beads::Processor();uint8_t *banks[2]={beads_mem,beads_mem+BEADS_BYTES/2};beads_proc->Init(banks);beads_reset();
 }
-static beads::Processor::Media beads_media(){return (beads::Processor::Media)bound(patch.beads_media,0,3);}
+static beads::Processor::Media beads_media(){static const beads::Processor::Media m[MD_BEADS_MEDIAS]={beads::Processor::MEDIA_DIRTY_TAPE,beads::Processor::MEDIA_CLEAN_TAPE,beads::Processor::MEDIA_DIGITAL};return m[bound(patch.beads_media,0,MD_BEADS_MEDIAS-1)];}
 static int beads_line_length(){return beads_proc->max_delay_line_length();} // samples of the mono line in use
 // One block: the grain sends in, Beads' grains out (wet only, at Beads' own level).
 static void beads_block(const float *send,unsigned n,float *wl,float *wr,bool frozen){

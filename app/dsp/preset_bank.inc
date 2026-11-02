@@ -226,7 +226,7 @@ static const TonePreset tone_bank[MD_TONE_PRESETS]={
 {"Deep Satin",11,900,665,760,450,520,780,0,1,120},
 {"Morning Ribbon",11,700,1000,890,600,680,650,0,1,120},
 };
-struct BiomePreset { const char *name; unsigned family; md_patch patch; };
+struct BiomePreset { const char *name; unsigned family; md_patch_v10 patch; };
 static const char *biome_families[]={"MIST","DRONE","RESONANCE","TECHNO","BROKEN","ORGANIC","PERCUSSION","MELODY","BLANK","FDDS"};
 static const BiomePreset biome_bank[MD_BIOMES]={
 {"Velvet Mist",0,{1296323121,4,223256869,{500,60,500,360},76,1,0,650,180,180,0,{{7,100,0,740,520,500,1,16,0,1000,48,500,0,2,250,1,0,120,720,0,1,100},{6,25,300,740,250,350,2,16,4,900,55,340,0,2,250,1,0,800,775,0,1,100},{5,140,295,460,270,450,2,16,8,900,60,660,0,2,0,1,0,150,830,0,1,100},{4,160,500,740,230,400,1,16,3,900,51,220,0,4,250,1,0,150,720,0,1,100},{3,180,750,740,250,450,3,16,6,900,67,780,0,2,250,1,0,500,775,0,1,100},{7,200,0,740,190,450,1,16,12,900,60,500,0,4,250,1,0,120,830,0,1,100}},0,1,0,0,0,0,-1,0,350,0,{-1,-1,-1,-1,-1,-1},0}},

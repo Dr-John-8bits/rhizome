@@ -30,4 +30,23 @@ Quelques lectures de l'état du moteur par l'écran sont faites sans verrou, com
 1. **La charge du processeur, Monde par Monde, dans le pire cas** : bande, HALL et Beads ouverts ensemble, Beads en CLEAN ou DIRTY TAPE. **La limite de 85 % ne doit jamais être atteinte.** Si elle l'est, on renonce d'abord à la HALL (voir « Points de vigilance » dans la feuille de route).
 2. **La pile réelle de l'interruption audio**, avec les mêmes réglages.
 3. **L'audio USB** pendant ces essais : aucun craquement.
-4. **La mémoire** : les chiffres de la compilation (RAM, pool, flash) sont notés ci-dessous.
+4. **La mémoire** : vérifiée à la compilation (ci-dessous).
+
+## La compilation pour le FM-1 (2 novembre 2026)
+Le paquet `app/build/rhizome-0.0.1.fwsc` fait 610 136 octets, identité `FM-1_968000001`. Les contrôles automatiques de la compilation passent :
+- aucune multiplication 64 bits à côté d'une lecture ;
+- aucune routine en double précision ;
+- accès aux registres limités à felucca-bsp.
+
+| Mémoire | Utilisé | Limite | Marge |
+|---|---|---|---|
+| Flash (image) | 561 720 octets | 602 112 | 40 Ko |
+| RAM (.data + .bss) | 85 848 octets | 98 304 | 12 Ko |
+| Pool | 276 852 octets | 344 064 | 66 Ko |
+
+En route, trois corrections :
+1. **Le compilateur du FM-1 n'a pas `<cassert>`** (Beads l'inclut) : un `app/compat/cassert` vide le remplace.
+2. **Les écrans appelaient `fminf` et `fmaxf`**, absents en C sur le FM-1 : ils utilisent maintenant `fm_minf` et `fm_maxf`.
+3. **La flash dépassait de 9 724 octets.**
+   - La table des 91 Mondes d'usine stockait chacun en patch complet de Rhizome, soit 296 octets de zéros par Monde (27 Ko en tout). Elle garde maintenant le format de Monades (1 680 octets par Monde) ; les champs de Rhizome sont posés au chargement, comme pour une sauvegarde de Monades.
+   - Le média VINTAGE de Beads est retiré : 2,5 Ko. Sans son convertisseur à 32 kHz, ce n'était qu'un DIGITAL en 12 bits.

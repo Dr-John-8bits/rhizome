@@ -89,26 +89,34 @@ float md_hall_rt60(int decay); /* seconds for a DECAY value, -1: infinite */
 /* Rhizome's granular bus is Beads (Mutable Instruments): beads_density 0..1000 (below 480 regular grains, faster toward 0;
  * above 520 random grains, more toward 1000; between, none), beads_shape and beads_random 0..1000, beads_media
  * MD_BEADS_DIRTY_TAPE .. MD_BEADS_DIGITAL (the memory's grain and length). */
-enum { MD_BEADS_DIRTY_TAPE, MD_BEADS_CLEAN_TAPE, MD_BEADS_VINTAGE, MD_BEADS_DIGITAL, MD_BEADS_MEDIAS };
+enum { MD_BEADS_DIRTY_TAPE, MD_BEADS_CLEAN_TAPE, MD_BEADS_DIGITAL, MD_BEADS_MEDIAS }; /* Beads' VINTAGE is left out (flash) */
 float md_beads_seconds(void); /* the memory's length now, for the media in use */
 float md_beads_rate(int density); /* new grains a second asked for (regular below the middle, an average above) */
 float md_beads_envelope(float shape,float t); /* the grain envelope SHAPE gives, at t (0..1 of the grain) */ /* speed: 1 = the slowest tape that still gives 1.43 s on head 3 */
 enum { MD_MOON_REPEAT, MD_MOON_UP, MD_MOON_DOWN, MD_MOON_THIRDS_UP, MD_MOON_THIRDS_DOWN, MD_MOON_HARMONICS, MD_MOON_INTERVALS };
 typedef struct { int32_t gates,period,ecc,phase,pitch,moons,moon_spin,moon_interval,moon_level; } md_orbit;
+/* The fields of a Monades v10 patch (1680 bytes), shared by md_patch and the factory Mondes' table, which keeps them
+ * at that size: Rhizome's fields are set when a Monde loads, as for a Monades save. Monades' notes on them:
+ * Monades v7: high-pass on the echo and room sends (0 = off), echo / room tone (500 = Mutable Dreams), LFOs.
+ * chorus = wet amount on the dry mix, 0 = off
+ * v8: generators, and the form: calm / build / peak / release of 2-16 bars (form_bars 0..3), depth 0 = off.
+ * v9: gamaka style and amount per track; vadi / samvadi = semitones above the root, -1 = none.
+ * v10: K2 Motion holds its variation for 1, 2, 4, 8 or 16 steps (0..4); 0 = every step, as 1.1
+ */
+#define MD_PATCH_V10_FIELDS \
+ uint32_t magic,version,seed; int32_t macro[4],tempo,locked,freeze,grain_size,grain_pos,feedback,quality; \
+ md_track track[MD_TRACKS]; \
+ int32_t root,scale,transpose,swing,grain_pitch,reverse,duck_source,duck_amount,duck_release; \
+ int32_t biome_id,tone_preset[6]; uint32_t edited_mask; \
+ md_extension ext[6]; int32_t delay_ms,delay_fb,reverb_time,fx_level; \
+ int32_t send_hp,echo_tone,room_tone; md_lfo lfo[6][2]; \
+ int32_t echo_sync,room_diffusion,chorus,chorus_depth; \
+ md_gen gen[6]; int32_t form,form_bars,form_drops; \
+ int32_t gamaka[6],gamaka_amount[6],vadi,samvadi; \
+ int32_t motion_every;
+typedef struct { MD_PATCH_V10_FIELDS } md_patch_v10;
 typedef struct {
- uint32_t magic,version,seed; int32_t macro[4],tempo,locked,freeze,grain_size,grain_pos,feedback,quality;
- md_track track[MD_TRACKS];
- int32_t root,scale,transpose,swing,grain_pitch,reverse,duck_source,duck_amount,duck_release;
- int32_t biome_id,tone_preset[6]; uint32_t edited_mask;
- md_extension ext[6]; int32_t delay_ms,delay_fb,reverb_time,fx_level;
- /* Monades v7: high-pass on the echo and room sends (0 = off), echo / room tone (500 = Mutable Dreams), LFOs. */
- int32_t send_hp,echo_tone,room_tone; md_lfo lfo[6][2];
- int32_t echo_sync,room_diffusion,chorus,chorus_depth; /* chorus = wet amount on the dry mix, 0 = off */
- /* v8: generators, and the form: calm / build / peak / release of 2-16 bars (form_bars 0..3), depth 0 = off. */
- md_gen gen[6]; int32_t form,form_bars,form_drops;
- /* v9: gamaka style and amount per track; vadi / samvadi = semitones above the root, -1 = none. */
- int32_t gamaka[6],gamaka_amount[6],vadi,samvadi;
- int32_t motion_every; /* v10: K2 Motion holds its variation for 1, 2, 4, 8 or 16 steps (0..4); 0 = every step, as 1.1 */
+ MD_PATCH_V10_FIELDS
  /* Rhizome v11: the orbits; precession 0..100 (100 = each ellipse turns once in 16 bars), perturbation 0..100. */
  md_orbit orbit[6]; int32_t orbit_prec,orbit_pert,orbit_comet,comet_event,comet_amount,orbit_conj,orbit_system,tape_heads,tape_wow,tape_drive,tape_age,hall_size,hall_predelay,hall_bass,hall_mod,hall_vintage,beads_shape,beads_density,beads_random,beads_media;
 } md_patch;

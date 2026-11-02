@@ -99,7 +99,7 @@ class Processor {
   inline uint8_t* delay_buffer_raw_bytes(size_t offset) {
     // Independently of the quality settings, we're writing in the same
     // bytes anyway!
-    return processor_vintage_digital_.delay_buffer_raw_bytes(mono_, offset);
+    return processor_digital_.delay_buffer_raw_bytes(mono_, offset);  // Rhizome: no VINTAGE
   }
   
   inline int* mutable_delay_write_ptr() {
@@ -108,8 +108,6 @@ class Processor {
         return processor_dirty_tape_.mutable_delay_write_ptr(mono_);
       case MEDIA_CLEAN_TAPE:
         return processor_clean_tape_.mutable_delay_write_ptr(mono_);
-      case MEDIA_VINTAGE_DIGITAL:
-        return processor_vintage_digital_.mutable_delay_write_ptr(mono_);
       case MEDIA_DIGITAL:
       default:
         return processor_digital_.mutable_delay_write_ptr(mono_);
@@ -128,8 +126,6 @@ class Processor {
         return processor_dirty_tape_.remaining(mono_);
       case MEDIA_CLEAN_TAPE:
         return processor_clean_tape_.remaining(mono_);
-      case MEDIA_VINTAGE_DIGITAL:
-        return processor_vintage_digital_.remaining(mono_);
       case MEDIA_DIGITAL:
       default:
         return processor_digital_.remaining(mono_);
@@ -141,7 +137,6 @@ class Processor {
     switch (media_) {
       case MEDIA_DIRTY_TAPE: return processor_dirty_tape_.line_length(mono_);
       case MEDIA_CLEAN_TAPE: return processor_clean_tape_.line_length(mono_);
-      case MEDIA_VINTAGE_DIGITAL: return processor_vintage_digital_.line_length(mono_);
       case MEDIA_DIGITAL: default: return processor_digital_.line_length(mono_);
     }
   }
@@ -149,7 +144,6 @@ class Processor {
     switch (media_) {
       case MEDIA_DIRTY_TAPE: return processor_dirty_tape_.grains(delay, remaining, max);
       case MEDIA_CLEAN_TAPE: return processor_clean_tape_.grains(delay, remaining, max);
-      case MEDIA_VINTAGE_DIGITAL: return processor_vintage_digital_.grains(delay, remaining, max);
       case MEDIA_DIGITAL: default: return processor_digital_.grains(delay, remaining, max);
     }
   }
@@ -160,8 +154,6 @@ class Processor {
         processor_dirty_tape_.Trim(mono_);
       case MEDIA_CLEAN_TAPE:
         processor_clean_tape_.Trim(mono_);
-      case MEDIA_VINTAGE_DIGITAL:
-        processor_vintage_digital_.Trim(mono_);
       case MEDIA_DIGITAL:
       default:
         processor_digital_.Trim(mono_);
@@ -170,7 +162,7 @@ class Processor {
   
   void WasteCPUCycles(size_t size) {
     // The one with the most convoluted memory access!
-    processor_vintage_digital_.WasteCPUCycles(size);
+    processor_digital_.WasteCPUCycles(size);  // Rhizome: no VINTAGE
   }
 
   void Process(
@@ -189,10 +181,7 @@ class Processor {
       RESOLUTION_16_BIT,
       kDelayBufferSizeBits / (16 * 2),
       1> processor_digital_;
-  GranularProcessor<
-      RESOLUTION_12_BIT,
-      kDelayBufferSizeBits / (12 * 2),
-      1> processor_vintage_digital_;
+  // Rhizome: no VINTAGE DIGITAL (flash space on the FM-1).
   GranularProcessor<
       RESOLUTION_12_BIT,
       kDelayBufferSizeBits / (12 * 2),

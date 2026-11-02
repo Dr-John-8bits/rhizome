@@ -8,7 +8,7 @@ static md_hall hg;
 static void hall_view_update(void){md_hall_view(&hg);}
 static float hg_tmax(void){float t=1;for(int b=0;b<3;b++)if(hg.rt60[b]>t)t=hg.rt60[b];return hg.infinite?10:(t+hg.predelay_ms*.001f)*1.1f;}
 static float hg_x(float t){return HG_X0+(HG_X1-HG_X0)*t/hg_tmax();}
-static float hg_y(float db){return HG_Y0+(HG_Y1-HG_Y0)*fminf(1,fmaxf(0,-db/60));}
+static float hg_y(float db){return HG_Y0+(HG_Y1-HG_Y0)*fm_minf(1,fm_maxf(0,-db/60));}
 static void hg_fmt_s(float s,char *out){out[0]=0;const int t=(int)(s*10+.5f);char b[8];md_num(t/10,b);ov_append(out,b);ov_append(out,".");b[0]=(char)('0'+t%10);b[1]=0;ov_append(out,b);ov_append(out," S");}
 static void hall_knob(const md_patch *p,int page,int k,const char **label,char *value,char *info,int brief){
  info[0]=value[0]=0;char b[16];
@@ -46,10 +46,10 @@ static void md_hall_page(const md_patch *p,uint16_t col){
   const float rt=hg.rt60[b],x1=rt<0?HG_X1:hg_x(hg.predelay_ms*.001f+rt),wob=page==HALL&&hk==3?p->hall_mod*.004f:0;
   const float y1=rt<0?HG_Y0:HG_Y1,dy=(y1-HG_Y0),dx=x1-x0;const int n=(int)(fm_sqrtf(dx*dx+dy*dy))+1;
   for(int k=0;k<=n;k++){const float f=(float)k/n,w=wob*fm_sinf(f*40);md_soft_point(x0+dx*f,HG_Y0+dy*f+w,ink);if(lit||b==1)md_soft_point(x0+dx*f,HG_Y0+dy*f+w+.7f,ink);}
-  const float lx=rt<0?HG_X1-20:fminf(x1+2,HG_X1-18),ly=rt<0?HG_Y0+4+b*9:HG_Y1-12-b*9;cv_text((int)lx,(int)ly,&FONT_XS,names[b],ink);
+  const float lx=rt<0?HG_X1-20:fm_minf(x1+2,HG_X1-18),ly=rt<0?HG_Y0+4+b*9:HG_Y1-12-b*9;cv_text((int)lx,(int)ly,&FONT_XS,names[b],ink);
   // The dot: the band's level now (0 here is -30 dB of energy), where the line has fallen that far.
   const float db=fm_log2f(hg.energy[b]+1e-12f)*3.0103f+30;
-  if(db>-60){const float down=fminf(0,db),x=rt<0?x0+(HG_X1-x0)*.5f:x0+dx*(-down/60),y=rt<0?hg_y(down):HG_Y0+dy*(-down/60);
+  if(db>-60){const float down=fm_minf(0,db),x=rt<0?x0+(HG_X1-x0)*.5f:x0+dx*(-down/60),y=rt<0?hg_y(down):HG_Y0+dy*(-down/60);
    if(ov_band(y-3,y+3))md_circle((int)(x+.5f),(int)(y+.5f),2,ink,1);}}
  // Words only where they help.
  if(!p->fx_level)md_text(10,44,"RETURN AT 0: FX > SPACE, K4",MD_DIM);

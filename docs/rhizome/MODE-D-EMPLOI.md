@@ -255,7 +255,7 @@ Le granulaire est celui du module Beads de Mutable Instruments, réduit pour le 
 | K1 | DENSITY | **Au milieu, aucun grain.** À gauche, des grains réguliers, de plus en plus fréquents. À droite, des grains au hasard, de plus en plus nombreux. La carte donne le nombre de grains par seconde. |
 | K2 | SHAPE | L'enveloppe de chaque grain : carrée, puis décroissante, puis en cloche, puis inversée. Elle est dessinée à l'écran. |
 | K3 | RANDOM | Fait varier la position, la taille, la forme et la hauteur d'un grain à l'autre. |
-| K4 | MEDIA | Le grain de la mémoire et sa durée : DIGITAL (16 bits, 1,4 s), VINTAGE (12 bits, 1,9 s), CLEAN TAPE (12 bits à demi-fréquence, 3,8 s), DIRTY TAPE (μ-law à demi-fréquence, avec du wow, 5,8 s). **Changer de média vide la mémoire**, comme sur le module. |
+| K4 | MEDIA | Le grain de la mémoire et sa durée : DIGITAL (16 bits, 1,4 s), CLEAN TAPE (12 bits à demi-fréquence, 3,8 s), DIRTY TAPE (μ-law à demi-fréquence, avec du wow, 5,8 s). **Changer de média vide la mémoire**, comme sur le module. |
 
 ### TAPE / MOTION
 - **K1 PITCH** : la hauteur des grains, de −24 à +24 demi-tons.

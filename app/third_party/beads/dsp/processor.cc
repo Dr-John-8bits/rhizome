@@ -43,7 +43,7 @@ using namespace stmlib;
 void Processor::Init(
     uint8_t* buffers[]) {
   processor_digital_.Init(48000.0f, buffers);
-  processor_vintage_digital_.Init(32000.0f, buffers);
+  // Rhizome: no VINTAGE DIGITAL (flash space; without its 32 kHz codec it is a 12-bit DIGITAL).
   processor_clean_tape_.Init(24000.0f, buffers);
   processor_dirty_tape_.Init(24000.0f, buffers);
   
@@ -74,10 +74,6 @@ void Processor::Configure(Media media, bool mono) {
     case MEDIA_DIGITAL:
       processor_digital_.Reset();
       max_delay = processor_digital_.max_delay_times_ratio();
-      break;
-    case MEDIA_VINTAGE_DIGITAL:
-      processor_vintage_digital_.Reset();
-      max_delay = processor_vintage_digital_.max_delay_times_ratio();
       break;
     case MEDIA_CLEAN_TAPE:
       processor_clean_tape_.Reset();
@@ -168,15 +164,6 @@ void Processor::Process(
       processor_digital_.Process(
           triggers, taps, freeze, parameters, feedback, mono_, in, out, size);
       copy(&in[0], &in[size], &dry_signal[0]);
-      break;
-    
-    case MEDIA_VINTAGE_DIGITAL:
-      processor_vintage_digital_.Process(
-          triggers, taps, freeze, parameters, feedback, mono_, in, out, size);
-      for (size_t i = 0; i < size; ++i) {
-        dry_signal[i].l = static_cast<int32_t>(in[i].l * 4096.0f) / 4096.0f;
-        dry_signal[i].r = static_cast<int32_t>(in[i].r * 4096.0f) / 4096.0f;
-      }
       break;
     
     case MEDIA_CLEAN_TAPE:

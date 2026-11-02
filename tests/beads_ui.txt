@@ -18,7 +18,7 @@ spin K2 10
 spin K3 5
 spin K4 -1
 wait 50
-expect beads_media 2
+expect beads_media 1
 tap EDIT
 tap EDIT
 tap EDIT

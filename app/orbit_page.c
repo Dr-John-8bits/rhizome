@@ -28,12 +28,12 @@ static void orbit_view_update(void){
  const md_patch *p=md_state();const md_stats *ms=md_status();float p23[6],lo=1e9f,hi=0,ext=1;
  ov_pos=ms->orbit_pos;
  // Farther out = slower (Kepler's third law, a ~ T^(2/3)), squeezed between 24 and 62 pixels, then fitted to the ring.
- for(int i=0;i<6;i++){p23[i]=fm_powf((float)md_orbit_steps(p->orbit[i].period),.6666667f);if(p->orbit[i].gates){lo=fminf(lo,p23[i]);hi=fmaxf(hi,p23[i]);}}
+ for(int i=0;i<6;i++){p23[i]=fm_powf((float)md_orbit_steps(p->orbit[i].period),.6666667f);if(p->orbit[i].gates){lo=fm_minf(lo,p23[i]);hi=fm_maxf(hi,p23[i]);}}
  for(int i=0;i<6;i++){OrbitView *o=&ov[i];o->on=p->orbit[i].gates>0||i==dream_ui.track;
   o->a=hi-lo<1e-3f?46:24+38*(p23[i]-lo)/(hi-lo);if(o->a<24)o->a=24;if(o->a>62)o->a=62;
   o->e=md_playing()?ms->orbit_e[i]:p->orbit[i].ecc*.001f;o->w=ms->orbit_w[i];
   if(o->on&&o->a*(1+o->e)>ext)ext=o->a*(1+o->e);}
- const float fit=fminf(1.2f,72/ext);
+ const float fit=fm_minf(1.2f,72/ext);
  for(int i=0;i<6;i++){OrbitView *o=&ov[i];o->a*=fit;if(!o->on)continue;
   const float M=md_playing()?ms->orbit_M[i]:ov_mean_at(-1.5707963f,o->w,o->e);ov_point(o,M,&o->x,&o->y);
   for(int k=0;k<OV_TRAIL;k++)ov_point(o,M-(k+1)*(6.2831853f/9/OV_TRAIL),&o->tx[k],&o->ty[k]); // a ninth of a turn behind
@@ -48,7 +48,7 @@ static void orbit_view_update(void){
  {OrbitView *c=&ov_comet;c->on=p->orbit_comet>0;c->e=MD_COMET_ECC_MILLI*.001f;c->a=8/(1-c->e);c->w=2.3561945f;
   ov_point(c,ms->comet_M,&c->x,&c->y);c->out=md_atan2(c->y-OV_CY,c->x-OV_CX);}
  if(ms->conj_count!=ov_conj_seen){ov_conj_seen=ms->conj_count;ov_conj_ms=plat_ms();ov_conj_a=ms->conj_a;ov_conj_b=ms->conj_b;}
- ov_level=fmaxf(ms->out_peak[0],ms->out_peak[1]);
+ ov_level=fm_maxf(ms->out_peak[0],ms->out_peak[1]);
 }
 static int ov_band(float y0,float y1){const float top=-(float)cv_oy;return y1>=top-2&&y0<top+42;} // does [y0, y1] touch this band
 static void ov_ring(float cx,float cy,float r,uint16_t ink,float step){
@@ -56,7 +56,7 @@ static void ov_ring(float cx,float cy,float r,uint16_t ink,float step){
  const int n=(int)(6.2831853f*r/step)+8;for(int k=0;k<n;k++){const float t=k*6.2831853f/n;md_soft_point(cx+r*fm_cosf(t),cy+r*fm_sinf(t),ink);}
 }
 static void ov_seg(float x0,float y0,float x1,float y1,uint16_t ink){ // an antialiased line, as dots a pixel apart
- if(!ov_band(fminf(y0,y1),fmaxf(y0,y1)))return;
+ if(!ov_band(fm_minf(y0,y1),fm_maxf(y0,y1)))return;
  const float dx=x1-x0,dy=y1-y0,len=fm_sqrtf(dx*dx+dy*dy);const int n=(int)len+1;
  for(int k=0;k<=n;k++)md_soft_point(x0+dx*k/n,y0+dy*k/n,ink);
 }
@@ -199,7 +199,7 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  // Trails (their length is the speed), ripples, bodies.
  for(int i=0;i<6;i++){const OrbitView *o=&ov[i];if(!o->on)continue;const uint16_t c=dream_colors[i];const int has=p->orbit[i].gates>0;
   if(dream_prefs.motion&&has){float x=o->x,y=o->y;for(int k=0;k<OV_TRAIL;k++){ov_seg(x,y,o->tx[k],o->ty[k],md_tint(MD_BG,c,(unsigned)(32-k*28/OV_TRAIL)));ov_seg(x+.5f,y+.5f,o->tx[k]+.5f,o->ty[k]+.5f,md_tint(MD_BG,c,(unsigned)(20-k*18/OV_TRAIL)));x=o->tx[k];y=o->ty[k];}}
-  if(dream_prefs.motion&&has&&!ov_hit_skip[i]&&now-ov_hit_ms[i]<700){const float k=(now-ov_hit_ms[i])/700.0f;ov_ring(ov_hit_x[i],ov_hit_y[i],4+(7+12*fminf(1,ov_hit_vel[i]*3))*fm_sqrtf(k),md_tint(MD_BG,c,(unsigned)(30*(1-k))),1.3f);}
+  if(dream_prefs.motion&&has&&!ov_hit_skip[i]&&now-ov_hit_ms[i]<700){const float k=(now-ov_hit_ms[i])/700.0f;ov_ring(ov_hit_x[i],ov_hit_y[i],4+(7+12*fm_minf(1,ov_hit_vel[i]*3))*fm_sqrtf(k),md_tint(MD_BG,c,(unsigned)(30*(1-k))),1.3f);}
   // Moons, where the last note's spin has taken them; lit as each plays (the MOONS page shows them close up).
   if(has&&p->orbit[i].moons&&ov_band(o->y-OV_MOON-3,o->y+OV_MOON+3))
    for(int k=0;k<p->orbit[i].moons;k++){const int lit=ov_moon_k[i]==k+1&&now-ov_moon_ms[i]<220;
@@ -213,10 +213,10 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
   if(r<OV_RING-4){const float tail=4+30*md_status()->comet_now;
    for(int k=0;k<3;k++){const float o=(k-1)*.8f;ov_seg(c->x-si*o,c->y+co*o,c->x+co*tail-si*o,c->y+si*tail+co*o,md_tint(MD_BG,MD_INK,k==1?18u:9u));}
    if(ov_band(c->y-3,c->y+3))md_circle((int)(c->x+.5f),(int)(c->y+.5f),2,MD_INK,1);}
-  else{const float x=OV_CX+OV_RING*co,y=OV_CY+OV_RING*si,near=fminf(1,(OV_RING+80)/(r+1)-.5f);
-   if(ov_band(y-3,y+3))md_circle((int)(x+.5f),(int)(y+.5f),2,md_tint(MD_BG,MD_INK,(unsigned)(10+16*fmaxf(0,near))),0);}}
+  else{const float x=OV_CX+OV_RING*co,y=OV_CY+OV_RING*si,near=fm_minf(1,(OV_RING+80)/(r+1)-.5f);
+   if(ov_band(y-3,y+3))md_circle((int)(x+.5f),(int)(y+.5f),2,md_tint(MD_BG,MD_INK,(unsigned)(10+16*fm_maxf(0,near))),0);}}
  // The star glows with what is playing; the perturbation shows as a halo while it is turned.
- {const float g=4+fminf(9,ov_level*30);ov_ring(OV_CX,OV_CY,g,md_tint(MD_BG,MD_INK,8),1.2f);ov_ring(OV_CX,OV_CY,g*.6f,md_tint(MD_BG,MD_INK,14),1.2f);
+ {const float g=4+fm_minf(9,ov_level*30);ov_ring(OV_CX,OV_CY,g,md_tint(MD_BG,MD_INK,8),1.2f);ov_ring(OV_CX,OV_CY,g*.6f,md_tint(MD_BG,MD_INK,14),1.2f);
   if(page==ORBIT_SYS&&hk==1&&p->orbit_pert)ov_ring(OV_CX,OV_CY,10+p->orbit_pert*.12f,md_tint(MD_BG,MD_INK,16),3);
   md_circle(OV_CX,OV_CY,2,MD_INK,1);}
  }

@@ -145,7 +145,8 @@ static void gen_reset();
 static int morph_on,drift_on,drift_slow,fx_shed; /* a morph is under way (morph.inc), driven by DERIVE (drift.inc); a new Monde ends both */
 // A factory Monde into p, in place: the audio thread has no stack to spare for a 1680-byte copy.
 static void bank_patch(md_patch &p,int id) {
- p=biome_bank[bound(id,0,MD_BIOMES-1)].patch;
+ static_assert(sizeof(md_patch_v10)==offsetof(md_patch,orbit),"the factory Mondes keep Monades' layout");
+ memcpy(&p,&biome_bank[bound(id,0,MD_BIOMES-1)].patch,sizeof(md_patch_v10)); // Rhizome: the table keeps 1680 bytes a Monde, the rest is set below
  // Mutable Dreams Mondes are 1.1 patches: Monades additions neutral. FDDS Mondes are complete v10 patches.
  if(p.version<10){extension_defaults(p);if(id>=65){p.fx_level=340;p.reverb_time=550;for(int i=0;i<6;i++)p.ext[i].reverb_send=300;}}
  else if(p.version==10)v11_defaults(p); // Rhizome: Monades' Mondes, orbits off

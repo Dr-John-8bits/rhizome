@@ -4,9 +4,9 @@
  * along it, the live grains (a band from where each reads, as long as it has left, white at its read point), the
  * bracket where new grains start (POSITION) and the feedback line under it. md_beads_page (BEADS): the ribbon, then
  * the grain envelope SHAPE really draws, the grain rate DENSITY asks for, and the media with the memory it gives. */
-static const char *const bd_media_names[MD_BEADS_MEDIAS]={"DIRTY TAPE","CLEAN TAPE","VINTAGE","DIGITAL"};
-static const char *const bd_media_brief[MD_BEADS_MEDIAS]={"DIRTY","CLEAN","VINT","DIGI"};
-static const char *const bd_media_infos[MD_BEADS_MEDIAS]={"MU-LAW, HALF RATE, WOW: ","12 BITS, HALF RATE: ","12 BITS: ","16 BITS: "};
+static const char *const bd_media_names[MD_BEADS_MEDIAS]={"DIRTY TAPE","CLEAN TAPE","DIGITAL"};
+static const char *const bd_media_brief[MD_BEADS_MEDIAS]={"DIRTY","CLEAN","DIGI"};
+static const char *const bd_media_infos[MD_BEADS_MEDIAS]={"MU-LAW, HALF RATE, WOW: ","12 BITS, HALF RATE: ","16 BITS: "};
 static void md_beads_ribbon(const md_patch *p,uint16_t col,int top){
  static md_tape tv;md_tape_view(&tv);
  const int x0=8,w=224,half=19,mid=top+21;const float len=(float)(tv.length?tv.length:1),scale=(float)w/len,space=p->macro[3]*.001f;

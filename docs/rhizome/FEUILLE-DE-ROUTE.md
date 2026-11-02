@@ -495,7 +495,7 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 4. **Delay à bande** et son animation. **Dans le simulateur le 2 novembre 2026** (voir « Dans le firmware » plus haut). Tests : temps de chaque tête, FREEZE qui boucle, STOP qui freine, PANIC silencieux, scénario `tests/tape_ui.txt`. Une écoute dans `M-VAVE FM1/ecoutes/`.
 5. **Réverbe HALL**. **Dans le simulateur le 2 novembre 2026** (voir « Dans le firmware » dans la section HALL). Tests : RT60 mesuré, VINTAGE, INFINITE, bornes, scénario `tests/hall_ui.txt`. Une écoute dans `M-VAVE FM1/ecoutes/`.
 6. **Granulaire Beads**. **Dans le simulateur le 2 novembre 2026.** C'est le cœur de Beads (MIT), dans `app/third_party/beads` ; ce qui a été changé pour le FM-1 est listé dans son `NOTICE.md`.
-   - **Mémoire** : les 128 Ko du granulaire de Monades, qu'il remplace. Elle reste en mono, donc sa durée dépend du média : DIGITAL 1,4 s, VINTAGE 1,9 s, CLEAN TAPE 3,8 s, DIRTY TAPE 5,8 s.
+   - **Mémoire** : les 128 Ko du granulaire de Monades, qu'il remplace. Elle reste en mono, donc sa durée dépend du média : DIGITAL 1,4 s, CLEAN TAPE 3,8 s, DIRTY TAPE 5,8 s. Le média VINTAGE de Beads est retiré pour la place en flash (sans son convertisseur à 32 kHz, ce n'était qu'un DIGITAL en 12 bits).
    - **Grains** : 6 au plus. Ils sont générés en continu, comme avec le bouton SEED verrouillé sur le module. **Avec SEED sur OFF, Beads ne lance aucun grain.**
    - **Réglages** : POSITION, SIZE, PITCH, FEEDBACK et FREEZE gardent les champs de Monades ; la comète peut aussi figer la mémoire. DIRECTION REVERSE passe par le tiers bas de SIZE, où Beads joue ses grains à l'envers.
    - **Nouvelle page BEADS** (FX, après GRANULAR BUS) : DENSITY, SHAPE, RANDOM, MEDIA. L'écran montre la mémoire et les grains vivants, et l'enveloppe de grain que SHAPE dessine vraiment.
@@ -518,5 +518,7 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 - le mode d'emploi est dans `docs/rhizome/MODE-D-EMPLOI.md`, et sur le site (`site/manuel/`, régénéré par `tools/site_manual.py`) ;
 - le mode d'emploi de Monades reste sur le site (`site/monades/manuel/`) pour les pages héritées ;
 - le simulateur est compilé par GitHub Actions (`.github/workflows/pages.yml`, avec le WASI SDK 34) et publié avec le site sur GitHub Pages.
+
+**Première compilation pour le FM-1** (2 novembre 2026) : `rhizome-0.0.1.fwsc`, 610 136 octets, identité `FM-1_968000001`. Flash 561 720 octets sur 602 112, RAM 85 848 sur 98 304, pool 276 852 sur 344 064. Revue avant flash et chiffres détaillés : `docs/rhizome/REVUE-AVANT-FLASH.md`. **Pas encore installé ni mesuré sur l'appareil.**
 
 Chaque étape se développe d'abord sur le Mac (`tools/build_local.py host`), puis dans le navigateur, puis sur le FM-1.

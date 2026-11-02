@@ -1,0 +1,6 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+ * Rhizome: the FM-1's library has no <cassert>; Beads only asserts on sizes when it starts (most are commented out). */
+#pragma once
+#ifndef assert
+#define assert(x) ((void)0)
+#endif
