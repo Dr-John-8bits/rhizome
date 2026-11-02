@@ -460,6 +460,19 @@ Pour Beads sur le FM-1, il faudra : un `abs` entier dans `app/compat`, retirer u
 ### Le risque connu de la plateforme
 D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures 16 bits peuvent corrompre un registre sur ce processeur. Le code en virgule flottante (Plaits, Rings, Beads le sont surtout) n'est pas concerné. Il faudra quand même chercher ces motifs dans le désassemblage du code de Rhizome.
 
+## Points de vigilance
+- **La charge du processeur, avant tout.** Il faut être certain que Rhizome ne fasse pas de mal au FM-1 : pas de surcharge, pas de craquements, pas de blocage.
+  - Les estimations faites sur le Mac le 2 novembre 2026 placent les Mondes les plus lourds de Monades près du plafond de 85 %, voire au-dessus. Ce sont les additions de la bande (+4 à 5 %), de la HALL (+2,5 à 4,5 %) et de Beads (+6 à 9 % quand SPACE est ouvert).
+  - **Ce ne sont que des estimations : seule une mesure sur l'appareil compte.** À faire dès la première compilation, Monde par Monde, avec la bande, la HALL et Beads ouverts ensemble, dans le pire des cas.
+  - La sécurité existe déjà : en cas de surcharge, le firmware passe en ECO et la HALL en VINTAGE (moitié du calcul).
+- **Si la charge ne tient pas, on renonce à quelque chose plutôt que de risquer l'appareil.** Dans l'ordre :
+  - **se passer de la HALL**, et utiliser sa mémoire (64 Ko) et son calcul pour enrichir le delay à bande : bande plus longue, plus de têtes, ou une diffusion dans la boucle de feedback pour un écho qui se change en nappe ;
+  - ou garder la seule version VINTAGE de la HALL ;
+  - ou remplacer la HALL par un effet plus original et plus léger, à inventer ;
+  - réduire Beads : moins de grains en ECO, ou un seul média ;
+  - passer un bloc sur le second cœur (`plat_cpu2_*`).
+- Le grand nettoyage (retirer les voix lourdes de Monades au profit de celles de Rhizome) devrait de toute façon redonner de la marge.
+
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
 - Même plateforme fm1-base, même chaîne de compilation, mêmes outils.
