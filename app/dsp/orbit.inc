@@ -10,6 +10,9 @@
 static const int16_t orbit_steps_of[MD_ORBIT_PERIODS]={4,6,8,12,16,24,32,48,64,96,112,128,192};
 static const int8_t orbit_moon_steps_of[MD_MOON_SPINS]={1,2,3,4,6,8,12,16};
 static const float ORBIT_TAU=6.28318531f,ORBIT_PI=3.14159265f;
+static const int16_t orbit_comet_steps_of[MD_COMETS]={0,64,128,256,512,1024};
+static const float COMET_E=MD_COMET_ECC_MILLI*.001f;
+static float comet_M0=ORBIT_PI,comet_target,comet_swell; // its mean anomaly at PLAY; what its passage asks for now, followed
 static const float orbit_tilt[6]={-.6f,.5f,1.6f,2.7f,3.8f,4.9f}; // each periapsis in its own direction (radians)
 struct Orbit { float M0,w0,gate_M[MD_ORBIT_GATES_MAX];int gate_n,motif;float accent_until,moon_t0,moon_vel; };
 static Orbit orbits[6];
@@ -57,6 +60,7 @@ static void orbit_reset(){ // PLAY: every body starts at the top, together
  orbit_prev=-1;orbit_since=0;orbit_prepared=-1;orbit_rng=patch.seed|1;orbit_rest=0;
  for(unsigned i=0;i<6;i++){Orbit &o=orbits[i];o.w0=orbit_tilt[i];o.M0=orbit_mean_of(-1.57079633f-o.w0,orbit_e(i,0));o.accent_until=-1;o.motif=0;o.gate_n=0;o.moon_t0=-100;
   stats.moon_t0[i]=-100;stats.moon_hit[i]=0;stats.orbit_hit_gate[i]=-1;stats.orbit_hit_pos[i]=-100;stats.orbit_hit_skip[i]=0;}
+ comet_M0=ORBIT_PI;stats.comet_M=ORBIT_PI;comet_target=0; // the comet starts far away
  memset(conj_cool,0,sizeof conj_cool);memset(conj_seen,0,sizeof conj_seen);stats.conj_a=stats.conj_b=-1;stats.conj_pos=-100;stats.orbit_pos=0;
 }
 // A new period or precession keeps each body where it is (no jump, no burst of gates).
@@ -64,6 +68,17 @@ static void orbit_rebase_period(unsigned i,int period){
  const float pos=orbit_pos_now()<0?0:orbit_pos_now(),M=orbit_M(i,pos);
  patch.orbit[i].period=period;orbits[i].M0=M-ORBIT_TAU*pos/orbit_steps(i);orbit_prepared=-1;
 }
+static float orbit_comet_M(float pos){const int n=orbit_comet_steps_of[bound(patch.orbit_comet,0,MD_COMETS-1)];return n?comet_M0+ORBIT_TAU*pos/n:comet_M0;}
+static void orbit_rebase_comet(int comet){
+ const float pos=orbit_pos_now()<0?0:orbit_pos_now(),M=orbit_comet_M(pos);patch.orbit_comet=comet;
+ const int n=orbit_comet_steps_of[comet];comet_M0=n?M-ORBIT_TAU*pos/n:M;
+}
+// How strongly the comet acts: nothing beyond its mean distance, all of it at the star (smooth in between): about a
+// fifth of its turn.
+static float orbit_comet_strength(float M){const float r=1-COMET_E*cosf(orbit_E(M,COMET_E)),x=(1-r)/COMET_E;return x<=0?0:x>=1?1:x*x*(3-2*x);}
+// Once a block: the room swell follows the passage (about 70 ms), and stops gently with the sequence.
+static void orbit_comet_follow(){comet_swell+=((playing&&patch.orbit_comet&&patch.comet_event!=MD_COMET_FREEZE?comet_target:0)-comet_swell)*.02f;}
+static bool orbit_comet_frozen(){return playing&&patch.orbit_comet&&patch.comet_event!=MD_COMET_SWELL&&comet_target>.35f;}
 static void orbit_rebase_prec(int prec){
  const float pos=orbit_pos_now()<0?0:orbit_pos_now();float w[6];
  for(unsigned i=0;i<6;i++)w[i]=orbit_w(i,pos);
@@ -82,6 +97,16 @@ static float orbit_triad_above(float src){
  const int pcs[3]={patch.root,(int)floorf(third+.5f)%12,(int)floorf(fifth+.5f)%12};
  for(int k=1;k<=12;k++){const int n=(int)floorf(src+.5f)+k;for(int j=0;j<3;j++)if(n%12==pcs[j])return (float)n;}
  return src+12;
+}
+// A conjunction as a chord: both bodies strike now. The second takes the note of the first's triad (a third, fifth or
+// octave in the scale) nearest its own, so each keeps its register.
+static void orbit_chord(unsigned a,unsigned b){
+ const float pa=stats.last_pitch[a];
+ const unsigned pair[2]={a,b};for(unsigned i:pair){const md_track &t=patch.track[i];float p=stats.last_pitch[i];if(t.mute||((orbit_rest>>i)&1)||p<=0)continue;
+  if(i==b&&t.model>=MD_FM&&patch.track[a].model>=MD_FM&&pa>0){float best=p,d=99;
+   for(int deg=0;deg<=4;deg+=2){float c=pa;for(int s=0;s<deg;s++)c=scale_neighbour(c,1);c+=12*floorf((p-c)/12+.5f);if(fabsf(c-p)<d){d=fabsf(c-p);best=c;}}
+   p=best;}
+  fire(i,p,.8f);out_note(i,p,.8f,orbit_step_len*2);}
 }
 static void orbit_fire(unsigned i,int gate,float pos){
  const md_track &t=patch.track[i];const md_orbit &c=patch.orbit[i];Orbit &o=orbits[i];
@@ -142,8 +167,15 @@ static void orbit_run(){
   if(!on[i]||!on[j]){conj_seen[k]=0;continue;}
   float d=phi[i]-phi[j];d-=ORBIT_TAU*floorf((d+ORBIT_PI)/ORBIT_TAU);
   if(conj_seen[k]&&(d<0)!=(conj_d[k]<0)&&fabsf(d)<.5f&&fabsf(conj_d[k])<.5f&&pos>=conj_cool[k]){
-   conj_cool[k]=pos+8;orbits[i].accent_until=orbits[j].accent_until=pos+4; // their next beat sings out
+   conj_cool[k]=pos+8;
+   if(patch.orbit_conj==MD_CONJ_ACCENT)orbits[i].accent_until=orbits[j].accent_until=pos+4; // their next beat sings out
+   else if(patch.orbit_conj==MD_CONJ_CHORD)orbit_chord(i,j);
    stats.conj_a=(int32_t)i;stats.conj_b=(int32_t)j;stats.conj_pos=pos;stats.conj_count++;}
   conj_d[k]=d;conj_seen[k]=1;}
- stats.orbit_pos=pos;orbit_prev=pos;
+ // The comet: a passage each time its mean anomaly comes round to the star.
+ if(patch.orbit_comet){const float M1=orbit_comet_M(orbit_prev),M2=orbit_comet_M(pos);
+  if(floorf(M2/ORBIT_TAU)>floorf(M1/ORBIT_TAU))stats.comet_passes++;
+  stats.comet_M=orbit_wrap(M2);comet_target=orbit_comet_strength(M2)*patch.comet_amount*.01f;}
+ else comet_target=0;
+ stats.comet_now=comet_target;stats.orbit_pos=pos;orbit_prev=pos;
 }

@@ -40,6 +40,7 @@ tap SEQ
 tap SEQ
 tap SEQ
 tap SEQ
+tap SEQ
 wait 100
 shot rhythm.png
 tap SEQ

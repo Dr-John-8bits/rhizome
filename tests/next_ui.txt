@@ -22,6 +22,7 @@ tap SEQ
 tap SEQ
 tap SEQ
 tap SEQ
+tap SEQ
 expect page 13
 spin K1 1
 spin K2 1
@@ -105,6 +106,7 @@ tap SEQ
 tap SEQ
 tap SEQ
 tap SEQ
+tap SEQ
 expect page 24
 spin K1 1
 tap SEQ
@@ -114,10 +116,12 @@ tap SEQ
 tap SEQ
 tap SEQ
 tap SEQ
+tap SEQ
 expect page 2
 expect invalid 0
 tap HOME
 wait 100
+tap SEQ
 tap SEQ
 tap SEQ
 tap SEQ

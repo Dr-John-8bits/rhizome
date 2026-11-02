@@ -60,7 +60,7 @@ static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob valu
 static uint16_t chorus_line[2048]; // ordinary RAM: the pool must keep 8 KB spare (base/tools/build.py)
 static int16_t diffuser[1210];static unsigned diffuser_head[4];static const unsigned diffuser_len[4]={150,214,319,527}; // Monades: 12 dB high-pass on the echo and room sends
 static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;memset(diffuser,0,sizeof diffuser);memset(diffuser_head,0,sizeof diffuser_head);fx_active=false;memset(echo,0,sizeof echo);memset(room,0,sizeof room);memset(room_head,0,sizeof room_head);memset(room_lp,0,sizeof room_lp);echo_head=0;echo_lp=fx_smooth=fx_highpass_in=fx_highpass_out=0;delay_smooth=8820;}
-static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;} // Rhizome: orbits off, one bar a turn
+static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;} // Rhizome: orbits off, one bar a turn
 static void v10_defaults(md_patch &p){p.motion_every=0;v11_defaults(p);}
 static void v9_defaults(md_patch &p){for(int i=0;i<6;i++){p.gamaka[i]=MD_GAMAKA_OFF;p.gamaka_amount[i]=500;}p.vadi=p.samvadi=-1;v10_defaults(p);}
 static void v8_defaults(md_patch &p){for(int i=0;i<6;i++)p.gen[i]={MD_GEN_OFF,500,8,12};p.form=0;p.form_bars=1;p.form_drops=2;v9_defaults(p);}
@@ -318,6 +318,10 @@ static void apply_command(Command e) {
  case MD_ORBIT_MOON_SPIN:patch.orbit[i].moon_spin=bound(v,0,MD_MOON_SPINS-1);break;
  case MD_ORBIT_MOON_INTERVAL:patch.orbit[i].moon_interval=bound(v,0,MD_MOON_INTERVALS-1);break;
  case MD_ORBIT_MOON_LEVEL:patch.orbit[i].moon_level=bound(v,0,100);break;
+ case MD_ORBIT_COMET:orbit_rebase_comet(bound(v,0,MD_COMETS-1));break;
+ case MD_ORBIT_COMET_EVENT:patch.comet_event=bound(v,0,MD_COMET_EVENTS-1);break;
+ case MD_ORBIT_COMET_AMOUNT:patch.comet_amount=bound(v,0,100);break;
+ case MD_ORBIT_CONJ:patch.orbit_conj=bound(v,0,MD_CONJ_MODES-1);break;
  case MD_ROOT:patch.root=bound(v,0,11);break;
  case MD_SCALE:patch.scale=bound(v,0,SCALE_COUNT-1);break;
  case MD_TRANSPOSE:patch.transpose=bound(v,-24,24);break;
@@ -595,7 +599,7 @@ static void quantum(float *lr,unsigned n) {
   float pan=clamp01(unit(t.pan)+lm[MD_TO_PAN]*.5f),dec=1.0f-1.0f/(MD_RATE*(.06f+decay_u*decay_u*16.0f));
   float attackstep=1.0f/(1+MD_RATE*8.0f*att*att),sendlevel=clamp01(unit(t.send)+lm[MD_TO_GRAIN_SEND]*.5f);
   const bool melodic=md_has_envelope(t.model);
-  const float velocity=melodic?v.velocity:1,warp_target=unit(e.warps),ds=clamp01(unit(e.delay_send)+lm[MD_TO_ECHO_SEND]*.5f),rs=clamp01(unit(e.reverb_send)+lm[MD_TO_ROOM_SEND]*.5f),expr=expression[i];
+  const float velocity=melodic?v.velocity:1,warp_target=unit(e.warps),ds=clamp01(unit(e.delay_send)+lm[MD_TO_ECHO_SEND]*.5f),rs=clamp01(unit(e.reverb_send)+lm[MD_TO_ROOM_SEND]*.5f+comet_swell),expr=expression[i];
   float track_peak=stats.track_peak[i];
   // Keep the exact envelope -> filter -> gain order, but let the SVF retain
   // coefficients and state in registers across a tile instead of the mixer.
@@ -636,7 +640,7 @@ static void quantum(float *lr,unsigned n) {
   stats.env_now[i]=melodic?v.env:0;stats.env_attacking[i]=melodic&&v.attacking;
   if(melodic&&!v.attacking&&v.env<.000001f)v.active=0;
  }
- const float echo_feedback=lfo_echo_fb?fminf(.8f,clamp01(unit(patch.delay_fb)+lfo_echo_fb*.5f)):unit(patch.delay_fb),room_decay=.45f+.5f*unit(patch.reverb_time),effect_return=unit(patch.fx_level),echo_target=fminf(15435.0f,fmaxf(1764.0f,(patch.echo_sync?echo_ms_now():(float)patch.delay_ms)*44.1f*(1+lfo_echo_time*.5f)));
+ const float echo_feedback=lfo_echo_fb?fminf(.8f,clamp01(unit(patch.delay_fb)+lfo_echo_fb*.5f)):unit(patch.delay_fb),room_decay=.45f+.5f*unit(patch.reverb_time)+(.49f-.5f*unit(patch.reverb_time))*comet_swell,effect_return=unit(patch.fx_level)+(1.4f-unit(patch.fx_level))*comet_swell,echo_target=fminf(15435.0f,fmaxf(1764.0f,(patch.echo_sync?echo_ms_now():(float)patch.delay_ms)*44.1f*(1+lfo_echo_time*.5f)));
  const float echo_glide=lfo_echo_time?.002f:.00005f,echo_tone=tone_coef(patch.echo_tone,.04f,.25f,.9f),room_tone=tone_coef(patch.room_tone,.05f,.3f,.85f);
  const float diffusion=fx_shed?0:patch.room_diffusion*.0007f; // up to 0.7, Dattorro uses 0.625-0.75
  const bool send_hp=patch.send_hp>0;if(send_hp&&patch.send_hp!=send_hp_set){send_hp_set=patch.send_hp;float fc=md_send_hp_hz(patch.send_hp)/(float)MD_RATE;send_hp_filter[0].set_f_q<stmlib::FREQUENCY_ACCURATE>(fc,.707f);send_hp_filter[1].set_f_q<stmlib::FREQUENCY_ACCURATE>(fc,.707f);}
@@ -645,7 +649,7 @@ static void quantum(float *lr,unsigned n) {
   md_chorus_process(out,aux,n,patch.chorus*.001f,patch.chorus_depth*.001f);
   for(unsigned k=0;k<n;k++){lr[2*k]=out[k];lr[2*k+1]=aux[k];}
  }
- unsigned maxgrains=patch.quality?4:2;
+ unsigned maxgrains=patch.quality?4:2;const bool frozen=patch.freeze||orbit_comet_frozen(); // Rhizome: the comet can freeze the tape
  float fx_peak[3]={stats.fx_peak[0],stats.fx_peak[1],stats.fx_peak[2]},out_peak[2]={stats.out_peak[0],stats.out_peak[1]},limit_peak=stats.limit_peak;
  for(unsigned k=0;k<n;k++) {
   float wet[2]={};
@@ -655,7 +659,7 @@ static void quantum(float *lr,unsigned n) {
    grainclock=32; // Defer rather than truncate a grain after a size/quality change.
    if(slot>=0&&active<maxgrains){
     unsigned life=2205+(unsigned)(clamp01(unit(patch.grain_size)+lfo_grain_size*.5f)*11025);
-    float travel=((patch.freeze?0.0f:1.0f)-grainrate)*life;
+    float travel=((frozen?0.0f:1.0f)-grainrate)*life;
     float lo=260+fmaxf(0.0f,-travel),hi=(float)tape_valid-260-fmaxf(0.0f,travel);
     if(hi>lo){
      Grain &g=grains[slot];g.life=life;g.age=0;g.phase=0;g.inc=1.0f/life;
@@ -680,13 +684,13 @@ static void quantum(float *lr,unsigned n) {
   float w=(wet[0]+wet[1])*.5f;feedback_lp+=(w-feedback_lp)*.65f;
   // Full-rate tape preserves the dry send's bandwidth; 131072 PCM16 samples.
   // Same 256 KiB memory footprint, now 2.97 s at 44.1 kHz rather than 5.94 s.
-  if(!patch.freeze){float input=clip(send[k]+feedback_lp*fb);
+  if(!frozen){float input=clip(send[k]+feedback_lp*fb);
    tape[writehead]=int16_t(input*32767);
    {unsigned col=writehead>>9;uint8_t a=(uint8_t)(fabsf(input)*254.9f);if(col!=tape_peak_col){tape_peak_col=col;tape_peak[col]=0;}if(a>tape_peak[col])tape_peak[col]=a;}
    writehead=(writehead+1)&GM;if(tape_valid<GN)tape_valid++;stats.grain_writes++;
   }
   float effect[2]={};
-  if(patch.fx_level)fx_active=true;
+  if(patch.fx_level||comet_swell>.001f)fx_active=true;
   if(fx_active){
   // Full-rate independent echo, interpolated time movement, bounded feedback.
   delay_smooth+=(echo_target-delay_smooth)*echo_glide;
@@ -700,7 +704,7 @@ static void quantum(float *lr,unsigned n) {
   if(diffusion>0){float x=hp;unsigned base=0;for(unsigned j=0;j<4;j++){int16_t &cell=diffuser[base+diffuser_head[j]];float d=cell*(1.0f/32768.0f),y=d-diffusion*x;cell=int16_t(clip(x+diffusion*y)*32767);if(++diffuser_head[j]>=diffuser_len[j])diffuser_head[j]=0;base+=diffuser_len[j];x=y;}hp=x;} // smears the room's attack
   static const unsigned lens[4]={887,1013,1151,1201};float rv[4],sum=0;
   for(unsigned j=0;j<4;j++){rv[j]=room[j][room_head[j]]/32768.0f;room_lp[j]+=(rv[j]-room_lp[j])*room_tone;sum+=room_lp[j];}
-  for(unsigned j=0;j<4;j++){float value=hp*.3f+(sum*.5f-room_lp[j])*room_decay;room[j][room_head[j]]=int16_t(clip(value)*32767);if(++room_head[j]>=lens[j])room_head[j]=0;}
+  for(unsigned j=0;j<4;j++){float value=hp*.3f*(1+comet_swell)+(sum*.5f-room_lp[j])*room_decay;room[j][room_head[j]]=int16_t(clip(value)*32767);if(++room_head[j]>=lens[j])room_head[j]=0;}
   fx_smooth+=(effect_return-fx_smooth)*.002f;
   effect[0]=fx_smooth*(delayed*.5f+(rv[0]+rv[2])*.35f);effect[1]=fx_smooth*(delayed*.5f+(rv[1]+rv[3])*.35f);
   // Meters only: the returns as they reach the final 1.9x mix stage.
@@ -724,6 +728,7 @@ static void quantum(float *lr,unsigned n) {
 extern "C" {
 int md_hit(unsigned s,unsigned h,unsigned l,unsigned r) {if(!l||l>32)return 0;h=h>l?l:h;return (((s+r)%l)*h)%l<h;}
 int md_orbit_steps(int period){return orbit_steps_of[bound(period,0,MD_ORBIT_PERIODS-1)];}
+int md_orbit_comet_steps(int comet){return orbit_comet_steps_of[bound(comet,0,MD_COMETS-1)];}
 int md_orbit_moon_steps(int spin){return orbit_moon_steps_of[bound(spin,0,MD_MOON_SPINS-1)];}
 // The gates of a track: its turn's steps, the euclidean hits among them, each as a direction (top = -pi/2, clockwise).
 int md_orbit_gate_angles(const md_patch *p,int track,float *phi){
@@ -765,9 +770,9 @@ unsigned md_scope(int track,float *dst){
 }
 void md_tape_view(md_tape *v){
  // Same placement rule as new grains in quantum(), so the screen shows where the next ones start.
- memcpy(v->peak,tape_peak,sizeof v->peak);v->head=writehead;v->valid=tape_valid;v->length=GN;v->freeze=patch.freeze;
+ memcpy(v->peak,tape_peak,sizeof v->peak);v->head=writehead;v->valid=tape_valid;v->length=GN;v->freeze=patch.freeze||orbit_comet_frozen();
  float rate=stmlib::SemitonesToRatio((float)patch.grain_pitch)*(patch.reverse?-1:1);
- float life=2205+(unsigned)(unit(patch.grain_size)*11025),travel=((patch.freeze?0.0f:1.0f)-rate)*life;
+ float life=2205+(unsigned)(unit(patch.grain_size)*11025),travel=((patch.freeze||orbit_comet_frozen()?0.0f:1.0f)-rate)*life;
  float lo=260+fmaxf(0.0f,-travel),hi=(float)tape_valid-260-fmaxf(0.0f,travel);
  v->zone=hi>lo?lo+unit(patch.grain_pos)*(hi-lo):-1;v->zone_len=life;
  for(unsigned j=0;j<4;j++){const Grain &g=grains[j];int on=g.life&&g.age<g.life;v->grain[j].active=on;if(!on)continue;
@@ -828,6 +833,7 @@ void md_render(float *lr,unsigned n) {
   out_advance(z);
   if(clock_source&&playing){clock_age+=z;if(clock_age>MD_RATE*2){playing=0;memset(repeats,0,sizeof repeats);out_all_off();}}
   if(playing)orbit_run(); // Rhizome: gates crossed up to here fire before the voices render
+  orbit_comet_follow();
   quantum(lr,z);lr+=z*2;n-=z;if(playing)orbit_since+=z;
  }
 }
@@ -850,6 +856,7 @@ int md_validate(const md_patch *p) {
  if(p->motion_every<0||p->motion_every>4)return 0;
  for(int i=0;i<6;i++){const md_orbit &o=p->orbit[i];if(o.gates<0||o.gates>MD_ORBIT_GATES_MAX||o.period<0||o.period>=MD_ORBIT_PERIODS||o.ecc<0||o.ecc>MD_ORBIT_ECC_MAX||o.phase<0||o.phase>=MD_ORBIT_PHASES||o.pitch<0||o.pitch>=MD_PITCH_SOURCES||
   o.moons<0||o.moons>MD_MOONS_MAX||o.moon_spin<0||o.moon_spin>=MD_MOON_SPINS||o.moon_interval<0||o.moon_interval>=MD_MOON_INTERVALS||o.moon_level<0||o.moon_level>100)return 0;}
+ if(p->orbit_comet<0||p->orbit_comet>=MD_COMETS||p->comet_event<0||p->comet_event>=MD_COMET_EVENTS||p->comet_amount<0||p->comet_amount>100||p->orbit_conj<0||p->orbit_conj>=MD_CONJ_MODES)return 0;
  if(p->orbit_prec<0||p->orbit_prec>100||p->orbit_pert<0||p->orbit_pert>100)return 0;
  if(p->vadi< -1||p->vadi>11||p->samvadi< -1||p->samvadi>11)return 0;
  if(p->form<0||p->form>1000||p->form_bars<0||p->form_bars>3||p->form_drops<0||p->form_drops>3)return 0;

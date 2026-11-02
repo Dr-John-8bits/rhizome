@@ -104,7 +104,7 @@ C'est la page principale de Rhizome. L'animation *est* le séquenceur. Ce qu'on 
 Chaque élément porte une information, donc la règle « rien de décoratif » est respectée d'office. La version sans animation montre la même chose, à l'arrêt (orbites, portes, positions).
 
 ### Réglages (dans le firmware depuis le 2 novembre 2026)
-SEQ ouvre **ORBIT**, puis **ORBIT / SYSTEM**, puis **ORBIT / MOONS**, puis les pages de Monades (RHYTHM, GROOVE, BASS, PHRASE, GENERATOR, FORM). SELECT choisit la piste.
+SEQ ouvre **ORBIT**, puis **ORBIT / SYSTEM**, puis **ORBIT / MOONS**, puis **ORBIT / COMET**, puis les pages de Monades (RHYTHM, GROOVE, BASS, PHRASE, GENERATOR, FORM). SELECT choisit la piste.
 - **ORBIT** (piste choisie) :
   - K1 PERIOD : de 1 temps à 12 mesures, 13 valeurs ;
   - K2 ECCENTRICITY : de 0 à 0,85 ;
@@ -118,6 +118,11 @@ SEQ ouvre **ORBIT**, puis **ORBIT / SYSTEM**, puis **ORBIT / MOONS**, puis les p
   - K2 SPIN : le temps d'un tour, de 1/16 à une mesure, 8 valeurs ;
   - K3 INTERVAL : ce que jouent les lunes à partir de la note, en 6 choix. REPEAT rejoue la même note (un ratchet). STEPS UP et STEPS DOWN montent ou descendent la gamme degré par degré, THIRDS UP et THIRDS DOWN par tierces. HARMONICS joue l'octave, l'octave et la quinte, puis deux octaves. Sur une piste de batterie, la lune rejoue le même coup ;
   - K4 LEVEL : la vélocité des lunes, en pourcentage de celle de la note.
+- **ORBIT / COMET** (tout le système) :
+  - K1 COMET : un tour en 4, 8, 16, 32 ou 64 mesures, ou OFF ;
+  - K2 EVENT : ce que fait son passage. SWELL fait gonfler la salle, FREEZE fige la bande granulaire, BOTH fait les deux ;
+  - K3 AMOUNT : l'intensité du passage, de 0 à 100 ;
+  - K4 CONJUNCTION : ce que fait l'alignement de deux corps. OFF ne fait rien, ACCENT accentue leur temps suivant, CHORD les fait frapper ensemble en accord.
 - La gamme et la tonalité restent sur HARMONY (GLO). Le MOTIF s'écrit au clavier sur GENERATOR, comme dans Monades.
 
 ### Les lunes (dans le firmware depuis le 2 novembre 2026)
@@ -135,7 +140,23 @@ Ce que ça donne :
 - sur ORBIT et ORBIT / SYSTEM, chaque lune est un petit point autour de son corps, blanc quand elle joue ;
 - **ORBIT / MOONS montre le corps choisi en gros plan.** L'étoile est en bas, au bout d'un pointillé. Le côté extérieur est marqué en haut, et la lune qui y passe s'allume. Chaque lune porte le nom de la note qu'elle joue (par exemple A#4, G#4, F#4 en descendant depuis B4), et le corps porte la sienne.
 
-Prévus et pas encore faits : la comète, l'accord sur une conjonction (aujourd'hui c'est un accent), les notes du MOTIF écrites à côté des portes, les systèmes réels en presets.
+### La comète et les conjonctions (dans le firmware depuis le 2 novembre 2026)
+**La comète** est un corps sans voix, d'excentricité 0,9. Elle passe presque tout son tour loin de l'étoile, puis la frôle :
+- PLAY la fait partir de loin, donc le premier passage arrive à la moitié du tour ;
+- son passage agit pendant à peu près un cinquième du tour, et le plus fort au plus près de l'étoile ;
+- SWELL : envoi vers la salle plus fort, queue plus longue, retour plus fort, puis tout revient en douceur. Ça ne touche pas au patch ;
+- FREEZE : la bande granulaire se fige pendant le cœur du passage.
+
+À l'écran :
+- dans l'anneau de la mesure, on voit la comète elle-même. **Sa queue pointe à l'opposé de l'étoile, comme en vrai, et sa longueur est l'intensité du passage** ;
+- au-delà de l'anneau, une marque sur l'anneau indique sa direction, et brille plus à mesure qu'elle approche ;
+- sur ORBIT / COMET, tourner K1 dessine toute son orbite, et la carte dit quand elle repassera (« NEXT PASS IN 5 BARS »).
+
+Mesuré dans le simulateur sur Quiet Lanterns, avec une comète de 8 mesures à 80 : au passage, la différence avec et sans comète atteint −39 dB pour une musique à −38 dB. Le gonflement s'entend donc nettement.
+
+**L'accord sur une conjonction** : les deux corps rejouent tout de suite ensemble. Le second prend la note la plus proche de la sienne dans l'accord du premier (tierce, quinte ou octave dans la gamme), donc chacun garde son registre. Avec cinq corps, les conjonctions sont fréquentes : OFF permet de les rendre muettes.
+
+Prévus et pas encore faits : les notes du MOTIF écrites à côté des portes, les systèmes réels en presets.
 
 ### Coût
 L'équation de Kepler se résout avec une table (anomalie moyenne → position, 256 valeurs par excentricité) ou deux itérations de Newton, une fois par bloc de 64 échantillons (1,45 ms). La précision des coups est donc d'un bloc, comme dans Monades. Coût de calcul négligeable.
@@ -348,12 +369,12 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 1. **Banc d'essai du calcul** : chaque bloc mesuré sur le Mac, puis sur le FM-1. Il décide du nombre de voix et de la taille de Beads. **Sur le Mac, le 2 novembre 2026, Beads compris** : voir « Banc d'essai sur le Mac ». Reste la confirmation sur le FM-1.
 2. **Création du dépôt** à partir de Monades. **Fait le 2 novembre 2026** : dépôt privé `Dr-John-8bits/rhizome`, identité `FM-1_968`, noms USB et écrans Rhizome. Le préfixe `FM-1_976` prévu au départ était déjà pris par LSDj Burrito ; `FM-1_968` renvoie à *Différence et répétition* (Deleuze, 1968). Le grand nettoyage (retirer les 91 Mondes, les écrans et le site de Monades) se fera au moment où le moteur de Rhizome les remplacera : le moteur actuel en a besoin pour tourner.
 3. **Séquenceur orbital** dans le simulateur, puis sur le FM-1. **Première version dans le simulateur le 2 novembre 2026**, sur le moteur de Monades :
-   - moteur `app/dsp/orbit.inc` : patch v11 (1904 octets), 11 commandes, conjonctions qui accentuent, lunes ;
-   - pages ORBIT, ORBIT / SYSTEM et ORBIT / MOONS (`app/orbit_page.c`), dans le style prévu : grand dessin, bandeau fin, carte du potard ;
-   - tests : rythme euclidien exact pour une orbite ronde (à 0,05 pas près), rubato sur un cycle stable, MOTIF, conjonction, pas de rafale, lunes (moments exacts, notes, intervalles), import des patchs et des emplacements de Monades, scénario `tests/orbit_ui.txt` ;
-   - captures dans `docs/rhizome/captures/`, deux écoutes de 45 s (Monde 61 Quiet Lanterns, cinq corps, puis avec des lunes) dans `M-VAVE FM1/ecoutes/` ;
+   - moteur `app/dsp/orbit.inc` : patch v11 (1920 octets), 15 commandes, conjonctions (accent ou accord), lunes, comète ;
+   - pages ORBIT, ORBIT / SYSTEM, ORBIT / MOONS et ORBIT / COMET (`app/orbit_page.c`), dans le style prévu : grand dessin, bandeau fin, carte du potard ;
+   - tests : rythme euclidien exact pour une orbite ronde (à 0,05 pas près), rubato sur un cycle stable, MOTIF, conjonction, pas de rafale, lunes (moments exacts, notes, intervalles), comète (passages, durée, gel de la bande), accord, import des patchs et des emplacements de Monades, scénario `tests/orbit_ui.txt` ;
+   - captures dans `docs/rhizome/captures/`, trois écoutes de 45 s (Monde 61 Quiet Lanterns : cinq corps, puis avec des lunes, puis avec la comète et les accords) dans `M-VAVE FM1/ecoutes/` ;
    - le patch v11 n'est encore sorti nulle part : sa taille peut changer sans conversion jusqu'à la première version installée ;
-   - remarque : avec cinq corps, les conjonctions sont fréquentes (18 en 12 s), donc moins « rares et précieuses » qu'avec deux ou trois. À régler à l'oreille, par exemple en ne comptant que les corps aux périodes éloignées ;
+   - remarque : avec cinq corps, les conjonctions sont fréquentes (18 en 12 s), donc moins « rares et précieuses » qu'avec deux ou trois. À régler à l'oreille ; K4 CONJUNCTION sur OFF les rend muettes ;
    - **reste à faire : le compiler pour le FM-1 et l'essayer sur l'appareil.**
 4. **Delay à bande** et son animation.
 5. **Réverbe HALL**.

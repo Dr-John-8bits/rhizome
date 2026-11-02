@@ -1,14 +1,15 @@
 /* SPDX-License-Identifier: GPL-3.0-only
- * Rhizome: the ORBIT, ORBIT / SYSTEM and ORBIT / MOONS pages. Included by app.c before md_draw_all.
+ * Rhizome: the ORBIT, ORBIT / SYSTEM, ORBIT / MOONS and ORBIT / COMET pages. Included by app.c before md_draw_all.
  * One large drawing, a thin strip for K1-K4, and the card of the knob being turned in the corner opposite what it
  * changes. Everything drawn is the engine's state: the ellipses as they are now (precession, breathing), the gates
  * where the bodies play, each body where it is with a trail whose length is its speed (the rubato), a ripple for each
  * note, the gate lit when it plays (grey when the perturbation refused it), a line for a conjunction, the bar on the
  * outer ring, the moons where the last note's spin has taken them (each lit as it plays, on the body's outer side).
- * The geometry is computed once a frame (orbit_view_update), then drawn band by band. */
+ * The comet where it is, its tail pointing away from the star and as long as its passage acts; beyond the bar ring,
+ * a mark on the ring in its direction. The geometry is computed once a frame (orbit_view_update), then drawn band by band. */
 enum { OV_CX=120, OV_CY=119, OV_RING=78, OV_TRAIL=10, OV_MOON=9 };
 typedef struct { int on; float a,e,w,x,y,tx[OV_TRAIL],ty[OV_TRAIL],out,mx[MD_MOONS_MAX],my[MD_MOONS_MAX]; } OrbitView;
-static OrbitView ov[6];
+static OrbitView ov[6],ov_comet; // the comet: a fixed ellipse, periapsis 8 pixels from the star, down and to the left
 static float ov_pos,ov_level;
 static uint32_t ov_hits_seen[6],ov_hit_ms[6],ov_conj_seen,ov_conj_ms,ov_touch_ms,ov_moon_seen[6],ov_moon_ms[6];
 static int ov_moon_k[6];
@@ -44,6 +45,8 @@ static void orbit_view_update(void){
    if(md_playing()&&ms->moon_t0[i]>-100){f=(ms->orbit_pos-ms->moon_t0[i])/md_orbit_moon_steps(p->orbit[i].moon_spin);f=f<0?0:f>1?1:f;}
    for(int k=0;k<n;k++){const float a=o->out+6.2831853f*(f-(k+1)/(float)(n+1));o->mx[k]=o->x+OV_MOON*fm_cosf(a);o->my[k]=o->y+OV_MOON*fm_sinf(a);}
    if(ms->moon_hits[i]!=ov_moon_seen[i]){ov_moon_seen[i]=ms->moon_hits[i];ov_moon_ms[i]=plat_ms();ov_moon_k[i]=ms->moon_hit[i];}}}
+ {OrbitView *c=&ov_comet;c->on=p->orbit_comet>0;c->e=MD_COMET_ECC_MILLI*.001f;c->a=8/(1-c->e);c->w=2.3561945f;
+  ov_point(c,ms->comet_M,&c->x,&c->y);c->out=md_atan2(c->y-OV_CY,c->x-OV_CX);}
  if(ms->conj_count!=ov_conj_seen){ov_conj_seen=ms->conj_count;ov_conj_ms=plat_ms();ov_conj_a=ms->conj_a;ov_conj_b=ms->conj_b;}
  ov_level=fmaxf(ms->out_peak[0],ms->out_peak[1]);
 }
@@ -57,11 +60,11 @@ static void ov_seg(float x0,float y0,float x1,float y1,uint16_t ink){ // an anti
  const float dx=x1-x0,dy=y1-y0,len=fm_sqrtf(dx*dx+dy*dy);const int n=(int)len+1;
  for(int k=0;k<=n;k++)md_soft_point(x0+dx*k/n,y0+dy*k/n,ink);
 }
-static void ov_ellipse(const OrbitView *o,uint16_t ink,float step){
+static void ov_ellipse(const OrbitView *o,uint16_t ink,float step){ // kept between the title and the strip
  const float b=o->a*fm_sqrtf(1-o->e*o->e),cx=OV_CX-o->a*o->e*fm_cosf(o->w),cy=OV_CY-o->a*o->e*fm_sinf(o->w);
  if(!ov_band(cy-o->a,cy+o->a))return;
  const float c=fm_cosf(o->w),s=fm_sinf(o->w);const int n=(int)(6.2831853f*fm_sqrtf((o->a*o->a+b*b)*.5f)/step)+12;
- for(int k=0;k<n;k++){const float t=k*6.2831853f/n,ex=o->a*fm_cosf(t),ey=b*fm_sinf(t);md_soft_point(cx+ex*c-ey*s,cy+ex*s+ey*c,ink);}
+ for(int k=0;k<n;k++){const float t=k*6.2831853f/n,ex=o->a*fm_cosf(t),ey=b*fm_sinf(t),y=cy+ex*s+ey*c;if(y>=42&&y<=196)md_soft_point(cx+ex*c-ey*s,y,ink);}
 }
 static void ov_fmt_period(int steps,char *s,int brief){ // in beats below a bar, in bars above
  const int bar=steps>=16,whole=bar?steps/16:steps/4,half=bar?(steps%16)!=0:(steps%4)!=0;
@@ -71,6 +74,8 @@ static void ov_fmt_period(int steps,char *s,int brief){ // in beats below a bar,
 static void ov_fmt_milli(int v,char *s){md_num(v/1000,s);while(*s)s++;*s++='.';*s++=(char)('0'+v/100%10);*s++=(char)('0'+v/10%10);*s=0;}
 static void ov_append(char *s,const char *a){while(*s)s++;while(*a)*s++=*a++;*s=0;}
 static int ov_gcd(int a,int b){while(b){int t=a%b;a=b;b=t;}return a;}
+// Steps until the comet next reaches the star (its mean anomaly comes round to 0).
+static int ov_comet_wait(const md_patch *p){const float M=md_status()->comet_M;return (int)((1-M/6.2831853f)*md_orbit_comet_steps(p->orbit_comet));}
 static const char *ov_pitch_name(int src){return src==MD_PITCH_MOTIF?"MOTIF":src==MD_PITCH_ECHO?"ECHO":"ORBIT";}
 static void ov_fmt_bar(int num,int den,char *s){ // a fraction of a bar, reduced: 3/16, 1/4, 1 BAR
  const int g=ov_gcd(num,den);num/=g;den/=g;md_num(num,s);if(den==1){ov_append(s," BAR");return;}ov_append(s,"/");char b[8];md_num(den,b);ov_append(s,b);
@@ -96,7 +101,7 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
    if(o->pitch==MD_PITCH_ECHO){char b[4]={'T',(char)('1'+(tr+5)%6),0};ov_append(info,"TRIAD NOTE ABOVE ");ov_append(info,b);}
    else ov_append(info,o->pitch==MD_PITCH_MOTIF?"THE PHRASE, IN ORDER":"NEAR THE STAR = HIGHER");}
   else{*label="NOTE";const int n=p->track[tr].note;ov_append(value,md_pitch_names[n%12]);char b[4];md_num(n/12-1,b);ov_append(value,b);ov_append(info,"BASE NOTE OF THE TRACK");}
- }else{
+ }else if(page==ORBIT_MOONS){
   const int n=o->moons,spin=md_orbit_moon_steps(o->moon_spin);
   if(k==0){*label="MOONS";if(!n){ov_append(value,"OFF");ov_append(info,"NO ORNAMENT");}
    else{md_num(n,value);ov_append(info,n>1?"ORNAMENTS AFTER EACH NOTE":"ORNAMENT AFTER EACH NOTE");}}
@@ -106,6 +111,18 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
     *const infos[MD_MOON_INTERVALS]={"THE SAME NOTE AGAIN","UP THE SCALE, STEP BY STEP","DOWN THE SCALE, STEP BY STEP","UP THE SCALE IN THIRDS","DOWN THE SCALE IN THIRDS","OCTAVE, +FIFTH, 2 OCTAVES"};
    *label="INTERVAL";ov_append(value,(brief?brief_names:names)[o->moon_interval]);ov_append(info,p->track[tr].model<MD_FM?"A DRUM: THE SAME HIT":infos[o->moon_interval]);}
   else{*label="LEVEL";md_num(o->moon_level,value);ov_append(info,"OF THE NOTE'S VELOCITY");}
+ }else{
+  if(k==0){*label="COMET";if(!p->orbit_comet){ov_append(value,"OFF");ov_append(info,"NO RARE EVENT");}
+   else{md_num(md_orbit_comet_steps(p->orbit_comet)/16,value);ov_append(value,brief?" BAR":" BARS");
+    if(!md_playing())ov_append(info,"FIRST PASS HALF A TURN IN");
+    else if(md_status()->comet_now>0)ov_append(info,"PASSING THE STAR NOW");
+    else{const int bars=(ov_comet_wait(p)+15)/16;char b[8];md_num(bars,b);ov_append(info,"NEXT PASS IN ");ov_append(info,b);ov_append(info,bars>1?" BARS":" BAR");}}}
+  else if(k==1){static const char *const names[MD_COMET_EVENTS]={"SWELL","FREEZE","BOTH"},*const infos[MD_COMET_EVENTS]={"THE ROOM SWELLS AS IT PASSES","THE GRANULAR TAPE FREEZES","THE ROOM SWELLS, THE TAPE FREEZES"};
+   *label="EVENT";ov_append(value,names[p->comet_event]);ov_append(info,infos[p->comet_event]);}
+  else if(k==2){*label="AMOUNT";md_num(p->comet_amount,value);ov_append(info,p->comet_amount?"HOW MUCH ITS PASSAGE DOES":"IT PASSES, NOTHING HAPPENS");}
+  else{static const char *const names[MD_CONJ_MODES]={"OFF","ACCENT","CHORD"},*const brief_names[MD_CONJ_MODES]={"OFF","ACC","CHORD"},
+    *const infos[MD_CONJ_MODES]={"ALIGNED BODIES: NOTHING","ALIGNED: NEXT BEAT ACCENTED","ALIGNED: THEY STRIKE A CHORD"};
+   *label="CONJUNCTION";ov_append(value,(brief?brief_names:names)[p->orbit_conj]);ov_append(info,infos[p->orbit_conj]);}
  }
 }
 // The MOONS page: the selected body close up, its outer side (away from the star) at the top, where each moon plays as
@@ -171,13 +188,24 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
    for(int k=0;k<p->orbit[i].moons;k++){const int lit=ov_moon_k[i]==k+1&&now-ov_moon_ms[i]<220;
     md_circle((int)(o->mx[k]+.5f),(int)(o->my[k]+.5f),lit?2:1,lit?MD_INK:md_tint(MD_BG,MD_INK,i==tr?28u:20u),1);}
   if(ov_band(o->y-8,o->y+8)){if(i==tr)md_circle((int)(o->x+.5f),(int)(o->y+.5f),6,md_tint(MD_BG,c,has?28u:12u),0);md_circle((int)(o->x+.5f),(int)(o->y+.5f),i==tr?4:3,has?c:md_tint(MD_BG,c,12),1);}}
+ // The comet: its whole orbit while it is being set; inside the bar ring, itself and its tail (away from the star, as
+ // long as its passage acts); beyond, a mark on the ring in its direction, brighter as it nears.
+ if(ov_comet.on){const OrbitView *c=&ov_comet;
+  if(page==ORBIT_COMET&&hk==0)ov_ellipse(c,md_tint(MD_BG,MD_INK,10),3);
+  const float dx=c->x-OV_CX,dy=c->y-OV_CY,r=fm_sqrtf(dx*dx+dy*dy),co=fm_cosf(c->out),si=fm_sinf(c->out);
+  if(r<OV_RING-4){const float tail=4+30*md_status()->comet_now;
+   for(int k=0;k<3;k++){const float o=(k-1)*.8f;ov_seg(c->x-si*o,c->y+co*o,c->x+co*tail-si*o,c->y+si*tail+co*o,md_tint(MD_BG,MD_INK,k==1?18u:9u));}
+   if(ov_band(c->y-3,c->y+3))md_circle((int)(c->x+.5f),(int)(c->y+.5f),2,MD_INK,1);}
+  else{const float x=OV_CX+OV_RING*co,y=OV_CY+OV_RING*si,near=fminf(1,(OV_RING+80)/(r+1)-.5f);
+   if(ov_band(y-3,y+3))md_circle((int)(x+.5f),(int)(y+.5f),2,md_tint(MD_BG,MD_INK,(unsigned)(10+16*fmaxf(0,near))),0);}}
  // The star glows with what is playing; the perturbation shows as a halo while it is turned.
  {const float g=4+fminf(9,ov_level*30);ov_ring(OV_CX,OV_CY,g,md_tint(MD_BG,MD_INK,8),1.2f);ov_ring(OV_CX,OV_CY,g*.6f,md_tint(MD_BG,MD_INK,14),1.2f);
   if(page==ORBIT_SYS&&hk==1&&p->orbit_pert)ov_ring(OV_CX,OV_CY,10+p->orbit_pert*.12f,md_tint(MD_BG,MD_INK,16),3);
   md_circle(OV_CX,OV_CY,2,MD_INK,1);}
  }
  // Words only where they help.
- if(!p->orbit[tr].gates)md_text(10,44,page==ORBIT?"K3 GATES STARTS THIS ORBIT":"NO ORBIT: ORBIT PAGE, K3 GATES",MD_DIM);
+ if(page==ORBIT_COMET){if(!p->orbit_comet)md_text(10,44,"K1 COMET: A RARE PASSAGE",MD_DIM);else if(!md_playing())md_text(10,44,"PLAY: IT STARTS FAR AWAY",MD_DIM);}
+ else if(!p->orbit[tr].gates)md_text(10,44,page==ORBIT?"K3 GATES STARTS THIS ORBIT":"NO ORBIT: ORBIT PAGE, K3 GATES",MD_DIM);
  else if(page==ORBIT_MOONS&&!p->orbit[tr].moons)md_text(10,44,"K1 MOONS: ORNAMENTS AFTER NOTES",MD_DIM);
  else if(!md_playing())md_text(10,44,page==ORBIT_MOONS?"EACH NOTE SPINS ITS MOONS ONCE":"PLAY: ALL START FROM THE TOP",MD_DIM);
  // The strip: four knobs, value and a short gauge.
@@ -188,7 +216,7 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  // The card of the knob being turned, in the corner opposite the body it changes.
  // A full-width card, on the half of the screen away from the body, with a thread to it.
  if(touched){const char *label;char value[24]={0},info[48];ov_knob(p,page,hk,&label,value,info,0);
-  const OrbitView *o=&ov[tr];const int body=page==ORBIT||(page==ORBIT_SYS&&hk>=2),y=page==ORBIT_MOONS||(body&&o->y<OV_CY)?164:42;
+  const OrbitView *o=&ov[tr];const int body=page==ORBIT||(page==ORBIT_SYS&&hk>=2),y=page==ORBIT_MOONS||(body&&o->y<OV_CY)||(page==ORBIT_COMET&&ov_comet.on&&ov_comet.y<OV_CY)?164:42;
   char head[24]={'K',(char)('1'+hk),' ',0};ov_append(head,label);
   cv_rect(6,y,228,33,MD_CARD);cv_rect(6,y,228,1,col);cv_text(12,y+3,&FONT_XS,head,MD_DIM);
   cv_text(228-text_w(&FONT_B,value),y+2,&FONT_B,value,col);cv_text(12,y+18,&FONT_XS,info,MD_INK);

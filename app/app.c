@@ -5,8 +5,8 @@
 #ifndef APP_VERSION
 #define APP_VERSION "DEV" /* a release build passes its own (tools/build.py --release X.Y.Z) */
 #endif
-enum { LIVE,SOUND,RHYTHM,GRAIN,MIX,SYSTEM,ENVELOPE,GROOVE,TAPE,HARMONY,FILTER,APPEARANCE,MIXER,BASSLINE,SPACE,MODULATION,PHRASE,MIDI,BANKS,ZONES,LFO_A,LFO_B,SPACE_TONE,ECHO_CHORUS,GENERATOR,FORM,RAGA,MORPH,DRIFT,CHANNELS,ORBIT,ORBIT_SYS,ORBIT_MOONS };
-static int orbit_page(int p){return p==ORBIT||p==ORBIT_SYS||p==ORBIT_MOONS;} /* Rhizome */
+enum { LIVE,SOUND,RHYTHM,GRAIN,MIX,SYSTEM,ENVELOPE,GROOVE,TAPE,HARMONY,FILTER,APPEARANCE,MIXER,BASSLINE,SPACE,MODULATION,PHRASE,MIDI,BANKS,ZONES,LFO_A,LFO_B,SPACE_TONE,ECHO_CHORUS,GENERATOR,FORM,RAGA,MORPH,DRIFT,CHANNELS,ORBIT,ORBIT_SYS,ORBIT_MOONS,ORBIT_COMET };
+static int orbit_page(int p){return p==ORBIT||p==ORBIT_SYS||p==ORBIT_MOONS||p==ORBIT_COMET;} /* Rhizome */
 static struct { int page,track,help,dirty,octave; uint32_t btn,keys,down[NB],held,next; char msg[32]; uint32_t msg_until; } dream_ui;
 static int dream_store_hold;
 // A Monde (PRESET) or a user Monde (USER BANKS K3) asked for while the Monde in play has unsaved edits: a card asks
@@ -51,7 +51,7 @@ static const uint16_t dream_colors[6]={RGB(255,140,118),RGB(255,198,104),RGB(124
 #define MD_INK RGB(244,242,255)
 #define MD_DIM RGB(172,180,208)
 #define MD_EDGE RGB(60,66,100)
-static const char *dream_pages[]={"LIVE MONDE","SOUND","RHYTHM","GRANULAR BUS","MIX / NOTES","QUALITY / SYSTEM","ENVELOPE / BLOOM","GROOVE / REPEATS","TAPE / MOTION","HARMONY / GLOBAL","VELVET FILTER","LOOK / STARTUP","GLOBAL MIXER","BASS / MOTIFS","SHARED SPACE","MARBLES / TIDES / WARPS","PHRASE / NOTES","MIDI / PERFORMANCE","USER BANKS","MIDI OUT ZONES","LFO A","LFO B","SPACE TONE","ECHO SYNC / CHORUS","GENERATOR / DEJA VU","FORM","RAGA / GAMAKA","MORPH","DERIVE","MIDI CHANNELS","ORBIT","ORBIT / SYSTEM","ORBIT / MOONS"};
+static const char *dream_pages[]={"LIVE MONDE","SOUND","RHYTHM","GRANULAR BUS","MIX / NOTES","QUALITY / SYSTEM","ENVELOPE / BLOOM","GROOVE / REPEATS","TAPE / MOTION","HARMONY / GLOBAL","VELVET FILTER","LOOK / STARTUP","GLOBAL MIXER","BASS / MOTIFS","SHARED SPACE","MARBLES / TIDES / WARPS","PHRASE / NOTES","MIDI / PERFORMANCE","USER BANKS","MIDI OUT ZONES","LFO A","LFO B","SPACE TONE","ECHO SYNC / CHORUS","GENERATOR / DEJA VU","FORM","RAGA / GAMAKA","MORPH","DERIVE","MIDI CHANNELS","ORBIT","ORBIT / SYSTEM","ORBIT / MOONS","ORBIT / COMET"};
 static const char *help_title[NB]={"GRANULAR BUS","MUTE A TRACK","RETURN","FREEZE","CHOOSE A VOICE","GLOBAL","LIVE MACROS","SAVE","LOCK THE SEED","GENERATE RHYTHMS","PLAY / STOP","VARY / DICE","LOWER OCTAVE","HIGHER OCTAVE"};
 static const char *help_lines[NB][5]={
  {"FX: Grain > Tape > Space >","Space Tone > Echo / Chorus >","Marbles / Tides > LFO A > LFO B","Grain: K1 mix / K2 length","REC: dice this page"},
@@ -63,7 +63,7 @@ static const char *help_lines[NB][5]={
  {"K1 DENSITY: number of events","K2 MOTION: melodic movement","K3 COLOUR: brighter / darker","K4 SPACE: granular level","PRESET: 90 Mondes + Blank"},
  {"Stop PLAY; use internal clock.","SAVE stores Monde and preferences,","then opens the save screen:","16 Mondes / 64 tones, free slot.","Granular audio is not stored."},
  {"ARP: lock the random seed","The same seed repeats.","REC: create a new variation","ENV: undo the last variation","Unequal lengths keep cycling."},
- {"SEQ: Orbit > System > Moons >","Rhythm > Groove > Bass > Phrase >","Gen > Form. Rhythm: hits, length","K4: event probability","REC: dice this page"},
+ {"SEQ: Orbit > System > Moons >","Comet > Rhythm > Groove > Bass >","Phrase > Gen > Form","K4: event probability","REC: dice this page"},
  {"PLAY: start / stop","Stop lets the sound decay.","SYSTEM + REC: silence all","Keyboard: play the selected track","Start restarts the sequence."},
  {"LIVE / GLO: new variation","Other pages: dice what you see","Scale, tempo, mutes stay put.","ENV: undo / SYSTEM, MIDI: PANIC","Holding opens help only."},
  {"OCT-: keyboard one octave down","Sequence notes stay unchanged.","MIX K2: the track base note","The first hardware key is F3.","HOME: return to live controls"},
@@ -287,7 +287,7 @@ static void md_draw_all(void) {
   if(dream_ui.help==B_EDIT&&dream_ui.page==ENVELOPE)lines=envhelp;
   if(dream_ui.help==B_SEQ&&dream_ui.page==GROOVE)lines=groovehelp;
   if(dream_ui.help==B_FX&&dream_ui.page==TAPE)lines=tapehelp;
-  static const char *newhelp[21][5]={
+  static const char *newhelp[22][5]={
    {"SELECT: track / SEL: mute","K1 level / K2 grain send","K3 delay send / K4 reverb send","FX: SPACE sets effect return","Sends follow track level."},
    {"K1 OFF / EUCLID / STEP","K2 motif / K3 glide / K4 note","SEQ again: edit phrase notes","Marbles varies offbeat notes.","All tracks remain assignable."},
    {"K1 delay time: 40-350 ms","K2 echo feedback / K3 room tail","K4 shared effect return","Mixer: individual track sends","PANIC clears all effect tails."},
@@ -308,7 +308,8 @@ static void md_draw_all(void) {
    {"K1 track / K2 channel in","K3 channel out (TRACKS mode)","K4 all six from one channel","OFF: not heard / not sent","Tracks may share a channel."},
    {"K1 period: a beat to 12 bars","K2 eccentricity: the rubato","K3 gates a turn; 0 = off","K4 phase: the gates turn","A round orbit is euclidean."},
    {"K1 precession: ellipses turn","K2 perturbation: it lives","K3 pitch: orbit, motif, echo","K4 the track's base note","Aligned bodies: accent."},
-   {"K1 moons: 0 to 3 a body","K2 spin: one turn after a note","K3 interval: what they play","K4 level, from the note's","A moon plays on the outer side."}};
+   {"K1 moons: 0 to 3 a body","K2 spin: one turn after a note","K3 interval: what they play","K4 level, from the note's","A moon plays on the outer side."},
+   {"K1 comet: a turn in 4-64 bars","K2 event: swell, freeze, both","K3 how much its passage does","K4 conjunction: accent, chord","It acts as it nears the star."}};
   if(md_context_help())lines=newhelp[dream_ui.page-MIXER];
   for(i=0;i<5;i++)md_text(14,80+i*22,lines[i],MD_INK);
   md_text(14,197,"Release, then tap any key to close.",MD_DIM);return;
@@ -921,8 +922,8 @@ void app_overload(void) {overloads++;dream_cmd(MD_OVERLOAD,0,0);}
 // Lights say what is in use: the button of the page shown, SEL when the selected track is muted, ARP locked,
 // LFO frozen, PLAY playing (green); ENV glows when there is something to undo.
 // The five page buttons and their pages, in the order each press goes through them.
-static const struct { int button; uint8_t pages[9]; int n; } page_cycles[5]={
- {B_HOME,{LIVE,MORPH,DRIFT},3},{B_EDIT,{SOUND,FILTER,ENVELOPE,MIX,MIXER},5},{B_SEQ,{ORBIT,ORBIT_SYS,ORBIT_MOONS,RHYTHM,GROOVE,BASSLINE,PHRASE,GENERATOR,FORM},9},
+static const struct { int button; uint8_t pages[10]; int n; } page_cycles[5]={
+ {B_HOME,{LIVE,MORPH,DRIFT},3},{B_EDIT,{SOUND,FILTER,ENVELOPE,MIX,MIXER},5},{B_SEQ,{ORBIT,ORBIT_SYS,ORBIT_MOONS,ORBIT_COMET,RHYTHM,GROOVE,BASSLINE,PHRASE,GENERATOR,FORM},10},
  {B_FX,{GRAIN,TAPE,SPACE,SPACE_TONE,ECHO_CHORUS,MODULATION,LFO_A,LFO_B},8},{B_GLO,{HARMONY,RAGA,SYSTEM,APPEARANCE,MIDI,CHANNELS,ZONES,BANKS},8}};
 static int page_button(int page){for(int c=0;c<5;c++)for(int k=0;k<page_cycles[c].n;k++)if(page_cycles[c].pages[k]==page)return page_cycles[c].button;return B_HOME;}
 // A page button: from one of its pages to the next (the last goes back to the first), from anywhere else to its first page.
@@ -1023,6 +1024,7 @@ void app_input_only(void) {
   if(orbit_page(dream_ui.page)){const md_orbit *o=&p->orbit[tr];orbit_touch(b);
    if(dream_ui.page==ORBIT){const int cs[]={MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_GATES,MD_ORBIT_PHASE},vs[]={o->period,o->ecc,o->gates,o->phase};dream_cmd(cs[b],tr,vs[b]+d*(b==1?25:1));}
    else if(dream_ui.page==ORBIT_SYS){const int cs[]={MD_ORBIT_PREC,MD_ORBIT_PERT,MD_ORBIT_PITCH,MD_NOTE},vs[]={p->orbit_prec,p->orbit_pert,o->pitch,t->note};dream_cmd(cs[b],tr,vs[b]+d*(b<2?5:1));}
+   else if(dream_ui.page==ORBIT_COMET){const int cs[]={MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ},vs[]={p->orbit_comet,p->comet_event,p->comet_amount,p->orbit_conj};dream_cmd(cs[b],tr,vs[b]+d*(b==2?5:1));}
    else{const int cs[]={MD_ORBIT_MOONS,MD_ORBIT_MOON_SPIN,MD_ORBIT_MOON_INTERVAL,MD_ORBIT_MOON_LEVEL},vs[]={o->moons,o->moon_spin,o->moon_interval,o->moon_level};dream_cmd(cs[b],tr,vs[b]+d*(b==3?5:1));}
    continue;}
   if(dream_ui.page==LIVE){c=MD_MACRO;tr=b;v=p->macro[b]+d*20;}
@@ -1095,7 +1097,8 @@ int app_expect(const char *what,int *got) {
  else if(!strncmp(what,"motif",5)&&what[5]>='0'&&what[5]<='9')*got=md_state()->ext[dream_ui.track].notes[atoi(what+5)&15];
  else if(!strcmp(what,"orbit_gates"))*got=md_state()->orbit[dream_ui.track].gates;else if(!strcmp(what,"orbit_pitch"))*got=md_state()->orbit[dream_ui.track].pitch;
  else if(!strcmp(what,"orbit_hits")){unsigned n=0;for(int i=0;i<6;i++)n+=md_status()->orbit_hits[i];*got=(int)n;}else if(!strcmp(what,"conjunctions"))*got=(int)md_status()->conj_count;
- else if(!strcmp(what,"orbit_moons"))*got=md_state()->orbit[dream_ui.track].moons;else if(!strcmp(what,"moon_hits")){unsigned n=0;for(int i=0;i<6;i++)n+=md_status()->moon_hits[i];*got=(int)n;}
+ else if(!strcmp(what,"orbit_moons"))*got=md_state()->orbit[dream_ui.track].moons;else if(!strcmp(what,"comet_passes"))*got=(int)md_status()->comet_passes;else if(!strcmp(what,"orbit_comet"))*got=md_state()->orbit_comet;
+ else if(!strcmp(what,"moon_hits")){unsigned n=0;for(int i=0;i<6;i++)n+=md_status()->moon_hits[i];*got=(int)n;}
  else if(!strcmp(what,"invalid"))*got=md_status()->nonfinite;else if(!strcmp(what,"queue_drops"))*got=md_status()->dropped_commands;else return 0;return 1;
 }
 

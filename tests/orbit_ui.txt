@@ -45,6 +45,14 @@ spin K4 -3
 wait 50
 expect orbit_moons 3
 tap SEQ
+expect page 33
+spin K1 1
+spin K2 2
+spin K3 8
+spin K4 1
+wait 50
+expect orbit_comet 1
+tap SEQ
 expect page 2
 tap PLAY
 peakreset
@@ -52,6 +60,7 @@ wait 12000
 expect orbit_hits >20
 expect conjunctions >0
 expect moon_hits >10
+expect comet_passes >0
 expect peak_db_max >-30
 expect invalid 0
 expect queue_drops 0
