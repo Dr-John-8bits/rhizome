@@ -60,7 +60,8 @@ static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob valu
 static uint16_t chorus_line[2048]; // ordinary RAM: the pool must keep 8 KB spare (base/tools/build.py)
 static int16_t diffuser[1210];static unsigned diffuser_head[4];static const unsigned diffuser_len[4]={150,214,319,527}; // Monades: 12 dB high-pass on the echo and room sends
 static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;memset(diffuser,0,sizeof diffuser);memset(diffuser_head,0,sizeof diffuser_head);fx_active=false;memset(echo,0,sizeof echo);memset(room,0,sizeof room);memset(room_head,0,sizeof room_head);memset(room_lp,0,sizeof room_lp);echo_head=0;echo_lp=fx_smooth=fx_highpass_in=fx_highpass_out=0;delay_smooth=8820;}
-static void v10_defaults(md_patch &p){p.version=10;p.motion_every=0;}
+static void v11_defaults(md_patch &p){p.version=11;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT};p.orbit_prec=p.orbit_pert=0;} // Rhizome: orbits off, one bar a turn
+static void v10_defaults(md_patch &p){p.motion_every=0;v11_defaults(p);}
 static void v9_defaults(md_patch &p){for(int i=0;i<6;i++){p.gamaka[i]=MD_GAMAKA_OFF;p.gamaka_amount[i]=500;}p.vadi=p.samvadi=-1;v10_defaults(p);}
 static void v8_defaults(md_patch &p){for(int i=0;i<6;i++)p.gen[i]={MD_GEN_OFF,500,8,12};p.form=0;p.form_bars=1;p.form_drops=2;v9_defaults(p);}
 static void v7_defaults(md_patch &p){p.send_hp=0;p.echo_tone=p.room_tone=500;p.echo_sync=p.room_diffusion=p.chorus=0;p.chorus_depth=500;v8_defaults(p);for(int i=0;i<6;i++)for(int s=0;s<2;s++)p.lfo[i][s]={3,MD_LFO_SINE,s?MD_TO_PAN:MD_TO_CUTOFF,0};}
@@ -158,7 +159,8 @@ static int morph_on,drift_on,drift_slow,fx_shed; /* a morph is under way (morph.
 static void bank_patch(md_patch &p,int id) {
  p=biome_bank[bound(id,0,MD_BIOMES-1)].patch;
  // Mutable Dreams Mondes are 1.1 patches: Monades additions neutral. FDDS Mondes are complete v10 patches.
- if(p.version!=10){extension_defaults(p);if(id>=65){p.fx_level=340;p.reverb_time=550;for(int i=0;i<6;i++)p.ext[i].reverb_send=300;}}
+ if(p.version<10){extension_defaults(p);if(id>=65){p.fx_level=340;p.reverb_time=550;for(int i=0;i<6;i++)p.ext[i].reverb_send=300;}}
+ else if(p.version==10)v11_defaults(p); // Rhizome: Monades' Mondes, orbits off
 }
 // Unsaved work (from Mutable Dreams 1.3): a fingerprint of the patch when it was loaded or saved. What changes by
 // itself (the free seed, the auto ECO drop, the tape freeze, the edit flags, the phrase cursor, and the tempo while it
@@ -262,6 +264,7 @@ static void dice(int i,int page){
  }
  if(page<=MD_DICE_ENVELOPE){patch.tone_preset[i]=-1;patch.edited_mask|=2u<<i;}
 }
+#include "orbit.inc"
 static void apply_command(Command e) {
  int i=bound(e.t,0,5),v=e.v;md_track &t=patch.track[i];
  // Playback, preview notes and emergency silence do not change a preset.
@@ -280,7 +283,7 @@ static void apply_command(Command e) {
  } else switch(e.c) {
  case MD_MACRO:patch.macro[bound(e.t,0,3)]=bound(v,0,1000);break;
  case MD_TEMPO:patch.tempo=bound(v,30,220);break;
- case MD_PLAY:{int was=playing;playing=!!v;memset(repeats,0,sizeof repeats);if(playing){step=0;untilstep=0;seqrng=patch.seed;beat=0;beat_limit=1;beat_wraps=0;gen_reset();memset(motion_held,0,sizeof motion_held);}
+ case MD_PLAY:{int was=playing;playing=!!v;memset(repeats,0,sizeof repeats);if(playing){step=0;untilstep=0;seqrng=patch.seed;beat=0;beat_limit=1;beat_wraps=0;gen_reset();orbit_reset();memset(motion_held,0,sizeof motion_held);}
   if(routing.clock&&!clock_source&&playing!=was){out_push(playing?0xfa:0xfc,0,0);clock_left=0;}if(!playing)out_all_off();}break;
  case MD_LOCK:patch.locked=!!v;break;
  case MD_MUTATE: if(!drift_on)previous=patch;patch.edited_mask|=1u;patch.seed=random_word(seqrng)|1;for(unsigned j=0;j<6;j++)patch.track[j].rotate=random_word(seqrng)%patch.track[j].length;break;
@@ -304,6 +307,13 @@ static void apply_command(Command e) {
  case MD_BREATHE:t.breathe=bound(v,0,1000);break;
  case MD_ACCENT:t.accent=bound(v,0,1000);break;
  case MD_SWING:patch.swing=bound(v,0,600);break;
+ case MD_ORBIT_GATES:patch.orbit[i].gates=bound(v,0,MD_ORBIT_GATES_MAX);break;
+ case MD_ORBIT_PERIOD:orbit_rebase_period(i,bound(v,0,MD_ORBIT_PERIODS-1));break;
+ case MD_ORBIT_ECC:patch.orbit[i].ecc=bound(v,0,MD_ORBIT_ECC_MAX);break;
+ case MD_ORBIT_PHASE:patch.orbit[i].phase=(v%MD_ORBIT_PHASES+MD_ORBIT_PHASES)%MD_ORBIT_PHASES;break;
+ case MD_ORBIT_PITCH:patch.orbit[i].pitch=bound(v,0,MD_PITCH_SOURCES-1);break;
+ case MD_ORBIT_PREC:orbit_rebase_prec(bound(v,0,100));break;
+ case MD_ORBIT_PERT:patch.orbit_pert=bound(v,0,100);break;
  case MD_ROOT:patch.root=bound(v,0,11);break;
  case MD_SCALE:patch.scale=bound(v,0,SCALE_COUNT-1);break;
  case MD_TRANSPOSE:patch.transpose=bound(v,-24,24);break;
@@ -379,11 +389,13 @@ static void tick() {
  float duration=MD_RATE*60.0f/(patch.tempo*4.0f)*(1+(step%2?-1:1)*unit(patch.swing)*.5f);
  if((step%32)==0) {if(patch.locked)seqrng=patch.seed;else patch.seed=random_word(seqrng)|1;}
  static const int degree[7]={0,2,3,5,7,10,12};
- float tension=.6f;unsigned dropped=0;
+ float tension=.6f;unsigned dropped=0;orbit_step_len=duration;orbit_since=0; // Rhizome: the orbits measure the step from here
  if(patch.form){unsigned bars=form_bar_len[bound(patch.form_bars,0,3)],bar=step/16,sec=(bar/bars)%4,cyc=bar/(bars*4);
   tension=form_tension_of[sec];dropped=form_mask(cyc,sec);
   stats.form_section=sec;stats.form_cycle=cyc;stats.form_drop_mask=dropped;stats.form_pos=(float)(step%(16*bars))/(16*bars);}
+ orbit_rest=dropped;
  for(unsigned i=0;i<6;i++) {
+  if(patch.orbit[i].gates){stats.step_played[i]=stats.step_skipped[i]=0;continue;} // Rhizome: an orbit plays this track
   const md_track &t=patch.track[i];if(step%(unsigned)t.speed)continue;
   unsigned local=step/t.speed;
   int hits=bound(t.hits+(patch.macro[0]-500)*t.length/1500+(int)floorf(lfo_mod[i][MD_TO_HITS]*t.length+.5f)+(patch.form?(int)floorf((tension-.6f)*unit(patch.form)*t.length*.8f+.5f):0),0,t.length);
@@ -707,12 +719,21 @@ static void quantum(float *lr,unsigned n) {
 }
 extern "C" {
 int md_hit(unsigned s,unsigned h,unsigned l,unsigned r) {if(!l||l>32)return 0;h=h>l?l:h;return (((s+r)%l)*h)%l<h;}
+int md_orbit_steps(int period){return orbit_steps_of[bound(period,0,MD_ORBIT_PERIODS-1)];}
+// The gates of a track: its turn's steps, the euclidean hits among them, each as a direction (top = -pi/2, clockwise).
+int md_orbit_gate_angles(const md_patch *p,int track,float *phi){
+ const md_orbit &o=p->orbit[bound(track,0,5)];const int n=md_orbit_steps(o.period),k=o.gates<n?o.gates:n;int count=0;
+ for(int s=0;s<n&&count<MD_ORBIT_GATES_MAX;s++)if((s*k)%n<k)phi[count++]=-1.57079633f+o.phase*.261799388f+ORBIT_TAU*s/n;
+ return count;
+}
+float md_orbit_eccentric(float mean,float e){return orbit_E(mean,e);}
+float md_atan2(float y,float x){return orbit_atan2(y,x);}
 void md_init() {
  voices=reinterpret_cast<Voice*>(voices_raw);memset(voices_raw,0,sizeof voices_raw);memset(tape,0,sizeof tape);memset(grains,0,sizeof grains);
  memset(&stats,0,sizeof stats);memset(smooth,0,sizeof smooth);memset(dcx,0,sizeof dcx);memset(dcy,0,sizeof dcy);
  out_r=out_w=owed_n=0;memset(&routing,0,sizeof routing);clock_left=0;memset(chan_bend,0,sizeof chan_bend);for(int i=0;i<6;i++)in_chan[i]=out_chan[i]=i+1;
  for(int i=0;i<6;i++)last_generated[i]=60;
- memset(midi_bank,0,sizeof midi_bank);qread=qwrite=writehead=grainclock=tape_valid=0;feedback_lp=0;rng=0x88888;stmlib::Random::Seed(rng);scene(0);playing=0;clock_source=midi_quantize=clock_pulse=0;clock_age=clock_last=0;clock_interval=0;
+ memset(midi_bank,0,sizeof midi_bank);qread=qwrite=writehead=grainclock=tape_valid=0;feedback_lp=0;rng=0x88888;stmlib::Random::Seed(rng);scene(0);orbit_reset();playing=0;clock_source=midi_quantize=clock_pulse=0;clock_age=clock_last=0;clock_interval=0;
 }
 void md_set_midi_routing(const md_midi_routing *r){
  // Turning output off (or changing the routing) first releases every note still owed on the old routing.
@@ -786,7 +807,7 @@ static void midi_track(unsigned i,unsigned type,unsigned a,unsigned b){
 unsigned md_command_space(void){return 64-(qwrite-qread);}
 int md_command(int c,int t,int v) {if(c<0||c>=MD_COMMAND_COUNT)return 0;unsigned w=qwrite;if(w-qread>=64){stats.dropped_commands++;return 0;}queue[w&63]={c,t,v};fence();qwrite=w+1;return 1;}
 void md_render(float *lr,unsigned n) {
- while(n){if(qread!=qwrite){while(qread!=qwrite){fence();Command e=queue[qread&63];apply(e);fence();qread++;}returnable=memcmp(&previous,&patch,sizeof patch)!=0;}
+ while(n){if(qread!=qwrite){while(qread!=qwrite){fence();Command e=queue[qread&63];apply(e);fence();qread++;}returnable=memcmp(&previous,&patch,sizeof patch)!=0;orbit_prepared=-1;}
   unsigned z=n<Q?n:Q;
   if(playing){
    if(!clock_source&&untilstep<=0)tick();
@@ -801,12 +822,13 @@ void md_render(float *lr,unsigned n) {
   }
   out_advance(z);
   if(clock_source&&playing){clock_age+=z;if(clock_age>MD_RATE*2){playing=0;memset(repeats,0,sizeof repeats);out_all_off();}}
-  quantum(lr,z);lr+=z*2;n-=z;
+  if(playing)orbit_run(); // Rhizome: gates crossed up to here fire before the voices render
+  quantum(lr,z);lr+=z*2;n-=z;if(playing)orbit_since+=z;
  }
 }
 const md_patch *md_state(){return &patch;}const md_stats *md_status(){return &stats;}int md_playing(){return playing;}
 int md_validate(const md_patch *p) {
- if(!p||p->magic!=0x4D445231||p->version!=10||!p->seed||p->tempo<30||p->tempo>220)return 0;
+ if(!p||p->magic!=0x4D445231||p->version!=11||!p->seed||p->tempo<30||p->tempo>220)return 0;
  if(p->biome_id< -1||p->biome_id>=MD_BIOMES||p->edited_mask>127)return 0;
  for(int i=0;i<6;i++)if(p->tone_preset[i]< -1||p->tone_preset[i]>=MD_TONE_PRESETS)return 0;
  for(int j=0;j<4;j++)if(p->macro[j]<0||p->macro[j]>1000)return 0;
@@ -821,17 +843,21 @@ int md_validate(const md_patch *p) {
  for(int i=0;i<6;i++){const md_gen &g=p->gen[i];if(g.source<0||g.source>=MD_GEN_SOURCES||g.dejavu<0||g.dejavu>1000||g.loop<1||g.loop>16||g.spread<0||g.spread>24)return 0;}
  for(int i=0;i<6;i++)if(p->gamaka[i]<0||p->gamaka[i]>=MD_GAMAKAS||p->gamaka_amount[i]<0||p->gamaka_amount[i]>1000)return 0;
  if(p->motion_every<0||p->motion_every>4)return 0;
+ for(int i=0;i<6;i++){const md_orbit &o=p->orbit[i];if(o.gates<0||o.gates>MD_ORBIT_GATES_MAX||o.period<0||o.period>=MD_ORBIT_PERIODS||o.ecc<0||o.ecc>MD_ORBIT_ECC_MAX||o.phase<0||o.phase>=MD_ORBIT_PHASES||o.pitch<0||o.pitch>=MD_PITCH_SOURCES)return 0;}
+ if(p->orbit_prec<0||p->orbit_prec>100||p->orbit_pert<0||p->orbit_pert>100)return 0;
  if(p->vadi< -1||p->vadi>11||p->samvadi< -1||p->samvadi>11)return 0;
  if(p->form<0||p->form>1000||p->form_bars<0||p->form_bars>3||p->form_drops<0||p->form_drops>3)return 0;
  if(p->echo_sync<0||p->echo_sync>=MD_ECHO_SYNCS||p->room_diffusion<0||p->room_diffusion>1000||p->chorus<0||p->chorus>1000||p->chorus_depth<0||p->chorus_depth>1000)return 0;
  for(int i=0;i<6;i++)for(int s=0;s<2;s++){const md_lfo &l=p->lfo[i][s];if(l.rate<0||l.rate>=MD_LFO_RATES||l.shape<0||l.shape>=MD_LFO_SHAPES||l.target<0||l.target>=MD_LFO_TARGETS||l.depth< -1000||l.depth>1000)return 0;}
  return 1;
 }
-int md_load(const md_patch *p){if(playing||!md_validate(p))return 0;patch=*p;previous=patch;returnable=0;morph_on=0;drift_on=0;drift_slow=0;morph_span=0;fx_shed=0;seqrng=patch.seed;clear_audio();for(int j=0;j<4;j++)smooth[j]=unit(patch.macro[j]);for(int i=0;i<6;i++)reset_voice(i);mark_saved();return 1;}
+int md_load(const md_patch *p){if(playing||!md_validate(p))return 0;patch=*p;orbit_prepared=-1;previous=patch;returnable=0;morph_on=0;drift_on=0;drift_slow=0;morph_span=0;fx_shed=0;seqrng=patch.seed;clear_audio();for(int j=0;j<4;j++)smooth[j]=unit(patch.macro[j]);for(int i=0;i<6;i++)reset_voice(i);mark_saved();return 1;}
 unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof diffuser+sizeof element_body+sizeof element_strike+sizeof echo+sizeof room+sizeof voices_raw+sizeof tape+sizeof grains+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
 int md_decode(md_patch *out,const void *data,unsigned bytes){
  if(!out||!data)return 0;
  if(bytes==sizeof(md_patch)){md_patch p;memcpy(&p,data,sizeof p);if(!md_validate(&p))return 0;*out=p;return 1;}
+ // Monades v10 (1680 bytes): no orbits.
+ if(bytes==offsetof(md_patch,orbit)){md_patch p;memcpy(&p,data,bytes);if(p.version!=10)return 0;v11_defaults(p);if(!md_validate(&p))return 0;*out=p;return 1;}
  // Monades v9 (1676 bytes): Motion varies every step.
  if(bytes==offsetof(md_patch,motion_every)){md_patch p;memcpy(&p,data,bytes);if(p.version!=9)return 0;v10_defaults(p);if(!md_validate(&p))return 0;*out=p;return 1;}
  // Monades v8 (1620 bytes): no gamakas, no pivot notes.

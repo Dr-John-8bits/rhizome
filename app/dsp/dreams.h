@@ -18,7 +18,9 @@ enum { MD_MODEL, MD_TONE, MD_HARM, MD_DECAY, MD_LEVEL, MD_SEND, MD_HITS,
  MD_GAMAKA,MD_GAMAKA_AMOUNT,MD_VADI,MD_SAMVADI,MD_MOTION_EVERY,MD_CLEAR_PHRASE,MD_DICE,
  MD_MORPH_TO,MD_MORPH,MD_MORPH_BARS,MD_MORPH_SCOPE,MD_MORPH_KEEP,
  MD_DRIFT_SLOW,MD_DRIFT_AMOUNT,MD_DRIFT_VOYAGE,MD_DRIFT_SCOPE,MD_DRIFT_HOME,
- MD_OVERLOAD,MD_COMMAND_COUNT }; /* OVERLOAD: the audio ran late; FULL drops to ECO, ECO sheds chorus and room diffusion until the next Monde */ /* CLEAR_PHRASE: all 16 steps rest, cursor on step 1 */ /* LFO commands: track argument = track + 6 * slot (A, B) */
+ MD_OVERLOAD,
+ MD_ORBIT_GATES,MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_PHASE,MD_ORBIT_PITCH,MD_ORBIT_PREC,MD_ORBIT_PERT, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
+ MD_COMMAND_COUNT }; /* OVERLOAD: the audio ran late; FULL drops to ECO, ECO sheds chorus and room diffusion until the next Monde */ /* CLEAR_PHRASE: all 16 steps rest, cursor on step 1 */ /* LFO commands: track argument = track + 6 * slot (A, B) */
 typedef struct { int32_t model,tone,harm,decay,level,send,hits,length,rotate,prob,note,pan,mute,speed,attack,ratchet,accent,shape,cutoff,resonance,filter,breathe; } md_track;
 typedef struct { int32_t delay_send,reverb_send,bass_mode,pattern,glide,marbles,tides,tides_rate,warps,edit_step; int32_t notes[16]; } md_extension;
 /* Monades LFO, two per track. rate: 0..14 synced to the tempo (8 bars .. 1/32), 15..30 free 0.02..20 Hz.
@@ -43,6 +45,14 @@ enum { MD_DICE_SOUND, MD_DICE_FILTER, MD_DICE_ENVELOPE, MD_DICE_MIX, MD_DICE_MIX
  MD_DICE_LFO_A, MD_DICE_LFO_B, MD_DICE_RAGA, MD_DICE_PAGES };
 enum { MD_GAMAKA_OFF, MD_GAMAKA_KAN, MD_GAMAKA_MEEND, MD_GAMAKA_ANDOLAN, MD_GAMAKA_MIX, MD_GAMAKAS };
 typedef struct { int32_t source,dejavu,loop,spread; } md_gen;
+/* Rhizome orbits, per track. gates 0 = off (the track keeps its euclidean rhythm), 1..16 = a body crossing that many
+ * gates per turn, spread as a euclidean rhythm on the turn's steps. period: index of md_orbit_steps (one turn in
+ * sixteenths, 4 to 192). ecc 0..850 thousandths (0 = round: the exact euclidean rhythm). phase: the gates turn by
+ * 15 degree steps (0..23). pitch: where notes come from: the distance to the star, the track's phrase in order, or
+ * the triad note above the previous track's last note (tintinnabuli). */
+enum { MD_ORBIT_PERIODS=13, MD_ORBIT_PHASES=24, MD_ORBIT_ECC_MAX=850, MD_ORBIT_GATES_MAX=16 };
+enum { MD_PITCH_ORBIT, MD_PITCH_MOTIF, MD_PITCH_ECHO, MD_PITCH_SOURCES };
+typedef struct { int32_t gates,period,ecc,phase,pitch; } md_orbit;
 typedef struct {
  uint32_t magic,version,seed; int32_t macro[4],tempo,locked,freeze,grain_size,grain_pos,feedback,quality;
  md_track track[MD_TRACKS];
@@ -57,6 +67,8 @@ typedef struct {
  /* v9: gamaka style and amount per track; vadi / samvadi = semitones above the root, -1 = none. */
  int32_t gamaka[6],gamaka_amount[6],vadi,samvadi;
  int32_t motion_every; /* v10: K2 Motion holds its variation for 1, 2, 4, 8 or 16 steps (0..4); 0 = every step, as 1.1 */
+ /* Rhizome v11: the orbits; precession 0..100 (100 = each ellipse turns once in 16 bars), perturbation 0..100. */
+ md_orbit orbit[6]; int32_t orbit_prec,orbit_pert;
 } md_patch;
 typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; float peak; uint32_t grain_writes,voice_quanta,skipped_quanta; int32_t last_note[6]; uint32_t quality_reductions,element_modes; float track_peak[6];
  /* Monades meters, output-referred like the final mix: grain/delay/room returns, master L/R, pre-limiter peak. */
@@ -73,7 +85,12 @@ typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; floa
  uint32_t form_section,form_cycle,form_drop_mask; float form_pos;
  float gamaka_now[6]; int32_t gamaka_style[6]; float gamaka_age[6]; /* ornament offset in semitones now, its style, ms since the note */
  uint32_t midi_out_track[6]; /* note-ons queued per track (TRACKS and ZONES) */
- int32_t hits_now[6],rotate_now[6]; /* the hits and rotation the sequencer last used per track (Density, FORM, LFOs included) */ } md_stats;
+ int32_t hits_now[6],rotate_now[6]; /* the hits and rotation the sequencer last used per track (Density, FORM, LFOs included) */
+ /* Rhizome orbits as the engine holds them: position in steps since PLAY, each body's mean anomaly, periapsis direction
+  * and eccentricity now (radians; direction 0 = right, -pi/2 = top), its last gate crossed (or refused by the
+  * perturbation) at which step position, and the last conjunction (two bodies aligned with the star). */
+ float orbit_pos,orbit_M[6],orbit_w[6],orbit_e[6],orbit_hit_pos[6];int32_t orbit_hit_gate[6],orbit_hit_skip[6];uint32_t orbit_hits[6];
+ int32_t conj_a,conj_b;float conj_pos;uint32_t conj_count; } md_stats;
 /* Monades granular view: tape overview (256 columns, oldest wraps at the write head), grains as samples behind the head. */
 typedef struct { uint8_t peak[256]; uint32_t head,valid,length; int32_t freeze; float zone,zone_len; struct { float behind,len,env; int32_t active; } grain[4]; } md_tape;
 void md_tape_view(md_tape *view);
@@ -105,6 +122,10 @@ unsigned md_memory_bytes(void);
 int md_has_envelope(int model);
 int md_cutoff_hz(int value);
 int md_hit(unsigned step,unsigned hits,unsigned length,unsigned rotate);
+int md_orbit_steps(int period); /* one turn, in sixteenths */
+int md_orbit_gate_angles(const md_patch *p,int track,float *phi); /* directions of its gates (radians), returns the count */
+float md_orbit_eccentric(float mean,float e); /* Kepler's equation: the eccentric anomaly E, M = E - e sin E */
+float md_atan2(float y,float x);
 const char *md_model_name(int model);
 const char *md_biome_name(int id);
 const char *md_biome_family(int id);

@@ -5,7 +5,7 @@
 static int bank_slot,bank_kind,bank_char,bank_armed=-1;
 static char bank_name[24]="MY MONDE";
 typedef struct { uint32_t magic; char name[24]; md_patch patch; } UserBiome;
-enum { USER_BIOME_1_1=28+1292 }; /* a slot saved by Mutable Dreams 1.1 (patch v6) */
+enum { USER_BIOME_1_1=28+1292, USER_BIOME_MONADES=28+1680 }; /* a slot saved by Mutable Dreams 1.1 (patch v6), by Monades (v10) */
 static UserBiome user_biome_io;
 static uint32_t bank_arm_until;
 typedef struct { char name[24]; md_track track; md_extension ext; } UserTone;
@@ -55,7 +55,7 @@ static int bank_action(int save){
    e->glide=t->ext.glide;e->tides=t->ext.tides;e->tides_rate=t->ext.tides_rate;e->warps=t->ext.warps;
    bank_patch_io.tone_preset[dream_ui.track]=-1;bank_patch_io.edited_mask|=1u|(2u<<dream_ui.track);
   }else {int n=plat_store_load(obj,&user_biome_io,sizeof user_biome_io);
-   if((n!=sizeof user_biome_io&&n!=USER_BIOME_1_1)||user_biome_io.magic!=0x4d445542||!md_decode(&bank_patch_io,&user_biome_io.patch,(unsigned)n-28)){app_say("INVALID USER SLOT","");return 6;}memcpy(bank_name,user_biome_io.name,24);bank_name[23]=0;}
+   if((n!=sizeof user_biome_io&&n!=USER_BIOME_1_1&&n!=USER_BIOME_MONADES)||user_biome_io.magic!=0x4d445542||!md_decode(&bank_patch_io,&user_biome_io.patch,(unsigned)n-28)){app_say("INVALID USER SLOT","");return 6;}memcpy(bank_name,user_biome_io.name,24);bank_name[23]=0;}
   int ok=dream_install(&bank_patch_io,sizeof bank_patch_io);app_say(ok?"USER SLOT LOADED":"INVALID USER SLOT","");return ok?0:6;
  }
 }
