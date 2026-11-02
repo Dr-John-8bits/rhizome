@@ -256,7 +256,7 @@ La HALL **remplace la petite salle de Monades** (quatre lignes courtes et ses di
 
 **Calcul**
 - La HALL ajoute environ +0,6 à +1,1 ms par seconde de son, soit **+2,5 à +4,5 % du FM-1**, moins que la salle retirée.
-- Avec la bande, les Mondes les plus lourds de Monades arriveraient vers 77 et 83 %, sous le plafond de 85 % mais de peu.
+- Avec la bande, les Mondes les plus lourds de Monades arriveraient vers 77 et 83 % : trop près du plafond de 85 %, qui ne doit jamais être atteint (voir « Points de vigilance »).
 - VINTAGE divise le coût de la HALL par deux, et Beads remplacera la mémoire granulaire de Monades.
 
 **Pas fait** : Oliverb comme second algorithme.
@@ -462,6 +462,8 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 
 ## Points de vigilance
 - **La charge du processeur, avant tout.** Il faut être certain que Rhizome ne fasse pas de mal au FM-1 : pas de surcharge, pas de craquements, pas de blocage.
+  - **La règle, comme pour Monades : les 85 % ne doivent jamais être atteints**, même dans le pire cas (les Mondes les plus lourds, avec la bande, la HALL et Beads ouverts ensemble). Ce n'est pas un objectif mais un plafond, et il faut garder une marge en dessous.
+  - Monades a déjà montré pourquoi : son audio USB craquait sur les Mondes chargés (70 à 80 % du temps de rendu) jusqu'à la réserve agrandie `FELUCCA_UAC_DEEP`, que Rhizome a gardée.
   - Les estimations faites sur le Mac le 2 novembre 2026 placent les Mondes les plus lourds de Monades près du plafond de 85 %, voire au-dessus. Ce sont les additions de la bande (+4 à 5 %), de la HALL (+2,5 à 4,5 %) et de Beads (+6 à 9 % quand SPACE est ouvert).
   - **Ce ne sont que des estimations : seule une mesure sur l'appareil compte.** À faire dès la première compilation, Monde par Monde, avec la bande, la HALL et Beads ouverts ensemble, dans le pire des cas.
   - La sécurité existe déjà : en cas de surcharge, le firmware passe en ECO et la HALL en VINTAGE (moitié du calcul).

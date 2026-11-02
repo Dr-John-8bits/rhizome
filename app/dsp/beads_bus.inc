@@ -12,9 +12,12 @@ alignas(beads::Processor) static unsigned char beads_raw[sizeof(beads::Processor
 static beads::Processor *beads_proc;
 static int beads_media_now=-1;
 static uint8_t tape_peak[256];static unsigned tape_peak_col;
-static void beads_reset(){
- memset(beads_mem,0,sizeof beads_mem);memset(tape_peak,0,sizeof tape_peak);tape_peak_col=0;
- beads_proc=new(beads_raw) beads::Processor();uint8_t *banks[2]={beads_mem,beads_mem+BEADS_BYTES/2};beads_proc->Init(banks);beads_media_now=-1;
+// Built once, at md_init (before the audio runs). Afterwards a reset (a Monde loaded from the screen's side, PANIC) only
+// empties the memory and asks the audio thread to reconfigure Beads on its next block: the object is never rebuilt
+// while the audio thread may be using it.
+static void beads_reset(){memset(beads_mem,0,sizeof beads_mem);memset(tape_peak,0,sizeof tape_peak);tape_peak_col=0;beads_media_now=-1;}
+static void beads_init(){
+ beads_proc=new(beads_raw) beads::Processor();uint8_t *banks[2]={beads_mem,beads_mem+BEADS_BYTES/2};beads_proc->Init(banks);beads_reset();
 }
 static beads::Processor::Media beads_media(){return (beads::Processor::Media)bound(patch.beads_media,0,3);}
 static int beads_line_length(){return beads_proc->max_delay_line_length();} // samples of the mono line in use
@@ -34,7 +37,7 @@ static void beads_block(const float *send,unsigned n,float *wl,float *wr,bool fr
  beads::ModulatedParameter d;d.base=patch.beads_density*.001f;d.cv=0;
  const int len=beads_line_length();
  for(unsigned o=0;o<n;o+=BEADS_CHUNK){const unsigned c=n-o<BEADS_CHUNK?n-o:BEADS_CHUNK;
-  beads::FloatFrame in[BEADS_CHUNK],out[BEADS_CHUNK];bool fr[BEADS_CHUNK];
+  static beads::FloatFrame in[BEADS_CHUNK],out[BEADS_CHUNK];static bool fr[BEADS_CHUNK]; // off the audio stack (7.9 KB on the FM-1)
   for(unsigned i=0;i<c;i++){const float x=clip(send[o+i]);in[i].l=in[i].r=x;fr[i]=frozen;}
   beads_proc->Process(beads::SEED_BUTTON_STATE_LOCKED,nullptr,fr,d,p,m,in,out,c); // SEED latched, as on the module: grains all along
   for(unsigned i=0;i<c;i++){wl[o+i]=out[i].l;wr[o+i]=out[i].r;}

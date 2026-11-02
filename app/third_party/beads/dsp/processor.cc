@@ -118,9 +118,11 @@ void Processor::Process(
   float expo_fm_amount = 20.0f * (fabsf(density.base - 0.5f) - 0.225f);
   CONSTRAIN(expo_fm_amount, 0.0f, 1.0f);
 
-  TriggerGenerator::Output triggers_buffer[kMaxBlockSize];  // Rhizome: fixed sizes
-  DelayController::Output taps_buffer[kMaxBlockSize];
-  bool gate_out[kMaxBlockSize];
+  // Rhizome: fixed sizes, and static: off the stack (the FM-1's audio interrupt has 7.9 KB); the audio thread is the
+  // only caller.
+  static TriggerGenerator::Output triggers_buffer[kMaxBlockSize];
+  static DelayController::Output taps_buffer[kMaxBlockSize];
+  static bool gate_out[kMaxBlockSize];
 
   TriggerGenerator::Output* triggers = &triggers_buffer[0];
   DelayController::Output* taps = &taps_buffer[0];
@@ -157,7 +159,7 @@ void Processor::Process(
     }
   }
   
-  FloatFrame dry_signal[kMaxBlockSize];
+  static FloatFrame dry_signal[kMaxBlockSize];  // Rhizome: static (see above)
   
   // Granular processing.
   const float feedback = mix_parameters.feedback;

@@ -41,6 +41,22 @@
 
 namespace beads {
 
+// Rhizome: the scratch of the half-rate media lives outside the stack (the FM-1's audio interrupt has 7.9 KB of it),
+// once for all: one media processes at a time, and only from the audio thread. Plain data: no guard, no constructor.
+struct DownsampleScratch {
+  bool freeze[32];
+  TriggerGenerator::Output triggers[32];
+  DelayController::Output taps[32];
+  FloatFrame in[32];
+  FloatFrame out[32];
+  float down[32];
+  float up[32];
+};
+inline DownsampleScratch& downsample_scratch() {
+  static DownsampleScratch scratch;
+  return scratch;
+}
+
 template<Resolution resolution, int max_delay, int ratio>
 class GranularProcessor {
  public:
@@ -177,14 +193,15 @@ class GranularProcessor {
     } else {
       size_t d_size = size / size_t(ratio);
 
-      // Rhizome: fixed sizes (at most 32 frames a call).
-      bool d_freeze[32];
-      TriggerGenerator::Output d_triggers[32];
-      DelayController::Output d_taps[32];
-      FloatFrame d_in[32];
-      FloatFrame d_out[32];
-      float downsampled[32];
-      float upsampled[32];
+      // Rhizome: at most 32 frames a call, in the shared scratch (not on the stack).
+      DownsampleScratch& scratch = downsample_scratch();
+      bool* d_freeze = scratch.freeze;
+      TriggerGenerator::Output* d_triggers = scratch.triggers;
+      DelayController::Output* d_taps = scratch.taps;
+      FloatFrame* d_in = scratch.in;
+      FloatFrame* d_out = scratch.out;
+      float* downsampled = scratch.down;
+      float* upsampled = scratch.up;
 
       DownsampleGate(freeze, d_freeze, size);
       

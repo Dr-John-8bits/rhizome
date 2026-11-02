@@ -70,13 +70,39 @@ Plus rapide encore : **SEQ 2 fois**, puis **K4 SYSTEM**, pour charger un vrai sy
 
 ## Le séquenceur orbital
 
-### L'idée
-- Au centre, une **étoile**. Chaque piste qui a des portes est un **corps** sur une ellipse autour d'elle.
-- Les **portes** sont des directions fixes autour de l'étoile. Le corps joue une note chaque fois qu'il en passe une.
-- **Une orbite ronde joue exactement le rythme euclidien** de ses portes : 5 portes sur un tour d'une mesure donnent le rythme euclidien 5 sur 16.
-- **Une orbite ovale** garde le même nombre de notes par tour, mais elles se resserrent près de l'étoile et s'espacent loin d'elle : c'est la deuxième loi de Kepler, et ça s'entend comme un rubato.
-- Le mouvement suit le tempo, le swing et l'horloge MIDI reçue. PLAY fait repartir tous les corps du haut.
-- Une piste sans porte (GATES à 0) n'est pas un corps : elle garde son rythme euclidien de la page RHYTHM.
+### L'idée, en partant d'un séquenceur pas à pas
+Un séquenceur pas à pas fait tourner une boucle de pas, et certains pas jouent. Le séquenceur orbital fait la même chose, mais la boucle est **une orbite**, et la piste est **un corps** qui en fait le tour.
+
+| Sur un séquenceur pas à pas | Sur le séquenceur orbital |
+|---|---|
+| La longueur de la boucle (le nombre de pas) | **PERIOD** (K1) : la durée d'un tour, de 1 temps à 12 mesures |
+| Les pas qui jouent | **GATES** (K3) : de 1 à 16 portes par tour, réparties le plus régulièrement possible |
+| Décaler le motif | **PHASE** (K4) : faire tourner les portes |
+| Le swing, le même petit retard à chaque contretemps | **ECCENTRICITY** (K2) : le tour garde sa durée, mais les notes se resserrent d'un côté de l'orbite et s'étirent de l'autre |
+| Une piste, une boucle | Une piste, un corps. Plusieurs corps aux périodes différentes font une polyrythmie qui se réaligne |
+
+Concrètement :
+- **Le nombre de pas d'un tour**, c'est PERIOD. Ses 13 valeurs, en doubles croches : 4 (1 temps), 6, 8, 12, 16 (1 mesure), 24, 32, 48, 64, 96, 112, 128 et 192 (12 mesures).
+- **Le nombre de notes par tour**, c'est GATES, de 1 à 16. Il ne peut pas dépasser le nombre de pas du tour : un tour d'un temps compte 4 pas, donc 4 portes au plus. À 0, la piste n'est plus un corps et reprend son rythme de la page RHYTHM.
+- **Les portes sont placées comme un rythme euclidien** : réparties le plus régulièrement possible sur les pas du tour. Par exemple, 5 portes sur un tour d'une mesure (16 pas) tombent sur les pas 1, 5, 8, 11 et 14 : c'est le rythme euclidien 5 sur 16. Avec 4 portes, on obtient quatre noires.
+
+### L'étoile
+L'étoile ne joue pas. C'est le centre de gravité : **tout se mesure par rapport à elle**.
+- **Les corps tournent autour d'elle.** Sur une orbite ovale, un corps va plus vite près de l'étoile et plus lentement loin d'elle (la deuxième loi de Kepler). D'où le rubato.
+- **Les portes sont des directions vues depuis l'étoile**, comme les heures d'un cadran : un corps joue quand il passe devant l'une d'elles.
+- **La distance à l'étoile peut donner la note.** Avec la source ORBIT, plus le corps est près, plus la note est aiguë.
+- **Les événements se passent par rapport à elle.** Une conjonction, c'est deux corps alignés avec l'étoile ; la comète agit en la frôlant.
+- **À l'écran, elle brille** avec le niveau de sortie.
+
+### Rond, puis ovale
+- **Une orbite ronde** : le corps tourne à vitesse constante et passe ses portes à intervalles réguliers. C'est exactement le rythme euclidien.
+- **Une orbite ovale** : il passe toujours le même nombre de portes en un tour de la même durée, donc la boucle reste calée sur la mesure. Mais il les passe vite du côté de l'étoile et lentement de l'autre. Les notes se resserrent puis s'espacent, comme un musicien qui presse puis retient : un rubato qui revient à chaque tour.
+- **Avec la précession**, l'ovale tourne lentement sur lui-même. Le moment où les notes se resserrent glisse alors peu à peu par rapport à la mesure, et la phrase change sans hasard.
+
+### Plusieurs corps
+Chaque piste a sa propre orbite. Avec des périodes différentes, les corps se retrouvent tous les N tours. Par exemple, un tour de 3 mesures et un tour de 4 mesures se réalignent toutes les 12 mesures. Ce sont les rapports que montre la carte de PERIOD (par exemple 3:4:6:8), et c'est le principe des systèmes réels de K4 SYSTEM.
+
+Le mouvement suit le tempo, le swing et l'horloge MIDI reçue. PLAY fait repartir tous les corps du haut.
 
 ### Ce que montre l'écran
 - **Les ellipses** : leur vraie forme et leur vraie orientation. Celle de la piste choisie est plus vive ; une piste sans porte est en pointillé.
@@ -269,7 +295,7 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 
 ## Points de vigilance
 
-- **La charge du processeur.** Sur le Mac, la bande, la HALL et Beads réunis placent les Mondes les plus lourds de Monades près de la limite que le firmware s'impose (85 %), peut-être au-dessus. Seule une mesure sur l'appareil le dira.
+- **La charge du processeur.** Comme pour Monades, **la limite de 85 % ne doit jamais être atteinte**, même dans le pire cas. Sur le Mac, la bande, la HALL et Beads réunis placent les Mondes les plus lourds de Monades trop près de cette limite. Seule une mesure sur l'appareil le dira.
 - **Si la charge ne tient pas, Rhizome renoncera à un effet plutôt que de risquer le FM-1.** La première candidate est la HALL : sa mémoire et son calcul serviraient à enrichir le delay ou à un effet plus léger.
 - En cas de surcharge, le firmware passe déjà de lui-même en mode économie, et la HALL en VINTAGE.
 

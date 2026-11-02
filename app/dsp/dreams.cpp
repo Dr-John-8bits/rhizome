@@ -52,7 +52,7 @@ static void reel_reset(); // Rhizome's tape echo (tape_echo.inc) holds the echo'
 static bool fx_active;
 static float fx_smooth,fx_highpass_in,fx_highpass_out;
 static void hall_reset(); // Rhizome's HALL (hall.inc)
-static void beads_reset(); // Rhizome's granular bus (beads_bus.inc)
+static void beads_reset(),beads_init(); // Rhizome's granular bus (beads_bus.inc)
 static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob value the coefficients were computed for
 // Monades: Rings chorus on the dry mix (4 KiB line), and Dattorro / Griesinger input diffusion before the room
 // (four allpasses, 1210 samples). Both are skipped entirely at 0.
@@ -656,7 +656,7 @@ static void quantum(float *lr,unsigned n) {
   for(unsigned k=0;k<n;k++){lr[2*k]=out[k];lr[2*k+1]=aux[k];}
  }
  const bool frozen=patch.freeze||orbit_comet_frozen(); // Rhizome: the comet can freeze the tape
- float bead_l[Q],bead_r[Q];beads_block(send,n,bead_l,bead_r,frozen); // Rhizome: Beads, on the grain sends
+ static float bead_l[Q],bead_r[Q];beads_block(send,n,bead_l,bead_r,frozen); // Rhizome: Beads, on the grain sends (static: off the audio stack)
  float fx_peak[3]={stats.fx_peak[0],stats.fx_peak[1],stats.fx_peak[2]},out_peak[2]={stats.out_peak[0],stats.out_peak[1]},limit_peak=stats.limit_peak;
  for(unsigned k=0;k<n;k++) {
   const float wet[2]={bead_l[k],bead_r[k]};
@@ -704,6 +704,7 @@ int md_orbit_gate_angles(const md_patch *p,int track,float *phi){
 float md_orbit_eccentric(float mean,float e){return orbit_E(mean,e);}
 float md_atan2(float y,float x){return orbit_atan2(y,x);}
 void md_init() {
+ beads_init(); // Rhizome: Beads is built once, here
  voices=reinterpret_cast<Voice*>(voices_raw);memset(voices_raw,0,sizeof voices_raw);
  memset(&stats,0,sizeof stats);memset(smooth,0,sizeof smooth);memset(dcx,0,sizeof dcx);memset(dcy,0,sizeof dcy);
  out_r=out_w=owed_n=0;memset(&routing,0,sizeof routing);clock_left=0;memset(chan_bend,0,sizeof chan_bend);for(int i=0;i<6;i++)in_chan[i]=out_chan[i]=i+1;
