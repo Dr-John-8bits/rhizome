@@ -22,7 +22,7 @@ def unpack(data):
 
 class Editor:
  patch_size=None # set from the device capability reply (cmd 7) before any transfer
- def __init__(self,port='Monades FM-1'):
+ def __init__(self,port='Rhizome FM-1'):
   self.i=mido.open_input(port);self.o=mido.open_output(port);self.seq=0;time.sleep(.6)
  def close(self):self.i.close();self.o.close()
  def call(self,c,p=()):
@@ -62,7 +62,7 @@ class Editor:
   return self.call(15,[kind,slot,track,action,*((b+bytes(24-len(b))) if action>=2 else b'')])
 
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('action',choices=['info','export','import']);p.add_argument('file',nargs='?');p.add_argument('--port',default='Monades FM-1');a=p.parse_args();d=Editor(a.port)
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('action',choices=['info','export','import']);p.add_argument('file',nargs='?');p.add_argument('--port',default='Rhizome FM-1');a=p.parse_args();d=Editor(a.port)
  try:
   cap=struct.unpack('<8I',d.call(7));assert cap[:2]==(1,7) and cap[2]>=1292;d.patch_size=cap[2] # the device states its patch size
   if a.action=='info':print(json.dumps(dict(protocol=cap[0],patch_bytes=cap[2],biomes=cap[4],sounds=cap[5]),indent=2))

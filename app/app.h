@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 #pragma once
 #include "plat.h"
-#define APP_NAME "MONADES"
+#define APP_NAME "RHIZOME"
 #define APP_SPLASH_RGB RGB(216,160,163)
 #define APP_BLOCK 256u /* 5.80 ms audio half; DSP tiles remain 64 frames. */
 /* USB audio: a render takes 70-80 % of its time (the FM-1 SYSTEM page, 29 October 2026), far over the ~40 % the

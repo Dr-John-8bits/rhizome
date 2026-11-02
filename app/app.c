@@ -232,7 +232,7 @@ static void md_draw_all(void) {
  if(dream_ui.help<0)md_space();
  cv_rect(0,0,240,39,MD_BG);cv_rect(10,38,220,1,MD_EDGE);cv_rect(10,38,28,1,col);
  cv_rect(0,224,240,16,MD_BG);
- cv_text(10,5,&FONT_B,"MONADES",MD_INK);
+ cv_text(10,5,&FONT_B,"RHIZOME",MD_INK);
  // Transport, in the usual symbols: a play triangle while the sequence runs (its dot lights on every beat), a stop square
  // when it does not. PLAY starts and stops; there is no pause on the FM-1.
  if(md_playing()){for(int r=0;r<9;r++)cv_rect(222,6+r,1+(r<5?r:8-r),1,dream_colors[2]);if(md_status()->step%4==0)cv_rect(232,9,3,3,MD_INK);}
@@ -249,7 +249,7 @@ static void md_draw_all(void) {
   // The fleet arrives from deep space and takes its formation around the star.
   {float e=progress>1?1:progress,arrive=1-(1-e)*(1-e);md_circle(120,100,(int)(2+4*arrive),MD_INK,1);
    md_fleet(120,100,30+(1-arrive)*24,progress*1.2f,md_state(),0);}
-  cv_text(120-text_w(&FONT_B,"MONADES")/2,158,&FONT_B,"MONADES",MD_INK);md_text(120-text_w(&FONT_XS,"FLASH DOG DUKE SILVER")/2,180,"FLASH DOG DUKE SILVER",col);
+  cv_text(120-text_w(&FONT_B,"RHIZOME")/2,158,&FONT_B,"RHIZOME",MD_INK);md_text(120-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT")/2,180,"WHEN DAY CHOKES THE NIGHT",col);
   md_text(120-text_w(&FONT_XS,"90 MONDES / 224 TONES")/2,200,"90 MONDES / 224 TONES",MD_DIM);
   cv_rect(32,220,(int)(176*progress),2,col);md_text(48,223,"ANY CONTROL TO BEGIN",MD_DIM);return;
  }
@@ -670,7 +670,7 @@ static void md_draw_all(void) {
   md_text(12,141,md_tone_name(p->tone_preset[dream_ui.track]),col);md_text(140,141,md_biome_family(p->biome_id),MD_DIM);
   const char *labels[]={"K1 DENSITY","K2 MOTION","K3 COLOUR","K4 SPACE"};for(i=0;i<4;i++)md_value(8+(i%2)*116,158+(i/2)*36,labels[i],p->macro[i]/10,dream_colors[i]);
  } else if(dream_ui.page==SYSTEM) {
-  md_text(10,48,"MONADES " APP_VERSION,MD_INK);md_text(238-text_w(&FONT_XS,"FLASH DOG DUKE SILVER"),48,"FLASH DOG DUKE SILVER",col);md_text(10,69,p->quality?"FULL  24 MODES / 4 GRAINS":"ECO / ADAPTIVE MODES / 2 GRAINS",col);
+  md_text(10,48,"RHIZOME " APP_VERSION,MD_INK);md_text(238-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT"),48,"WHEN DAY CHOKES THE NIGHT",col);md_text(10,69,p->quality?"FULL  24 MODES / 4 GRAINS":"ECO / ADAPTIVE MODES / 2 GRAINS",col);
   md_text(10,93,"LOAD / MAX %",MD_DIM);
 #ifdef PLAT_HOST
   md_text(139,93,"HOST ONLY",MD_INK);
@@ -1093,4 +1093,4 @@ int app_expect(const char *what,int *got) {
 void app_splash(void){for(unsigned y=0;y<240;y+=40){cv_begin(240,40,MD_BG);cv_oy=-(int)y;
  unsigned r=0x2545f491u;for(int k=0;k<70;k++){r^=r<<13;r^=r>>17;r^=r<<5;cv_pset((int)(r%240),(int)((r>>8)%240),k%3?MD_EDGE:MD_DIM);}
  md_circle(120,96,4,MD_INK,1);for(int j=0;j<6;j++){float a=j*1.04719755f-.52f;md_ship(120+fm_cosf(a)*30,96+fm_sinf(a)*30,a+1.5707963f,7,dream_colors[j],1,3,dream_colors[j]);}
- cv_text(120-text_w(&FONT_B,"MONADES")/2,160,&FONT_B,"MONADES",MD_INK);md_text(120-text_w(&FONT_XS,"FLASH DOG DUKE SILVER")/2,186,"FLASH DOG DUKE SILVER",MD_DIM);cv_blit(0,y);}}
+ cv_text(120-text_w(&FONT_B,"RHIZOME")/2,160,&FONT_B,"RHIZOME",MD_INK);md_text(120-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT")/2,186,"WHEN DAY CHOKES THE NIGHT",MD_DIM);cv_blit(0,y);}}

@@ -1,7 +1,7 @@
-name = "Monades"
-id_prefix = "FM-1_714"
-usb_manufacturer = "Monades Project"
-usb_product = "Monades FM-1"
+name = "Rhizome"
+id_prefix = "FM-1_968"
+usb_manufacturer = "Rhizome Project"
+usb_product = "Rhizome FM-1"
 ble = false
 backup = true
 usb_audio_in = true
