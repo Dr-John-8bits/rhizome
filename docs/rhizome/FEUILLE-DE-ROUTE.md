@@ -236,7 +236,7 @@ Ce qu'on sait :
 | 3 ou 4 voix Plaits | ✅ probable : 2 à 9 % par voix pour la plupart des moteurs |
 | Moteurs Plaits lourds (FM 2 opérateurs, Particle, String, Modal) | 🟡 11 à 20 % par voix : un ou deux au plus |
 | Rings polyphonique | 🔴 trop lourd : 32 à 57 % pour une seule partie. Seul RINGS STRING à une voix passe (environ 12 %) |
-| Granulaire Beads réduit | 🟡 pas encore mesuré : le plus gros risque |
+| Granulaire Beads | ✅ probable : 8 à 21 % selon le nombre de grains et le média |
 | Mode spectral de Clouds | 🔴 sans doute trop lourd |
 | Second cœur (Beads sur un cœur, le reste sur l'autre) | 🟡 faisable d'après X0X et les autres, à intégrer dans fm1-base |
 
@@ -281,14 +281,28 @@ Ce qu'on sait :
 | HALL à 44,1 kHz (stéréo) | 2,6 % |
 | TAPE DELAY, prototype (22 kHz, μ-law, 3 têtes, wow, flutter, saturation) | 4,1 % |
 
+**Beads** (mesuré le 2 novembre 2026, avec `--beads` : une copie de `pichenettes/eurorack`, compilée avec ses 32 grains d'origine puis réduite à 8 ; mono, une dent de scie à l'entrée) :
+
+| Média de Beads | 32 grains | 8 grains |
+|---|---|---|
+| DIGITAL (16 bits) | 13,8 % | 8,3 % |
+| VINTAGE (32 kHz, 12 bits) | 21,2 % | 11,2 % |
+| CLEAN TAPE (24 kHz, 12 bits) | 19,9 % | 15,0 % |
+| DIRTY TAPE (24 kHz, 8 bits μ-law) | 19,3 % | 12,1 % |
+
+- La densité des grains (0,65 ou 0,9) ne change presque rien : c'est le nombre de grains possibles qui compte.
+- Les médias « bande » coûtent plus que DIGITAL : ils convertissent la fréquence d'échantillonnage dans les deux sens, avec des filtres de 48 points.
+- **Même Beads complet (32 grains) tient** : au plus 21 %.
+
 **Ce que ça donne pour Rhizome**, avec par exemple STRING MACHINE, WAVETABLE, SIX-OP et CHORDS :
-- les quatre voix : environ 24 % ;
+- les quatre voix : environ 22 % ;
 - le HALL, la bande et les orbites : environ 8 % ;
+- Beads : 8 à 21 % ;
 - le mélange, les filtres et les LFO : quelques % de plus.
 
-On arrive autour de 35 à 40 %. Il reste donc **environ 45 % pour Beads** sous le plafond de 85 % que Monades s'impose.
+**Au total, environ 45 à 55 %**, sous le plafond de 85 % que Monades s'impose. Il reste de la marge pour une voix lourde (PARTICLE, MODAL) ou un Rings à une voix. Le second cœur n'est pas nécessaire au départ.
 
-**Beads n'est pas encore mesuré.** Le banc sait le faire (`--beads` : chemin d'une copie de `pichenettes/eurorack`, compilé avec ses 32 grains puis avec 8). Mais compiler et lancer du code téléchargé demande une autorisation explicite.
+Pour Beads sur le FM-1, il faudra : un `abs` entier dans `app/compat`, retirer un `printf` de débogage (actif sous `TEST`, que le FM-1 compile aussi), et réduire ses tampons (768 Ko sur le module) à la mémoire du FM-1. `std::partial_sort` est déjà ajouté.
 
 **Une découverte en route** : les autres moteurs de Plaits 1.2 et Rings demandent quelques fonctions que le FM-1 n'avait pas (`std::copy`, `std::sort`, `std::rotate`, `fabs` en simple précision). Elles sont ajoutées dans `app/compat`, en version courte et sans `double`.
 
@@ -302,7 +316,7 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 
 ## Ordre conseillé
 0. **Maquette jouable de l'écran ORBIT dans le navigateur** (240 × 240, avec le son) : valider la lisibilité et l'envie de jouer avant d'écrire le firmware. **Faite le 2 novembre 2026** : `docs/rhizome/maquette/orbite.html`, publiée sur [claude.ai](https://claude.ai/artifact/2Q3b1BXKckoXwbATJbcFHZ) (privée). La mécanique est la vraie : équation de Kepler, portes euclidiennes, précession, lunes, comète, conjonctions. Le son n'est qu'une esquisse dans le navigateur. Six systèmes : Kepler-223, Io-Europe-Ganymède, TRAPPIST-1, Pluton-Neptune, Euclidien, Dérive.
-1. **Banc d'essai du calcul** : chaque bloc mesuré sur le Mac, puis sur le FM-1. Il décide du nombre de voix et de la taille de Beads. **Sur le Mac, le 2 novembre 2026, sans Beads** : voir « Banc d'essai sur le Mac ». Restent Beads, puis la confirmation sur le FM-1.
+1. **Banc d'essai du calcul** : chaque bloc mesuré sur le Mac, puis sur le FM-1. Il décide du nombre de voix et de la taille de Beads. **Sur le Mac, le 2 novembre 2026, Beads compris** : voir « Banc d'essai sur le Mac ». Reste la confirmation sur le FM-1.
 2. **Création du dépôt** à partir de Monades. **Fait le 2 novembre 2026** : dépôt privé `Dr-John-8bits/rhizome`, identité `FM-1_968`, noms USB et écrans Rhizome. Le préfixe `FM-1_976` prévu au départ était déjà pris par LSDj Burrito ; `FM-1_968` renvoie à *Différence et répétition* (Deleuze, 1968). Le grand nettoyage (retirer les 91 Mondes, les écrans et le site de Monades) se fera au moment où le moteur de Rhizome les remplacera : le moteur actuel en a besoin pour tourner.
 3. **Séquenceur orbital** dans le simulateur, puis sur le FM-1.
 4. **Delay à bande** et son animation.

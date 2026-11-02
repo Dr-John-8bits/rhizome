@@ -81,7 +81,9 @@ def main():
             wt.write_text(wt.read_text().replace('GranularPlayer<WavetableGrain, 32>', f'GranularPlayer<WavetableGrain, {grains}>'))
             bsrc = sorted((root / 'beads' / 'dsp').glob('*.cc')) + [root / 'beads' / 'resources.cc']
             extra = (f'-I{root}', '-DRHIZOME_BEADS')
-            builds.append((f'rhizome-bench-beads{grains}', compile_all(bsrc, f'beads{grains}', extra), extra))
+            # Beads prints debug lines under TEST and calls abs() on integers: neither exists on the FM-1 yet
+            beads_only = ('-include', 'stdlib.h', '-include', 'stdio.h')
+            builds.append((f'rhizome-bench-beads{grains}', compile_all(bsrc, f'beads{grains}', extra + beads_only), extra))
 
     results = []
     for i, (name, extra_objs, extra) in enumerate(builds):
