@@ -19,3 +19,7 @@
 static inline float ceilf(float x){return -fm_floorf(-x);}
 static inline float fminf(float a,float b){return a<b?a:b;}
 static inline float fmaxf(float a,float b){return a>b?a:b;}
+#ifdef __cplusplus
+/* Rhizome: Rings calls fabs on floats; keep it single precision (no double on the FM-1) */
+static inline float fabs(float x){return fm_fabsf(x);}
+#endif

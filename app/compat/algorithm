@@ -5,4 +5,9 @@ template<class T> inline const T& min(const T&a,const T&b){return b<a?b:a;}
 template<class T> inline const T& max(const T&a,const T&b){return a<b?b:a;}
 template<class I,class T> inline void fill(I a,I b,const T&v){while(a!=b)*a++=v;}
 template<class T> inline void swap(T&a,T&b){T t=a;a=b;b=t;}
+// Rhizome: what the other Plaits 1.2 and Rings engines use (small arrays: insertion sort is enough)
+template<class I,class O> inline O copy(I a,I b,O d){while(a!=b)*d++=*a++;return d;}
+template<class I> inline void sort(I a,I b){for(I i=a;i!=b;++i)for(I j=i;j!=a&&*j<*(j-1);--j)swap(*j,*(j-1));}
+template<class I> inline void reverse(I a,I b){while(a!=b&&a!=--b)swap(*a++,*b);}
+template<class I> inline I rotate(I a,I m,I b){if(a==m)return b;if(m==b)return a;reverse(a,m);reverse(m,b);reverse(a,b);return a+(b-m);}
 }

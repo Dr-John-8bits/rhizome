@@ -7,7 +7,7 @@ Firmware pour le second M-VAVE FM-1, au service de **When Day Chokes The Night**
 
 ## Le nom
 **Rhizome**, d'après Deleuze et Guattari (*Rhizome*, 1976, repris en introduction de *Mille Plateaux*, 1980) : un réseau sans centre ni hiérarchie, qui pousse par tous les bouts. Le grain, l'écho et la réverbe font la même chose au son : ils le prolongent dans toutes les directions.
-- Préfixe firmware proposé : `FM-1_976` (Monades : `FM-1_714`, Mutable Dreams : `FM-1_710`). À vérifier : qu'aucun firmware ne porte déjà ce nom ou ce préfixe. Le 2 novembre 2026, aucun firmware « Rhizome » n'apparaît dans la liste du Firmware Hub. La liste de mutant.cloud ne s'est pas chargée.
+- Préfixe firmware : `FM-1_968`, d'après *Différence et répétition* (Deleuze, 1968). Le premier choix, `FM-1_976`, était déjà pris par LSDj Burrito. `FM-1_968` n'apparaît ni dans les catalogues de firmwares FM-1 ni dans une recherche web (2 novembre 2026) : à revérifier avant une publication. Monades : `FM-1_714`, Mutable Dreams : `FM-1_710`.
 - Identité USB : « Rhizome Project » / « Rhizome FM-1 ».
 
 ## Le rôle
@@ -227,19 +227,70 @@ Ce qu'on sait :
 - **Clouds** tourne sur un Cortex-M4 à 168 MHz à 32 kHz, et ajuste lui-même son nombre de grains à la charge.
 - **Beads** tourne sur un Cortex-M7 à 480 MHz : c'est le plus lourd. Il faudra le faire tourner comme Clouds (22 ou 32 kHz, mono, moins de grains).
 
-| Élément | Verdict |
+| Élément | Verdict (après le banc d'essai sur le Mac) |
 |---|---|
-| Séquenceur orbital, MIDI, horloge, USB audio | ✅ sûr (calcul négligeable ou déjà dans Monades) |
-| Delay à bande | ✅ sûr (lecture interpolée, filtre, saturation) |
-| HALL vintage à 22 kHz | ✅ probable |
-| HALL à 44,1 kHz | 🟡 à mesurer |
-| 3 ou 4 voix Plaits | 🟡 à mesurer selon les moteurs (Six-op et Particle sont les plus lourds) |
-| Rings polyphonique | 🟡 à mesurer |
-| Granulaire Beads réduit | 🟡 à mesurer : le plus gros risque |
+| Séquenceur orbital, MIDI, horloge, USB audio | ✅ sûr (orbites : environ 1 %) |
+| Delay à bande | ✅ sûr (prototype : environ 4 %) |
+| HALL à 44,1 kHz | ✅ probable (environ 2,6 %) |
+| HALL vintage à 22 kHz | ✅ probable (environ 1,3 %) |
+| 3 ou 4 voix Plaits | ✅ probable : 2 à 9 % par voix pour la plupart des moteurs |
+| Moteurs Plaits lourds (FM 2 opérateurs, Particle, String, Modal) | 🟡 11 à 20 % par voix : un ou deux au plus |
+| Rings polyphonique | 🔴 trop lourd : 32 à 57 % pour une seule partie. Seul RINGS STRING à une voix passe (environ 12 %) |
+| Granulaire Beads réduit | 🟡 pas encore mesuré : le plus gros risque |
 | Mode spectral de Clouds | 🔴 sans doute trop lourd |
 | Second cœur (Beads sur un cœur, le reste sur l'autre) | 🟡 faisable d'après X0X et les autres, à intégrer dans fm1-base |
 
-**Comment mesurer avant d'écrire Rhizome** : un banc d'essai qui fait tourner chaque bloc seul (une voix de chaque moteur, le HALL, Beads réduit) et affiche la charge sur la page SYSTEM, d'abord sur le Mac pour comparer à Monades, puis sur le FM-1. La charge connue de Monades (Monde 87 CLOUDEE : 69 %) sert d'étalon.
+### Banc d'essai sur le Mac (2 novembre 2026)
+`python3 tools/bench_rhizome.py` compile `tests/rhizome_bench.cpp` avec les réglages du DSP du FM-1 :
+- même optimisation, les maths rapides de `app/compat`, et la vectorisation automatique coupée, car le FM-1 n'a pas d'unité SIMD ;
+- chaque bloc rend une seconde de son à 44,1 kHz, par quanta de 64 échantillons, et on garde le meilleur temps de 5 passages de 20 s ;
+- le temps est converti en charge du FM-1 grâce à deux Mondes de Monades dont la charge a été lue sur l'appareil (87 CLOUDEE 69 %, 89 ALCHIMISTE 76 %, en ECO).
+
+**Les deux étalons concordent à 10 % près** : avec l'un seul, CLOUDEE donnerait 66 % et ALCHIMISTE 80 %. Les chiffres ci-dessous sont donc des ordres de grandeur, à ±10 % au moins. Ils seront confirmés sur le FM-1.
+
+| Bloc | Charge estimée sur le FM-1 |
+|---|---|
+| **Voix Plaits** (une voix, une note toutes les 0,5 s) | |
+| CHIPTUNE (1.2) | 1,8 % |
+| WAVESHAPING | 3,2 % |
+| CHORDS | 3,6 % |
+| VA (déjà dans Monades) | 3,9 % |
+| NOISE | 4,0 % |
+| VA-VCF (1.2) | 5,0 % |
+| WAVETABLE | 5,5 % |
+| ADDITIVE (déjà dans Monades) | 6,0 % |
+| STRING MACHINE (1.2) | 6,3 % |
+| PHASE DISTORTION (1.2) | 6,3 % |
+| WAVE TERRAIN (1.2) | 6,4 % |
+| GRANULAR FORMANT | 7,5 % |
+| SIX-OP FM, sons DX7 (1.2) | 8,0 % |
+| SWARM | 8,9 % |
+| MODAL | 11,2 % |
+| STRING (inharmonique) | 14,1 % |
+| PARTICLE | 19,4 % |
+| FM 2 opérateurs (déjà dans Monades) | 19,6 % |
+| **Rings** (une partie complète) | |
+| RINGS STRING, 1 voix | 11,6 % |
+| RINGS SYMPATHETIC, 2 voix | 31,9 % |
+| RINGS STRING, 4 voix | 43,3 % |
+| RINGS MODAL, 4 voix | 51,0 % |
+| RINGS MODAL, 1 voix (plus de modes par voix) | 56,5 % |
+| **Effets et séquenceur** | |
+| ORBITS, 4 corps (équation de Kepler à chaque quantum) | 1,3 % |
+| HALL vintage à 22 kHz (stéréo) | 1,3 % |
+| HALL à 44,1 kHz (stéréo) | 2,6 % |
+| TAPE DELAY, prototype (22 kHz, μ-law, 3 têtes, wow, flutter, saturation) | 4,1 % |
+
+**Ce que ça donne pour Rhizome**, avec par exemple STRING MACHINE, WAVETABLE, SIX-OP et CHORDS :
+- les quatre voix : environ 24 % ;
+- le HALL, la bande et les orbites : environ 8 % ;
+- le mélange, les filtres et les LFO : quelques % de plus.
+
+On arrive autour de 35 à 40 %. Il reste donc **environ 45 % pour Beads** sous le plafond de 85 % que Monades s'impose.
+
+**Beads n'est pas encore mesuré.** Le banc sait le faire (`--beads` : chemin d'une copie de `pichenettes/eurorack`, compilé avec ses 32 grains puis avec 8). Mais compiler et lancer du code téléchargé demande une autorisation explicite.
+
+**Une découverte en route** : les autres moteurs de Plaits 1.2 et Rings demandent quelques fonctions que le FM-1 n'avait pas (`std::copy`, `std::sort`, `std::rotate`, `fabs` en simple précision). Elles sont ajoutées dans `app/compat`, en version courte et sans `double`.
 
 ### Le risque connu de la plateforme
 D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures 16 bits peuvent corrompre un registre sur ce processeur. Le code en virgule flottante (Plaits, Rings, Beads le sont surtout) n'est pas concerné. Il faudra quand même chercher ces motifs dans le désassemblage du code de Rhizome.
@@ -251,8 +302,8 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 
 ## Ordre conseillé
 0. **Maquette jouable de l'écran ORBIT dans le navigateur** (240 × 240, avec le son) : valider la lisibilité et l'envie de jouer avant d'écrire le firmware. **Faite le 2 novembre 2026** : `docs/rhizome/maquette/orbite.html`, publiée sur [claude.ai](https://claude.ai/artifact/2Q3b1BXKckoXwbATJbcFHZ) (privée). La mécanique est la vraie : équation de Kepler, portes euclidiennes, précession, lunes, comète, conjonctions. Le son n'est qu'une esquisse dans le navigateur. Six systèmes : Kepler-223, Io-Europe-Ganymède, TRAPPIST-1, Pluton-Neptune, Euclidien, Dérive.
-1. **Banc d'essai du calcul** : chaque bloc mesuré sur le Mac, puis sur le FM-1. Il décide du nombre de voix et de la taille de Beads.
-2. **Création du dépôt** à partir de Monades, nettoyé (sans les Mondes ni les écrans propres à Monades).
+1. **Banc d'essai du calcul** : chaque bloc mesuré sur le Mac, puis sur le FM-1. Il décide du nombre de voix et de la taille de Beads. **Sur le Mac, le 2 novembre 2026, sans Beads** : voir « Banc d'essai sur le Mac ». Restent Beads, puis la confirmation sur le FM-1.
+2. **Création du dépôt** à partir de Monades. **Fait le 2 novembre 2026** : dépôt privé `Dr-John-8bits/rhizome`, identité `FM-1_968`, noms USB et écrans Rhizome. Le préfixe `FM-1_976` prévu au départ était déjà pris par LSDj Burrito ; `FM-1_968` renvoie à *Différence et répétition* (Deleuze, 1968). Le grand nettoyage (retirer les 91 Mondes, les écrans et le site de Monades) se fera au moment où le moteur de Rhizome les remplacera : le moteur actuel en a besoin pour tourner.
 3. **Séquenceur orbital** dans le simulateur, puis sur le FM-1.
 4. **Delay à bande** et son animation.
 5. **Réverbe HALL**.
