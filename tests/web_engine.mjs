@@ -19,7 +19,8 @@ command(112,0);command(111,15);command(114,0);render(2);
 assert(f.ex.web_store_len(18)>0);
 const saved=[...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)];
 command(45,160);render(2);command(114,0);render(2); // arms overwrite, leaves old slot
-command(113,0);render(2);assert.deepEqual([...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)],saved);
+command(113,0);render(2);assert.notDeepEqual([...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)],saved); // unsaved edits: the load waits for SEL (Monades 0.1.3)
+f.ex.web_buttons(2);render(40);f.ex.web_buttons(0);render(40);assert.deepEqual([...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)],saved); // SEL: discard the edits and load
 command(112,1);command(111,63);command(114,0);render(2);assert(f.ex.web_store_len(22)>0);
 const stores={};for(let i=0;i<f.ex.web_nobj();i++){const n=f.ex.web_store_len(i);if(n>0)stores[i]=[...new Uint8Array(f.mem.buffer,f.ex.web_store(i),n)];}
 const g=new Processor();await g.onMessage({type:'load',wasm:fs.readFileSync(root+'/app/build/wasm/dreams.wasm'),master:2400,store:stores});g.ex.dream_command(111,0,15);g.ex.dream_command(113,0,0);

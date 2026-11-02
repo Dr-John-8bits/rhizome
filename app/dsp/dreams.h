@@ -19,12 +19,12 @@ enum { MD_MODEL, MD_TONE, MD_HARM, MD_DECAY, MD_LEVEL, MD_SEND, MD_HITS,
  MD_MORPH_TO,MD_MORPH,MD_MORPH_BARS,MD_MORPH_SCOPE,MD_MORPH_KEEP,
  MD_DRIFT_SLOW,MD_DRIFT_AMOUNT,MD_DRIFT_VOYAGE,MD_DRIFT_SCOPE,MD_DRIFT_HOME,
  MD_OVERLOAD,
- MD_ORBIT_GATES,MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_PHASE,MD_ORBIT_PITCH,MD_ORBIT_PREC,MD_ORBIT_PERT,
+ MD_ORBIT_GATES=120,MD_ORBIT_PERIOD,MD_ORBIT_ECC,MD_ORBIT_PHASE,MD_ORBIT_PITCH,MD_ORBIT_PREC,MD_ORBIT_PERT,
  MD_ORBIT_MOONS,MD_ORBIT_MOON_SPIN,MD_ORBIT_MOON_INTERVAL,MD_ORBIT_MOON_LEVEL,
  MD_ORBIT_COMET,MD_ORBIT_COMET_EVENT,MD_ORBIT_COMET_AMOUNT,MD_ORBIT_CONJ,MD_ORBIT_SYSTEM,
  MD_TAPE_HEADS,MD_TAPE_WOW,MD_TAPE_DRIVE,MD_TAPE_AGE,MD_TAPE_TRANSPORT,
  MD_HALL_SIZE,MD_HALL_PREDELAY,MD_HALL_BASS,MD_HALL_MOD,MD_HALL_VINTAGE,
- MD_BEADS_SHAPE,MD_BEADS_DENSITY,MD_BEADS_RANDOM,MD_BEADS_MEDIA, /* Rhizome: after OVERLOAD, so the earlier numbers stay */
+ MD_BEADS_SHAPE,MD_BEADS_DENSITY,MD_BEADS_RANDOM,MD_BEADS_MEDIA, /* Rhizome: from 120, after OVERLOAD (the earlier numbers stay) and past 100..116, which the browser and the editor keep for their own codes (banks, preferences) */
  MD_COMMAND_COUNT }; /* OVERLOAD: the audio ran late; FULL drops to ECO, ECO sheds chorus and room diffusion until the next Monde */ /* CLEAR_PHRASE: all 16 steps rest, cursor on step 1 */ /* LFO commands: track argument = track + 6 * slot (A, B) */
 typedef struct { int32_t model,tone,harm,decay,level,send,hits,length,rotate,prob,note,pan,mute,speed,attack,ratchet,accent,shape,cutoff,resonance,filter,breathe; } md_track;
 typedef struct { int32_t delay_send,reverb_send,bass_mode,pattern,glide,marbles,tides,tides_rate,warps,edit_step; int32_t notes[16]; } md_extension;

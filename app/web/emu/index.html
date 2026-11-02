@@ -91,9 +91,9 @@ kbd { font: 600 .85em ui-monospace, Menlo, monospace; background: var(--card); b
 </head>
 <body>
 <header>
-  <div class="crew"><a href="https://thomasclaissethcl-blip.github.io/FDDS/">Flash Dog Duke Silver</a></div>
+  <div class="crew"><a href="https://dr-john-8bits.github.io/rhizome/">When Day Chokes The Night</a></div>
   <h1>{{NAME}} · simulateur</h1>
-  <nav><a href="https://dr-john-8bits.github.io/monades/">Accueil</a><a href="https://dr-john-8bits.github.io/monades/manuel/">Mode d'emploi</a><a href="https://dr-john-8bits.github.io/monades/#installer">Installer</a><a href="https://github.com/Dr-John-8bits/monades">Sources</a></nav>
+  <nav><a href="https://dr-john-8bits.github.io/rhizome/">Accueil</a><a href="https://dr-john-8bits.github.io/rhizome/manuel/">Mode d'emploi</a><a href="https://github.com/Dr-John-8bits/rhizome">Sources</a></nav>
   <p>Le firmware {{NAME}} complet, dans le navigateur : le même code que sur le FM-1, le même écran, le même son. Rien n'est envoyé au FM-1.</p>
 </header>
 <main>
@@ -138,7 +138,7 @@ kbd { font: 600 .85em ui-monospace, Menlo, monospace; background: var(--card); b
 <section class="help" aria-label="Guide">
   <div><h2>Le panneau</h2><p>Clique sur les boutons et les touches. Les molettes&nbsp;: clic puis glisser vers le haut ou le bas, ou flèches du clavier. Maintenir un bouton affiche son aide, comme sur le FM-1. En jaune sous un bouton&nbsp;: ce qu'il fait dans Monades.</p></div>
   <div><h2>Le clavier de l'ordinateur</h2><ul><li>Touches blanches&nbsp;: rangée du haut puis rangée du milieu des lettres.</li><li>Touches noires&nbsp;: rangée des chiffres.</li><li>P&nbsp;: PLAY · O&nbsp;: REC · Échap&nbsp;: HOME · les deux premières lettres de la rangée du bas (W / X en AZERTY, Z / X en QWERTY)&nbsp;: octave.</li><li>Flèches haut / bas&nbsp;: SELECT (piste).</li></ul></div>
-  <div><h2>Les pages</h2><p>Toutes les pages du FM-1, avec les mêmes boutons&nbsp;: HOME, EDIT, SEQ, FX, GLO. Le détail de chaque page est dans le <a href="https://dr-john-8bits.github.io/monades/manuel/">mode d'emploi</a>.</p></div>
+  <div><h2>Les pages</h2><p>Toutes les pages du FM-1, avec les mêmes boutons&nbsp;: HOME, EDIT, SEQ, FX, GLO. Le détail de chaque page est dans le <a href="https://dr-john-8bits.github.io/rhizome/manuel/">mode d'emploi</a>.</p></div>
   <div><h2>Les sauvegardes</h2><p>SAVE garde le Monde et les banques dans ce navigateur, à part du FM-1. «&nbsp;Réglages d'usine&nbsp;» les efface.</p></div>
 </section>
 <!-- what the screen says, for the computer's screen reader -->
@@ -194,7 +194,7 @@ knob(105, 205, 24, "PRESETS", ENC.PRESETS);
 knob(215, 205, 24, "ALGORITHM", ENC.ALGORITHM);
 for (let i = 0; i < 4; i++) knob(610 + i * 104, 100, 22, `KNOB${i + 1}`, ENC[`KNOB${i + 1}`], `KNOB ${i + 1}`);
 
-// The FM-1 prints the stock firmware's names; under them, in amber, what Monades does with the button.
+// The FM-1 prints the stock firmware's names; under them, in amber, what Monades (and Rhizome) does with the button.
 const HINTS = { SEL: "MUTE", ENV: "UNDO", LFO: "FREEZE", ARP: "LOCK", REC: "DICE" };
 const buttons = {};
 function button(x, y, w, h, label, two) {
