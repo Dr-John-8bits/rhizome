@@ -53,3 +53,6 @@ En route, trois corrections :
 
 ## Deuxième compilation (3 novembre 2026)
 Avec l'accueil et les 12 Mondes de Rhizome. Les mêmes contrôles passent. L'image tombe à **434 232 octets** (−127 488) : il reste 168 Ko de flash. RAM 85 896 sur 98 304, pool 276 852 sur 344 064. Le paquet `rhizome-0.0.1.fwsc` garde sa taille (610 136 octets, complété à la taille fixe).
+
+## Troisième compilation (3 novembre 2026)
+Avec les huit voix de Plaits à la place de celles de Monades. Les mêmes contrôles passent. L'image fait **475 160 octets** : il reste 127 Ko de flash. La RAM descend à **77 512 octets** sur 98 304 (Elements et Rings retirés). Le pool monte à **311 564** sur 344 064 : il reste 32 Ko, dont 8 à garder libres. Le paquet est copié dans `M-VAVE FM1/flash/rhizome-0.0.1-voix.fwsc`, c'est celui à installer.
