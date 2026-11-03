@@ -3,33 +3,20 @@
 #include <cstdio>
 #include <cmath>
 #include <cstring>
+#include <cstddef>
 #include <cassert>
 #include <cstdlib>
 #include <chrono>
 #include <initializer_list>
 #include <new>
-#include "plaits/dsp/engine/fm_engine.h"
-#include "plaits/dsp/engine/virtual_analog_engine.h"
-#include "plaits/dsp/engine/additive_engine.h"
 static float out[256];
 // Rhizome: its first Monde plays orbits through the effects; the tests below want Monades' first Monde: euclidean
 // tracks, all unmuted, the echo and the room returned at zero.
 static void no_orbits(md_patch &p){for(int i=0;i<6;i++){p.orbit[i].gates=0;p.track[i].mute=0;}p.fx_level=p.room_diffusion=p.chorus=p.send_hp=0;}
 static void render(unsigned blocks){for(unsigned i=0;i<blocks;i++){md_render(out,128);for(float x:out)if(!std::isfinite(x)||fabsf(x)>=1.0f){fprintf(stderr,"BAD OUTPUT %.9g frames %u nonfinite %u\n",x,md_status()->frames,md_status()->nonfinite);fflush(stderr);exit(2);}}}
 static unsigned test_hash(){md_init();md_command(MD_SCENE,0,1);md_command(MD_PLAY,0,1);unsigned h=2166136261u;for(int i=0;i<1500;i++){md_render(out,128);for(float x:out){unsigned u;memcpy(&u,&x,4);h=(h^u)*16777619u;}}return h;}
-template<class E> static void aux_equivalence(){
- alignas(E) unsigned char aa[sizeof(E)]={},bb[sizeof(E)]={};float ma[80]={},mb[80]={};
- E *a=new(aa)E(),*b=new(bb)E();stmlib::BufferAllocator pa(ma,sizeof ma),pb(mb,sizeof mb);a->Init(&pa);b->Init(&pb);a->Reset();b->Reset();
- for(int k=0;k<512;k++){
-  float x[32]={},y[32]={},aux[32]={};unsigned n=1+k%32;bool done=false;
-  plaits::EngineParameters par={1,36.0f+(k%60),(k%101)*.0099f,((k*7)%101)*.0099f,((k*13)%101)*.0099f,.8f};
-  a->Render(par,x,aux,n,&done);b->Render(par,y,nullptr,n,&done);
-  assert(!memcmp(x,y,n*sizeof(float)));
- }
-}
 int main(){
  setvbuf(stdout,nullptr,_IONBF,0);
- aux_equivalence<plaits::FMEngine>();aux_equivalence<plaits::VirtualAnalogEngine>();aux_equivalence<plaits::AdditiveEngine>();puts("PASS unused AUX removal: bit-identical main output for FM/VA/Additive over 512 parameter blocks each");
  for(unsigned l=1;l<=32;l++)for(unsigned h=0;h<=l;h++)for(unsigned r=0;r<l;r++){unsigned count=0;for(unsigned s=0;s<l;s++)count+=md_hit(s,h,l,r);assert(count==h);}puts("PASS Euclidean hit counts / all lengths and rotations");
  assert(test_hash()==test_hash());puts("PASS deterministic restart / identical audio hash");
  md_init();md_patch p=*md_state();assert(md_validate(&p));p.track[0].length=0;assert(!md_load(&p));p=*md_state();p.feedback=999999;assert(!md_load(&p));puts("PASS corrupted patch rejected");
@@ -48,19 +35,21 @@ int main(){
  // Old v1 data remains readable, with explicit neutral defaults for new features.
  struct OldPatch{uint32_t magic,version,seed;int32_t macro[4],tempo,locked,freeze,grain_size,grain_pos,feedback,quality;int32_t tracks[6][14];}old={};
  md_init();p=*md_state();no_orbits(p);memcpy(&old,&p,56);old.version=1;for(int i=0;i<6;i++)memcpy(old.tracks[i],&p.track[i],56);
- assert(md_import(&old,sizeof old));assert(md_state()->version==11&&md_state()->track[5].ratchet==1);assert(md_state()->duck_source==-1);old.tracks[0][7]=0;assert(!md_import(&old,sizeof old));
+ assert(md_import(&old,sizeof old));assert(md_state()->version==12&&md_state()->track[5].ratchet==1);assert(md_state()->duck_source==-1);old.tracks[0][7]=0;assert(!md_import(&old,sizeof old));
  puts("PASS v1 patch migration and corrupt legacy rejection");
  // Import the exact v2 layout, preserving its parameter values and migration shape.
  struct V2Patch{uint32_t magic,version,seed;int32_t head[11];int32_t tracks[6][17];int32_t globals[9];}v2={};
  md_init();p=*md_state();no_orbits(p);memcpy(&v2,&p,56);v2.version=2;memcpy(v2.globals,&p.root,36);
  for(int i=0;i<6;i++){memcpy(v2.tracks[i],&p.track[i],68);v2.tracks[i][0]=3;v2.tracks[i][3]=777;}
- assert(md_import(&v2,sizeof v2));assert(md_state()->track[5].shape==777&&md_state()->track[5].decay==777&&md_state()->version==11);
+ assert(md_import(&v2,sizeof v2));assert(md_state()->track[5].shape==777&&md_state()->track[5].decay==777&&md_state()->version==12);
  v2.tracks[0][0]=99;assert(!md_import(&v2,sizeof v2));puts("PASS v2 patch migration / corrupt model rejection");
 
  // Exact v3 prefix is preserved; unknown names remain explicitly custom.
  md_init();p=*md_state();no_orbits(p);unsigned char v3[620];memcpy(v3,&p,620);((uint32_t*)v3)[1]=3;
- assert(md_import(v3,sizeof v3));assert(md_state()->version==11&&md_state()->biome_id==-1&&md_state()->tone_preset[0]==-1);
- assert(!memcmp((const unsigned char*)md_state()+8,v3+8,612));puts("PASS v3 migration preserves all 153 parameter words / marks custom names");
+ assert(md_import(v3,sizeof v3));assert(md_state()->version==12&&md_state()->biome_id==-1&&md_state()->tone_preset[0]==-1);
+ {unsigned char want[620];memcpy(want,v3,620);static const int nearest[12]={MD_FORMANT,MD_SWARM,MD_SWARM,MD_SIXOP,MD_PD,MD_WAVETABLE,MD_WAVETABLE,MD_CHORDS,MD_TERRAIN,MD_SIXOP,MD_STRINGS,MD_WAVETABLE};
+  for(int i=0;i<6;i++){int32_t *m=(int32_t*)(want+offsetof(md_patch,track)+i*sizeof(md_track));*m=nearest[*m];} // Rhizome: Monades' voices become the nearest of Rhizome's
+  assert(!memcmp((const unsigned char*)md_state()+8,want+8,612));}puts("PASS v3 migration preserves all 153 parameter words, voices mapped to Rhizome's / marks custom names");
  // Every factory Biome must be valid, audible and genuinely different; Blank stays silent even after frozen tape.
  unsigned biome_hash[MD_BIOMES]={};
  for(int id=0;id<MD_BIOMES;id++){
@@ -80,7 +69,7 @@ int main(){
   for(int b=0;b<2757;b++){md_render(out,128);for(float x:out){assert(std::isfinite(x));energy+=x*x;}}
   if(energy<=1e-6){fprintf(stderr,"Silent preset %d %s energy %g\n",id,md_tone_name(id),energy);return 2;}
  }
- puts("PASS all 224 tone presets audible / 8 seconds each; rhythm, notes, mix and mute preserved");
+ puts("PASS all 128 tone presets audible / 8 seconds each; rhythm, notes, mix and mute preserved");
  md_init();md_command(MD_PLAY,0,1);render(2500);md_command(MD_FREEZE,0,1);md_command(MD_SCENE,0,MD_BLANK_BIOME);render(1);
  for(int b=0;b<500;b++){md_render(out,128);for(float x:out)assert(x==0);}
  md_command(MD_TRIGGER,0,60);render(100);assert(md_status()->events[0]>0&&md_status()->peak>0);puts("PASS Blank clears previous frozen audio / keyboard still plays");
@@ -88,7 +77,7 @@ int main(){
  double roughness[2]={};
  for(int filtered=0;filtered<2;filtered++){
   md_init();p=*md_state();no_orbits(p);p.macro[3]=0;
-  for(int i=0;i<6;i++){p.track[i].model=MD_VA;p.track[i].mute=i!=0;p.track[i].tone=800;p.track[i].shape=900;p.track[i].filter=filtered?2:0;p.track[i].cutoff=350;p.track[i].resonance=0;p.track[i].breathe=0;p.track[i].attack=0;}
+  for(int i=0;i<6;i++){p.track[i].model=MD_PD;p.track[i].mute=i!=0;p.track[i].tone=800;p.track[i].shape=900;p.track[i].filter=filtered?2:0;p.track[i].cutoff=350;p.track[i].resonance=0;p.track[i].breathe=0;p.track[i].attack=0;}
   assert(md_load(&p));md_command(MD_TRIGGER,0,60);render(100);double e=0,d=0;float last=0;
   for(int b=0;b<300;b++){md_render(out,128);for(int k=0;k<256;k+=2){e+=out[k]*out[k];d+=(out[k]-last)*(out[k]-last);last=out[k];}}
   assert(e>1e-6);roughness[filtered]=d/e;
@@ -100,7 +89,7 @@ int main(){
   for(int i=0;i<6;i++){p.track[i].model=m;p.track[i].filter=mode;p.track[i].resonance=1000;p.track[i].breathe=1000;p.track[i].cutoff=i%2?0:1000;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;p.track[i].ratchet=4;}
   assert(md_load(&p));md_command(MD_PLAY,0,1);render(3446);assert(!md_status()->nonfinite&&!md_status()->dropped_commands);
  }
- puts("PASS 24 filter/engine combinations at extreme resonance, cutoff, repeats and feedback / 10s each");
+ puts("PASS 24 filter/engine combinations (8 voices x 3 modes) at extreme resonance, cutoff, repeats and feedback / 10s each");
  // A stopped, never-triggered rack must not spend time in the six DSP engines.
  md_init();render(100);assert(md_status()->voice_quanta==0&&md_status()->skipped_quanta>0);assert(md_status()->peak==0);
  puts("PASS inactive voice DSP skipped / exact startup silence");
@@ -119,13 +108,13 @@ int main(){
  assert(times[0]==0&&times[1]>=7166&&times[1]<=7167&&times[2]==11025);
  puts("PASS swing 65:35 / pair duration unchanged to one sample");
  double attackenergy[2]={};
- for(int slow=0;slow<2;slow++){md_init();p=*md_state();no_orbits(p);p.macro[3]=0;for(int i=0;i<6;i++){p.track[i].mute=i!=0;p.track[i].model=MD_VA;p.track[i].attack=slow?1000:0;}assert(md_load(&p));md_command(MD_TRIGGER,0,60);for(int b=0;b<70;b++){md_render(out,128);for(float x:out)attackenergy[slow]+=x*x;}}
+ for(int slow=0;slow<2;slow++){md_init();p=*md_state();no_orbits(p);p.macro[3]=0;for(int i=0;i<6;i++){p.track[i].mute=i!=0;p.track[i].model=MD_WAVETABLE;p.track[i].attack=slow?1000:0;}assert(md_load(&p));md_command(MD_TRIGGER,0,60);for(int b=0;b<70;b++){md_render(out,128);for(float x:out)attackenergy[slow]+=x*x;}}
  assert(attackenergy[1]<attackenergy[0]*.01&&attackenergy[1]>0);puts("PASS 8-second attack attenuates first 200ms / remains audible");
  // Ducking never ducks its dry source; any other track can be the source.
  double duckenergy[3]={};
  for(int mode=0;mode<3;mode++){
   md_init();p=*md_state();no_orbits(p);p.macro[3]=0;p.duck_source=mode==2?5:0;p.duck_amount=mode?1000:0;p.duck_release=1000;
-  for(int i=0;i<6;i++){p.track[i].model=MD_VA;p.track[i].attack=0;p.track[i].level=i==0?600:0;p.track[i].mute=0;}
+  for(int i=0;i<6;i++){p.track[i].model=MD_WAVETABLE;p.track[i].attack=0;p.track[i].level=i==0?600:0;p.track[i].mute=0;}
   assert(md_load(&p));md_command(MD_TRIGGER,0,60);md_command(MD_TRIGGER,5,60);
   for(int b=0;b<35;b++){md_render(out,128);for(float x:out)duckenergy[mode]+=x*x;}
  }
@@ -153,12 +142,12 @@ int main(){
  md_init();md_command(MD_PLAY,0,1);render(2500);md_command(MD_PANIC,0,0);md_command(MD_FREEZE,0,1);md_command(MD_MACRO,3,1000);
  for(int b=0;b<5000;b++){md_render(out,128);for(float x:out)assert(x==0.0f);}
  assert(md_memory_bytes()>250000);puts("PASS expanded tape: panic/freeze remains exactly silent for 14.5s / no stale audio");
- // ECO's reduced engine clock must retain concert pitch, including odd render fragments.
- for(int model: {MD_FM,MD_VA,MD_HARMONIC}){
+ // ECO's reduced engine clock must retain concert pitch, including odd render fragments (the voices that run at half rate).
+ for(int model: {MD_PD,MD_TERRAIN}){
   int crossings[2]={};
   for(int quality=0;quality<2;quality++){
    md_init();p=*md_state();no_orbits(p);p.quality=quality;p.scale=0;p.macro[2]=500;p.macro[3]=0;
-   for(int i=0;i<6;i++){p.track[i].model=model;p.track[i].mute=i!=0;p.track[i].attack=0;p.track[i].decay=1000;p.track[i].filter=0;p.track[i].tone=0;p.track[i].harm=model==MD_VA?500:0;p.track[i].shape=model==MD_FM?500:model==MD_HARMONIC?1000:150;}
+   for(int i=0;i<6;i++){p.track[i].model=model;p.track[i].mute=i!=0;p.track[i].attack=0;p.track[i].decay=1000;p.track[i].filter=0;p.track[i].tone=0;p.track[i].harm=0;p.track[i].shape=500;}
    assert(md_load(&p));md_command(MD_TRIGGER,0,69);render(100);float prev=out[254];unsigned left=44100,part=0;
    const unsigned fragments[]={127,1,31,97};
    while(left){unsigned n=fragments[part++%4];if(n>left)n=left;md_render(out,n);for(unsigned k=0;k<n;k++){float x=out[k*2];assert(std::isfinite(x));if(prev<=0&&x>0)crossings[quality]++;prev=x;}left-=n;}
@@ -167,22 +156,18 @@ int main(){
   assert(abs(crossings[0]-crossings[1])<=3);assert(crossings[0]>=435&&crossings[0]<=445);
  }
  puts("PASS ECO pitch compensation / odd fragment continuity");
- for(int voices=2;voices<=3;voices++){
-  md_init();p=*md_state();no_orbits(p);p.quality=1;for(int i=0;i<6;i++){p.track[i].model=MD_RINGS;p.track[i].mute=i>=voices;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
-  assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==(voices==2));assert(md_status()->quality_reductions==(unsigned)(voices==3));
+ // Rhizome's FULL admission (its voices, its effects): five SIX-OP stay FULL, six use ECO before render; six of any
+ // other voice stay FULL; open the grains (SPACE) and six SWARM use ECO.
+ for(int count=5;count<=6;count++){
+  md_init();p=*md_state();no_orbits(p);p.quality=1;p.macro[3]=0;for(int i=0;i<6;i++){p.track[i].model=MD_SIXOP;p.track[i].mute=i>=count;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
+  assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==(count==5));assert(md_status()->quality_reductions==(unsigned)(count==6));
  }
- puts("PASS FULL admission guard keeps 2 Rings / sends 3 Rings to ECO before render");
- for(int model : {MD_FM,MD_HARMONIC})for(int count : {4,5}){
-  md_init();p=*md_state();no_orbits(p);p.quality=1;for(int i=0;i<6;i++){p.track[i].model=model;p.track[i].mute=i>=count;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
-  assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==(count==4));assert(md_status()->quality_reductions==(unsigned)(count==5));
+ for(int m=0;m<MD_MODELS;m++){if(m==MD_SIXOP)continue;
+  md_init();p=*md_state();no_orbits(p);p.quality=1;p.macro[3]=0;for(int i=0;i<6;i++){p.track[i].model=m;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
+  assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==1);
+  if(m==MD_SWARM){md_init();p.macro[3]=500;assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==0);}
  }
- puts("PASS measured FULL limits: 4 FM/Harmonic stay FULL, 5 use ECO before render");
- for(int kind=0;kind<2;kind++){
-  md_init();p=*md_state();no_orbits(p);p.quality=1;const int techno[6]={0,2,1,3,5,0};
-  for(int i=0;i<6;i++){p.track[i].model=kind?techno[i]:MD_SNARE;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
-  assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==0&&md_status()->quality_reductions==1);
- }
- puts("PASS full-rate tape admission: six snares and dense techno use ECO before rendering");
+ puts("PASS FULL admission: five SIX-OP stay FULL, six use ECO; six of another voice stay FULL; SPACE counts");
  md_init();unsigned seed=5678;
  for(int i=0;i<10000;i++){seed=seed*1664525+1013904223;md_command(seed%MD_COMMAND_COUNT,(seed>>8)%6,(int)((seed>>16)%1800)-300);render(1);if(!md_validate(md_state())){const md_patch *p=md_state();fprintf(stderr,"INVALID after %d cmd %u t%u v%d\n",i,seed%MD_COMMAND_COUNT,(seed>>8)%6,(int)((seed>>16)%1800)-300);for(int t=0;t<6;t++){const md_track &a=p->track[t];fprintf(stderr,"t%d model%d len%d hits%d rot%d note%d speed%d mute%d\n",t,a.model,a.length,a.hits,a.rotate,a.note,a.speed,a.mute);}return 1;}}
  puts("PASS 10,000 boundary / all-command / reassignment commands");

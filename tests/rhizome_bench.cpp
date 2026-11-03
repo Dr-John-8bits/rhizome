@@ -74,18 +74,7 @@ static void add(const char *group, const char *name, double ns) {
   fprintf(stderr, "  %-44s %10.0f ns/s\n", name, ns);
 }
 
-/* ---------- Monades, the yardstick ---------- */
-// Rhizome no longer carries Monades' Mondes: the two measured ones are kept as v10 patches (tools/generate_presets.py).
-#include "monades_yardstick.inc"
-static double monades(const char *name) {
-  static float st[2 * Q];
-  int k = 0;
-  while (k < 2 && !contains(yardstick_names[k], name)) k++;
-  if (k == 2) { fprintf(stderr, "no yardstick %s\n", name); exit(1); }
-  return measure([&] { md_init(); if (!md_import(&yardstick[k], sizeof(md_patch_v10))) { fprintf(stderr, "yardstick %s refused\n", name); exit(1); }
-                       md_command(MD_QUALITY, 0, 0); md_command(MD_PLAY, 0, 1); },
-                 [&](unsigned) { md_render(st, Q); });
-}
+/* ---------- Rhizome's Mondes ---------- */
 // Rhizome's own Mondes, as they load; "worst": SPACE fully open, so Beads always runs, on CLEAN TAPE (its heaviest).
 static double rhizome_monde(int id, bool worst) {
   static float st[2 * Q];
@@ -96,6 +85,13 @@ static double rhizome_monde(int id, bool worst) {
 }
 
 /* ---------- Plaits engines, one voice each ---------- */
+// As the firmware does: Plaits' own data, except SIX-OP, whose voices share one decoded bank (set_patches).
+static plaits::fm::Patch bench_bank[32];
+template <class E> static void load(E *engine, const uint8_t *user_data) { engine->LoadUserData(user_data); }
+static void load(plaits::SixOpEngine *engine, const uint8_t *user_data) {
+  for (int k = 0; k < 32; k++) bench_bank[k].Unpack(user_data + k * plaits::fm::Patch::SYX_SIZE);
+  engine->set_patches(bench_bank, 32);
+}
 static char plaits_ram[65536];
 template <class E> static double run_plaits(const uint8_t *user_data = nullptr) {
   static E *engine = nullptr;
@@ -103,7 +99,7 @@ template <class E> static double run_plaits(const uint8_t *user_data = nullptr) 
       delete engine; engine = new E();
       stmlib::BufferAllocator alloc(plaits_ram, sizeof plaits_ram);
       engine->Init(&alloc); engine->Reset();
-      engine->LoadUserData(user_data);                     // as Plaits' voice does, NULL = the built-in waves
+      load(engine, user_data);
     }, [&](unsigned q) {
       plaits::EngineParameters p;
       p.trigger = (q % 345) == 0 ? plaits::TRIGGER_RISING_EDGE : plaits::TRIGGER_LOW;   // a note every 0.5 s
@@ -250,9 +246,6 @@ int main(int argc, char **argv) {
   if (getenv("BENCH_SECONDS")) seconds = atof(getenv("BENCH_SECONDS"));
   if (getenv("BENCH_RUNS")) runs = atoi(getenv("BENCH_RUNS"));
   if (!only_beads) {
-    fprintf(stderr, "Monades (yardstick)\n");
-    add("ref", "Monades 87 CLOUDEE (FM-1: 69 %)", monades("CLOUDEE"));
-    add("ref", "Monades 89 ALCHIMISTE (FM-1: 76 %)", monades("ALCHIMISTE"));
     fprintf(stderr, "Rhizome's Mondes\n");
     for (int id = 0; id < MD_BLANK_BIOME; id++) {
       char name[96];

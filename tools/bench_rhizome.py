@@ -3,8 +3,8 @@
 
   python tools/bench_rhizome.py [--beads EURORACK_DIR] [--seconds 10] [--runs 3]
 
-The estimate scales Mac times by two Monades Mondes whose load was read on an FM-1 (87 CLOUDEE 69 %, 89 ALCHIMISTE
-76 %, ECO, 2 November 2026). Auto-vectorisation is off, as the FM-1 has no SIMD unit. A Mac estimate, not a
+The estimate scales Mac times by a factor measured on 2 November 2026 with two Monades Mondes whose load was read on an
+FM-1 (87 CLOUDEE 69 %, 89 ALCHIMISTE 76 %, ECO). Auto-vectorisation is off, as the FM-1 has no SIMD unit. A Mac estimate, not a
 measurement: the device bench confirms it.
 --beads: a checkout of github.com/pichenettes/eurorack (MIT); Beads is copied into the build folder and built twice,
 with its 32 grains and with 8.
@@ -17,7 +17,10 @@ R = Path(__file__).resolve().parents[1]
 A = R / 'app'
 T = A / 'third_party'
 OUT = A / 'build' / 'bench'
-DEVICE = {'Monades 87 CLOUDEE (FM-1: 69 %)': 69.0, 'Monades 89 ALCHIMISTE (FM-1: 76 %)': 76.0}
+# FM-1 % per Mac ns/s. Calibrated on 2 November 2026 with two Monades Mondes whose load was read on an FM-1 (87 CLOUDEE
+# 69 %, 89 ALCHIMISTE 76 %, ECO): 3.514e-6 and 3.362e-6, their mean below. Rhizome no longer carries Monades' voices, so
+# the yardstick cannot be re-run here: a measurement on the FM-1 will replace this figure.
+SCALE = 3.438e-6
 
 PLAITS = ['plaits/resources.cc', 'plaits/dsp/chords/chord_bank.cc', 'plaits/dsp/fm/algorithms.cc', 'plaits/dsp/fm/dx_units.cc',
           *[f'plaits/dsp/physical_modelling/{n}.cc' for n in ('modal_voice', 'resonator', 'string', 'string_voice')],
@@ -96,11 +99,8 @@ def main():
         out = subprocess.run([str(exe), *args], capture_output=False, stdout=subprocess.PIPE, text=True, env=env, check=True).stdout
         results += list(csv.reader(io.StringIO(out), delimiter='\t'))
 
-    ns = {name: float(v) for _, name, v in results}
-    scale = [DEVICE[k] / ns[k] for k in DEVICE]              # FM-1 % per Mac ns/s, from each Monde
-    s = sum(scale) / len(scale)
-    print(f'yardsticks agree within {abs(scale[0] - scale[1]) / s * 100:.0f} % '
-          f'(CLOUDEE alone: {ns[list(DEVICE)[0]] * s:.0f} %, ALCHIMISTE alone: {ns[list(DEVICE)[1]] * s:.0f} %)')
+    s = SCALE
+    print('FM-1 estimate from the 2 November 2026 calibration (Mac speed varies: a few % either way)')
     print(f'{"block":44} {"Mac ns/s":>10} {"FM-1 est.":>10}')
     for group, name, v in results:
         print(f'{name:44} {float(v):10.0f} {float(v) * s:9.1f} %')

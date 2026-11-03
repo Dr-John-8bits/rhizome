@@ -63,7 +63,8 @@ void WavetableEngine::Init(BufferAllocator* allocator) {
 
   diff_out_.Init();
   
-  wave_map_ = allocator->Allocate<const int16_t*>(kNumWavesPerBank);
+  // Rhizome: LoadUserData fills one pointer per wave of all four banks, not of one: 256, not 64.
+  wave_map_ = allocator->Allocate<const int16_t*>(kNumBanks * kNumWavesPerBank);
 }
 
 void WavetableEngine::Reset() {
@@ -157,9 +158,10 @@ void WavetableEngine::Render(
     ONE_POLE(y_lp_, y_modulation.Next(), lp_coefficient);
     ONE_POLE(z_lp_, z_modulation.Next(), lp_coefficient);
     
-    const float x = x_lp_;
-    const float y = y_lp_;
-    const float z = z_lp_;
+    // Rhizome: the smoothing can overshoot 7 by a hair (7.0000019 measured), and wave 8 is past the map: keep below.
+    const float x = min(x_lp_, 6.9999f);
+    const float y = min(y_lp_, 6.9999f);
+    const float z = min(z_lp_, 6.9999f);
 
     MAKE_INTEGRAL_FRACTIONAL(x);
     MAKE_INTEGRAL_FRACTIONAL(y);

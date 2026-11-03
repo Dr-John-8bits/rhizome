@@ -81,10 +81,18 @@ void SixOpEngine::Init(BufferAllocator* allocator) {
   }
   temp_buffer_ = allocator->Allocate<float>(kMaxBlockSize * 4);
   acc_buffer_ = allocator->Allocate<float>(kMaxBlockSize * kNumSixOpVoices);
-  patches_ = allocator->Allocate<fm::Patch>(kNumPatchesPerBank);
+  patches_ = NULL;  // Rhizome: shared, see set_patches
   
   active_voice_ = kNumSixOpVoices - 1;
   rendered_voice_ = 0;
+}
+
+void SixOpEngine::set_patches(const fm::Patch* patches, int count) {
+  patches_ = const_cast<fm::Patch*>(patches);
+  patch_index_quantizer_.Init(count, 0.005f, false);
+  for (int i = 0; i < kNumSixOpVoices; ++i) {
+    voice_[i].UnloadPatch();
+  }
 }
 
 void SixOpEngine::Reset() {
@@ -106,6 +114,11 @@ void SixOpEngine::Render(
     float* aux,
     size_t size,
     bool* already_enveloped) {
+  if (!patches_) {  // Rhizome: no bank yet
+    fill(&out[0], &out[size], 0.0f);
+    fill(&aux[0], &aux[size], 0.0f);
+    return;
+  }
   int patch_index = patch_index_quantizer_.Process(
       parameters.harmonics * 1.02f);
   

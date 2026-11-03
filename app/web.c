@@ -28,7 +28,7 @@ EXPORT int dream_knob(int page,int track,int knob){
 
  case APPEARANCE:v[0]=dream_prefs.motion;v[1]=dream_prefs.boot_sound;break;
  case LIVE:for(int j=0;j<4;j++)v[j]=p->macro[j]/10;break;
- case SOUND:v[0]=t->tone/10;v[1]=t->harm/10;v[2]=((md_has_envelope(t->model)||t->model==MD_ELEMENTS)?t->shape:t->decay)/10;v[3]=t->level/10;break;
+ case SOUND:v[0]=t->tone/10;v[1]=t->harm/10;v[2]=t->shape/10;v[3]=t->level/10;break;
  case FILTER:v[0]=md_cutoff_hz(t->cutoff);v[1]=t->resonance/10;v[2]=t->filter;v[3]=t->breathe/10;break;
  case RHYTHM:v[0]=t->hits;v[1]=t->length;v[2]=t->rotate;v[3]=t->prob/10;break;
  case GRAIN:v[0]=p->macro[3]/10;v[1]=p->grain_size/10;v[2]=p->grain_pos/10;v[3]=p->feedback/10;break;
@@ -56,7 +56,7 @@ EXPORT int dream_raw_knob(int page,int track,int knob){
 
  case APPEARANCE:v[0]=dream_prefs.motion;v[1]=dream_prefs.boot_sound;break;
  case LIVE:for(int j=0;j<4;j++)v[j]=p->macro[j];break;
- case SOUND:v[0]=t->tone;v[1]=t->harm;v[2]=(md_has_envelope(t->model)||t->model==MD_ELEMENTS)?t->shape:t->decay;v[3]=t->level;break;
+ case SOUND:v[0]=t->tone;v[1]=t->harm;v[2]=t->shape;v[3]=t->level;break;
  case FILTER:v[0]=t->cutoff;v[1]=t->resonance;v[2]=t->filter;v[3]=t->breathe;break;
  case RHYTHM:v[0]=t->hits;v[1]=t->length;v[2]=t->rotate;v[3]=t->prob;break;
  case GRAIN:v[0]=p->macro[3];v[1]=p->grain_size;v[2]=p->grain_pos;v[3]=p->feedback;break;

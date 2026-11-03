@@ -60,7 +60,7 @@ static const char *help_lines[NB][5]={
  {"SEL: mute / unmute this track","SELECT: choose one of six tracks","ALGO: change sound engine","Every engine fits every track.","EDIT + PRESET: sound library"},
  {"ENV: undo the last variation","REC: make a new variation","One previous variation is kept.","Choosing a Monde starts fresh.","SAVE: store the current patch"},
  {"LFO: freeze the granular memory","The cloud keeps playing.","Tracks remain live and playable.","LFO again: resume recording","FX: edit the cloud and tape"},
- {"EDIT: Sound/Filter/Env/Mix/Mixer","PRESET: 224 sound presets","ALGO: twelve sound engines","Rhythm and notes are preserved.","HOME + PRESET: whole Monde"},
+ {"EDIT: Sound/Filter/Env/Mix/Mixer","PRESET: 128 sound presets","ALGO: eight Plaits voices","Rhythm and notes are preserved.","HOME + PRESET: whole Monde"},
  {"GLO: Harmony > Raga > System >","Look > MIDI > Channels > Zones >","Banks. Harmony: root / scale","System: tempo / quality","SAVE stores these preferences."},
  {"K1 DENSITY: number of events","K2 MOTION: melodic movement","K3 COLOUR: brighter / darker","K4 SPACE: granular level","PRESET: 90 Mondes + Blank"},
  {"Stop PLAY; use internal clock.","SAVE stores Monde and preferences,","then opens the save screen:","16 Mondes / 64 tones, free slot.","Granular audio is not stored."},
@@ -256,7 +256,7 @@ static void md_draw_all(void) {
   // The Monde's own system: its bodies fall in from far away onto their orbits, at their own speeds (orbit_frame).
   {float e=progress>1?1:progress;md_orbit_mini(md_state(),1-(1-e)*(1-e)*(1-e),0);}
   cv_text(120-text_w(&FONT_B,"RHIZOME")/2,158,&FONT_B,"RHIZOME",MD_INK);md_text(120-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT")/2,180,"WHEN DAY CHOKES THE NIGHT",col);
-  {char m[32];md_num(MD_BIOMES-1,m);char *q=m;while(*q)q++;for(const char *f=" MONDES / 224 TONES";*f;)*q++=*f++;*q=0;md_text(120-text_w(&FONT_XS,m)/2,200,m,MD_DIM);}
+  {char m[32];md_num(MD_BIOMES-1,m);char *q=m;while(*q)q++;for(const char *f=" MONDES / 128 TONES";*f;)*q++=*f++;*q=0;md_text(120-text_w(&FONT_XS,m)/2,200,m,MD_DIM);}
   cv_rect(32,220,(int)(176*progress),2,col);md_text(48,223,"ANY CONTROL TO BEGIN",MD_DIM);return;
  }
  if(dream_asking()&&dream_ui.help<0){
@@ -272,17 +272,16 @@ static void md_draw_all(void) {
  if(dream_ui.help>=0) {
   cv_rect(6,43,228,178,MD_CARD);cv_text(14,51,&FONT_B,md_context_help()?dream_pages[dream_ui.page]:help_title[dream_ui.help],col);
   const char *const *lines=help_lines[dream_ui.help];
-  static const char *soundhelp[]={"PRESET: sound / ALGO: engine","K1: Tone / brightness","K2: Harmonics / chord","K3: Shape; drums use Decay","K4: Level / EDIT: Filter"};
-  static const char *elementhelp[]={"PRESET: sound / ALGO: engine","K1 strike colour / K2 geometry","K3 Mallet / Plectrum / Particles","ENVELOPE: resonator decay","K4 level / EDIT: filter"};
+  static const char *soundhelp[]={"PRESET: sound / ALGO: voice","K1 K2 K3: named for the voice","K2: chord or DX7 sound, named","Eight Plaits voices","K4: Level / EDIT: Filter"};
   static const char *mixhelp[]={"K1: send to granular bus","K2: track base note","K3: pan left / right","K4: clock division, 1 to 8","PRESET: sound / SEL: mute"};
   static const char *lookhelp[]={"K1: animation on / off","K2: startup sound on / off","K3: replay startup animation","K4: reset measured CPU peak","Stop + SAVE: keep preferences"};
   static const char *systemhelp[]={"K1: Tempo / K2: ECO or FULL","K3: ducking recovery","K4: reset measured CPU peak","REC: panic / clear tape","GLO: animation and startup"};
   static const char *harmonyhelp[]={"K1: root note C to B","K2: scale (91, by family)","K3: transpose +/-24 semitones","K4: tempo for all tracks","GLO: continue to Raga"};
   static const char *filterhelp[]={"K1: cutoff, 60 to 18000 Hz","K2: resonance at the cutoff","K3: 8 modes, LP / HP / BP / NOTCH","K4: slow filter movement","LPG darkens with the decay"};
-  static const char *envhelp[]={"K1: attack up to 8 seconds","K2: decay up to 16 seconds","FM / VA / Harmonic / Choir","K3: level / K4: grain send","Drums and Rings: engine decay"};
+  static const char *envhelp[]={"K1: attack up to 8 seconds","K2: decay up to 16 seconds","Every voice: this envelope","K3: level / K4: grain send","SIX-OP: and its own DX7 one"};
   static const char *groovehelp[]={"K1: global swing (0-60)","K2: 1-4 repeats per hit","K3: accent / K4: clock division","Repeats divide one step.","SEQ: return to hits / length"};
   static const char *tapehelp[]={"K1: grain pitch +/-24","K2: forward / reverse","K3: duck source; 0 means off","K4: attenuate other tracks","The source stays unchanged."};
-  if(dream_ui.help==B_EDIT&&dream_ui.page==SOUND)lines=t->model==MD_ELEMENTS?elementhelp:soundhelp;
+  if(dream_ui.help==B_EDIT&&dream_ui.page==SOUND)lines=soundhelp;
   if(dream_ui.help==B_EDIT&&dream_ui.page==MIX)lines=mixhelp;
   if(dream_ui.help==B_GLO&&dream_ui.page==APPEARANCE)lines=lookhelp;
   if(dream_ui.help==B_GLO&&dream_ui.page==SYSTEM)lines=systemhelp;
@@ -400,7 +399,6 @@ static void md_draw_all(void) {
     if(!l->depth)warn="DEPTH 0: THIS LFO IS OFF";
     else if((tg==MD_TO_CUTOFF||tg==MD_TO_RESONANCE)&&!t->filter)warn="NEEDS A TRACK FILTER";
     else if((tg==MD_TO_ECHO_SEND||tg==MD_TO_ROOM_SEND||tg==MD_TO_ECHO_TIME||tg==MD_TO_ECHO_FEEDBACK)&&!p->fx_level)warn="RETURN 0: SEE SPACE";
-    else if(tg==MD_TO_NOTES&&t->model<MD_FM)warn="DRUM ENGINE: NO NOTES";
     else if(tg==MD_TO_ROTATE&&p->ext[tr].bass_mode==2)warn="STEP MODE: EVERY STEP PLAYS";
     else if(tg==MD_TO_ATTACK&&!md_has_envelope(t->model))warn="THIS ENGINE HAS NO ATTACK";
     else if(tg==MD_TO_GRAIN_SEND||tg==MD_TO_GRAIN_POS||tg==MD_TO_GRAIN_SIZE){if(!p->macro[3])warn="GRAIN MIX 0: SEE GRANULAR";}
@@ -478,7 +476,6 @@ static void md_draw_all(void) {
     if(!g->source)info="OFF: MOTION MACRO PLAYS (1.1)";
     else if(t->mute)warn="TRACK MUTED: SEL TO HEAR IT";
     else if(p->ext[tr].bass_mode)warn="PHRASE MODE ON: NOTES FROM PHRASE";
-    else if(t->model<MD_FM)info="DRUMS: DEJA VU ON CHANCE ONLY";
     else if(g->source==MD_GEN_MARKOV&&nn<2)warn="PHRASE HAS < 2 NOTES: RANDOM";
     if(warn)md_text(x0,139,warn,MD_HOT);else if(info)md_text(x0,139,info,MD_DIM);
     else if(g->source==MD_GEN_MARKOV){char lab[32]="LEARNS PHRASE: ";md_num(nn,lab+15);char *q=lab;while(*q)q++;const char *a=" NOTES ";while(*a)*q++=*a++;md_num(mv,q);while(*q)q++;a=" MOVES";while(*a)*q++=*a++;*q=0;md_text(x0,139,lab,MD_DIM);}
@@ -729,7 +726,7 @@ static void md_draw_all(void) {
    md_text(16,125,info,MD_DIM);
   }
   for(int tk=0;tk<6;tk++){
-   if(p->track[tk].model<MD_FM||p->track[tk].mute||plat_ms()>pulse_until[tk]+300||ms->last_note[tk]<=0)continue;
+   if(p->track[tk].mute||plat_ms()>pulse_until[tk]+300||ms->last_note[tk]<=0)continue;
    float pc=micro?(ms->last_pitch[tk]*100.0f-(period==1200?0:p->root*100.0f)):(float)(ms->last_note[tk]%12)*100.0f;
    float a=pc/period*6.2831853f;md_circle(cx+(int)(fm_sinf(a)*28),cy-(int)(fm_cosf(a)*28),9+tk%2,dream_colors[tk],0);
   }
@@ -750,7 +747,9 @@ static void md_draw_all(void) {
     for(int px=1;px<200;px++){float pos=start+px*63.0f/199;int k=(int)pos;float fr=pos-k,v=sc[k]+(sc[k+1]-sc[k])*fr;int y=110-(int)(v*g);
      int a=y<py?y:py,z=y<py?py:y;cv_rect(20+px,a,1,z-a+1,col);py=y;}}
    md_text(8,139,"ZOOM FOLLOWS PITCH / AUTO GAIN",MD_DIM);
-   md_value(8,158,"K1 TONE",t->tone/10,col);md_value(124,158,"K2 HARMONICS",t->harm/10,col);if(t->model==MD_ELEMENTS)md_zoned(8,194,"K3 EXCITER",t->shape<334?"MALLET":t->shape<667?"PLECTRUM":"PARTICLES",t->shape/10,33,67,col);else md_value(8,194,md_has_envelope(t->model)?"K3 SHAPE":"K3 DECAY",(md_has_envelope(t->model)?t->shape:t->decay)/10,col);md_value(124,194,"K4 LEVEL",t->level/10,col);
+   {char k1[16]="K1 ",k2[16]="K2 ",k3[16]="K3 ";ov_append(k1,md_knob_name(t->model,0));ov_append(k2,md_knob_name(t->model,1));ov_append(k3,md_knob_name(t->model,2)); /* Rhizome: each voice names its knobs */
+    md_value(8,158,k1,t->tone/10,col);const char *hn=md_harm_name(t->model,t->harm);if(hn)md_named(124,158,k2,hn,col);else md_value(124,158,k2,t->harm/10,col);
+    md_value(8,194,k3,t->shape/10,col);md_value(124,194,"K4 LEVEL",t->level/10,col);}
   } else if(dream_ui.page==FILTER) {
    static const char *modes[]={"OFF","LP 12 dB","LP 24 dB","LOW PASS GATE","HIGH PASS","BAND PASS","NOTCH","HP 24 dB"};
    // Real response, 20 Hz..20 kHz (log) by +18..-36 dB: dim = the knobs, colour = what the voice hears now (LFOs, LPG).
@@ -1040,7 +1039,7 @@ void app_input_only(void) {
    else if(dream_ui.page==ECHO_CHORUS){const int cs[]={MD_ECHO_SYNC,MD_DELAY_FB,MD_CHORUS,MD_CHORUS_DEPTH},vs[]={p->echo_sync,p->delay_fb,p->chorus,p->chorus_depth};c=cs[b];v=vs[b]+d*(b==0?1:20);}
    else{const int cs[]={MD_BASS_STEP,MD_BASS_VALUE,MD_ACCENT,MD_PROB},vs[]={e->edit_step,e->notes[e->edit_step],t->accent,t->prob};c=cs[b];v=vs[b]+d*(b<2?1:20);}
   }
-  else if(dream_ui.page==SOUND){const int cmds[]={MD_TONE,MD_HARM,(md_has_envelope(t->model)||t->model==MD_ELEMENTS)?MD_SHAPE:MD_DECAY,MD_LEVEL};const int vals[]={t->tone,t->harm,(md_has_envelope(t->model)||t->model==MD_ELEMENTS)?t->shape:t->decay,t->level};c=cmds[b];v=vals[b]+d*20;}
+  else if(dream_ui.page==SOUND){const int cmds[]={MD_TONE,MD_HARM,MD_SHAPE,MD_LEVEL};const int vals[]={t->tone,t->harm,t->shape,t->level};c=cmds[b];v=vals[b]+d*20;}
   else if(dream_ui.page==FILTER){const int cmds[]={MD_CUTOFF,MD_RESONANCE,MD_FILTER,MD_BREATHE};const int vals[]={t->cutoff,t->resonance,t->filter,t->breathe};c=cmds[b];v=vals[b]+d*(b==2?1:20);}
   else if(dream_ui.page==RHYTHM){const int cmds[]={MD_HITS,MD_LENGTH,MD_ROTATE,MD_PROB};const int vals[]={t->hits,t->length,t->rotate,t->prob};c=cmds[b];v=vals[b]+d*(b==3?20:1);}
   else if(dream_ui.page==GRAIN){const int cmds[]={MD_MACRO,MD_GRAIN_SIZE,MD_GRAIN_POS,MD_FEEDBACK};const int vals[]={p->macro[3],p->grain_size,p->grain_pos,p->feedback};c=cmds[b];v=vals[b]+d*20;tr=3;}

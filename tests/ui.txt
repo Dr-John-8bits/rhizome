@@ -29,7 +29,7 @@ tap EDIT
 expect page 6
 spin K1 10
 wait 20
-expect attack 650
+expect attack 500
 wait 100
 shot envelope.png
 tap EDIT

@@ -116,7 +116,7 @@ static void orbit_load_system(int s){
  const float pos=orbit_pos_now()<0?0:orbit_pos_now();float M[6],w[6]; // the bodies carry on from where they are
  for(unsigned i=0;i<6;i++){M[i]=orbit_M(i,pos);w[i]=orbit_w(i,pos);}
  for(int pass=0;pass<3;pass++)for(unsigned i=0;i<6;i++){const md_track &t=patch.track[i];
-  if((pass==0&&!t.mute&&t.model>=MD_FM)||(pass==1&&!t.mute&&t.model<MD_FM)||(pass==2&&t.mute))order[n++]=i;}
+  if((pass==0&&!t.mute)||(pass==2&&t.mute))order[n++]=i;}
  for(unsigned i=0;i<6;i++)patch.orbit[i].gates=0;
  for(int b=0;b<y.n;b++){md_orbit &o=patch.orbit[order[b]];const OrbitBody &d=y.body[b];
   o.period=d.period;o.gates=d.gates;o.ecc=d.ecc;o.phase=0;o.moons=d.moons;o.moon_spin=d.moons?d.moon_spin:o.moon_spin;o.moon_interval=d.moons?d.moon_interval:o.moon_interval;}
@@ -129,7 +129,7 @@ static void orbit_load_system(int s){
 static void orbit_chord(unsigned a,unsigned b){
  const float pa=stats.last_pitch[a];
  const unsigned pair[2]={a,b};for(unsigned i:pair){const md_track &t=patch.track[i];float p=stats.last_pitch[i];if(t.mute||((orbit_rest>>i)&1)||p<=0)continue;
-  if(i==b&&t.model>=MD_FM&&patch.track[a].model>=MD_FM&&pa>0){float best=p,d=99;
+  if(i==b&&pa>0){float best=p,d=99;
    for(int deg=0;deg<=4;deg+=2){float c=pa;for(int s=0;s<deg;s++)c=scale_neighbour(c,1);c+=12*floorf((p-c)/12+.5f);if(fabsf(c-p)<d){d=fabsf(c-p);best=c;}}
    p=best;}
   fire(i,p,.8f);out_note(i,p,.8f,orbit_step_len*2);}
@@ -142,7 +142,7 @@ static void orbit_fire(unsigned i,int gate,float pos){
  if(r%1000<(unsigned)(pert*250))return; // the perturbation refuses a quarter of the gates at most
  const float e=orbit_e(i,pos),E=orbit_E(orbit_M(i,pos),e),rn=e<.01f?.5f:.5f-.5f*cosf(E); // 0 at the star, 1 farthest
  float pitch=(float)t.note;
- if(t.model>=MD_FM){
+ { // Rhizome: every voice is melodic
   if(c.pitch==MD_PITCH_MOTIF){const int32_t *ph=patch.ext[i].notes;int found=-1;
    for(int k=0;k<16&&found<0;k++){const int at=(o.motif+k)%16;if(ph[at]>=0)found=at;}
    if(found<0)return;o.motif=stats.motif_at[i]=(found+1)%16;pitch+=ph[found];}
@@ -162,7 +162,7 @@ static void orbit_fire(unsigned i,int gate,float pos){
  if(c.moons){o.moon_t0=stats.moon_t0[i]=pos;o.moon_vel=velocity; // the note spins its moons; each one's ornament, from it
   static const int8_t harmonics[MD_MOONS_MAX]={12,19,24};
   for(int k=1;k<=c.moons;k++){float m=pitch;
-   if(t.model>=MD_FM){const int deg=c.moon_interval==MD_MOON_UP?k:c.moon_interval==MD_MOON_DOWN?-k:c.moon_interval==MD_MOON_THIRDS_UP?2*k:c.moon_interval==MD_MOON_THIRDS_DOWN?-2*k:0;
+   {const int deg=c.moon_interval==MD_MOON_UP?k:c.moon_interval==MD_MOON_DOWN?-k:c.moon_interval==MD_MOON_THIRDS_UP?2*k:c.moon_interval==MD_MOON_THIRDS_DOWN?-2*k:0;
     if(c.moon_interval==MD_MOON_HARMONICS)m=quantize_any(m+harmonics[k-1],patch.root,patch.scale,0);
     for(int s=0;s<deg;s++)m=scale_neighbour(m,1);for(int s=0;s>deg;s--)m=scale_neighbour(m,-1);}
    stats.moon_note[i][k-1]=m;}}

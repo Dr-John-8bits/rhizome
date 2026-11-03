@@ -14,27 +14,27 @@ wait 200
 shot save/00-system.png
 turn SELECT -5
 turn ALGO 1
-expect model 9
+expect model 1
 expect unsaved 1
-expect shape 100
+expect shape 400
 wait 200
-shot save/01-exciter-mallet.png
+shot save/01-shape.png
 turn K3 8
-expect shape 260
+expect shape 560
 wait 200
-shot save/02-exciter-mallet-late.png
+shot save/02-shape-more.png
 turn K3 5
-expect shape 360
+expect shape 660
 wait 200
-shot save/03-exciter-plectrum.png
+shot save/03-shape-more.png
 turn K3 16
-expect shape 680
+expect shape 980
 wait 200
-shot save/04-exciter-particles.png
+shot save/04-shape-high.png
 turn K3 20
 expect shape 1000
 wait 200
-shot save/05-exciter-max.png
+shot save/05-shape-max.png
 tap HOME
 expect page 0
 turn PRESET 1
