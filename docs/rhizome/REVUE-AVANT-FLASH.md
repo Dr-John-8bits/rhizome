@@ -59,3 +59,6 @@ Avec les huit voix de Plaits à la place de celles de Monades. Les mêmes contr�
 
 ## Quatrième compilation (3 novembre 2026)
 Avec le REWIND, les périodes libres, les générateurs sur les orbites, les six Mondes DEEP et le filtre de la comète. Les mêmes contrôles passent. Image 489 132 octets (113 Ko de flash libres), RAM 77 576 sur 98 304, pool 311 564 sur 344 064. Le paquet `M-VAVE FM1/flash/rhizome-0.0.1-voix.fwsc` est remplacé par cette version : c'est celle à installer.
+
+## Cinquième compilation (3 novembre 2026)
+Avec la comète vagabonde (WANDER) et ses chocs sur les effets. Les mêmes contrôles passent. Image 491 568 octets (110 Ko de flash libres), RAM 77 640 sur 98 304, pool 311 564 sur 344 064. Le paquet `M-VAVE FM1/flash/rhizome-0.0.1-voix.fwsc` est remplacé par cette version : c'est celle à installer.
