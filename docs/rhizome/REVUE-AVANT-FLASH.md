@@ -56,3 +56,6 @@ Avec l'accueil et les 12 Mondes de Rhizome. Les mêmes contrôles passent. L'ima
 
 ## Troisième compilation (3 novembre 2026)
 Avec les huit voix de Plaits à la place de celles de Monades. Les mêmes contrôles passent. L'image fait **475 160 octets** : il reste 127 Ko de flash. La RAM descend à **77 512 octets** sur 98 304 (Elements et Rings retirés). Le pool monte à **311 564** sur 344 064 : il reste 32 Ko, dont 8 à garder libres. Le paquet est copié dans `M-VAVE FM1/flash/rhizome-0.0.1-voix.fwsc`, c'est celui à installer.
+
+## Quatrième compilation (3 novembre 2026)
+Avec le REWIND, les périodes libres, les générateurs sur les orbites, les six Mondes DEEP et le filtre de la comète. Les mêmes contrôles passent. Image 489 132 octets (113 Ko de flash libres), RAM 77 576 sur 98 304, pool 311 564 sur 344 064. Le paquet `M-VAVE FM1/flash/rhizome-0.0.1-voix.fwsc` est remplacé par cette version : c'est celle à installer.
