@@ -23,6 +23,18 @@ static int gen_draw(unsigned i,GenState &g){
  }
  int spread=c.spread;return (int)(r%(unsigned)(spread+1))-spread/2;
 }
+// One note of track i's generator: replayed from its loop (deja-vu) or drawn anew; pass, the Chance gate, is kept with it.
+static int gen_step(unsigned i,bool &pass){
+ GenState &g=gens[i];const unsigned len=(unsigned)bound(patch.gen[i].loop,1,16),pos=g.count%len;int off;
+ const bool replay=((g.valid>>pos)&1)&&random_word(g.rng)%1000<(unsigned)patch.gen[i].dejavu;
+ if(replay){off=g.off[pos];pass=(g.gate>>pos)&1;}
+ else{off=gen_draw(i,g);g.off[pos]=off;g.valid|=1u<<pos;g.gate=(g.gate&~(1u<<pos))|((unsigned)pass<<pos);}
+ g.prev=off;g.count++;
+ stats.gen_valid[i]=g.valid;stats.gen_gate[i]=g.gate;stats.gen_pos[i]=pos;stats.gen_fresh[i]=!replay;memcpy(stats.gen_off[i],g.off,sizeof g.off);
+ return off;
+}
+// Rhizome: a body's generator (orbit.inc): the same loop, for every note it plays (an orbit has no Chance).
+static int orbit_gen(unsigned i){bool pass=true;return gen_step(i,pass);}
 // Form: four sections, tension 0..1. Low tension thins the rhythm and lets some tracks rest, peak brings everything in.
 static const float form_tension_of[MD_FORM_SECTIONS]={.25f,.6f,1.0f,.45f};
 static const unsigned form_bar_len[4]={2,4,8,16};

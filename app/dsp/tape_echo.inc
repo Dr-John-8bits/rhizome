@@ -47,8 +47,9 @@ static float reel_at(float p){ // Hermite between tape samples
 // Once a block: the speed (inertia toward TIME, braking for STOP), wow, flutter, drift, dropouts.
 static float reel_rec_coef,reel_age;
 static void reel_block(unsigned n,float time_ms,float glide){
- const float target=reel_transport==MD_TAPE_STOP?0:fminf(REEL_SPEED_MAX,fmaxf(REEL_SPEED_MIN,reel_longest()/(time_ms*22.05f)));
- const float g=reel_transport==MD_TAPE_STOP||reel_speed<REEL_SPEED_MIN*.9f?.00025f:glide;
+ const float run=fminf(REEL_SPEED_MAX,fmaxf(REEL_SPEED_MIN,reel_longest()/(time_ms*22.05f)));
+ const float target=reel_transport==MD_TAPE_STOP?0:reel_transport==MD_TAPE_REWIND?-fminf(REEL_SPEED_MAX,3*run):run; // REWIND: back, three times as fast
+ const float g=reel_transport==MD_TAPE_STOP||reel_transport==MD_TAPE_REWIND||reel_speed<REEL_SPEED_MIN*.9f?.00025f:glide; // the motor turns round slowly
  if(reel_snap){reel_snap=false;reel_speed=target;}
  for(unsigned k=0;k<n;k++)reel_speed+=(target-reel_speed)*g; // per sample, as before: the same slide
  const float wow=patch.tape_wow*.001f;
@@ -58,7 +59,7 @@ static void reel_block(unsigned n,float time_ms,float glide){
  reel_mod=1+wow*.01f*reel_wow_now;
  // Slower tape holds fewer highs: the record head's filter follows the tape rate (and AGE takes more).
  reel_age=patch.tape_age*.001f;
- const float rate=22050*fmaxf(reel_speed,.05f),fc=fminf(.45f,.42f*rate/MD_RATE)*(1-.55f*reel_age);const float w=6.2831853f*fc;reel_rec_coef=w/(1+w); // a one-pole at fc (close to 1-exp(-w), without exp)
+ const float rate=22050*fmaxf(fabsf(reel_speed),.05f),fc=fminf(.45f,.42f*rate/MD_RATE)*(1-.55f*reel_age);const float w=6.2831853f*fc;reel_rec_coef=w/(1+w); // a one-pole at fc (close to 1-exp(-w), without exp)
  if(reel_drop_left){reel_drop_left=reel_drop_left>n?reel_drop_left-n:0;if(!reel_drop_left)reel_drop_target=1;}
  else if(reel_age>0&&(reel_rng>>8)%100000<(unsigned)(reel_age*reel_age*60)){reel_drop_target=.15f+.3f*fabsf(reel_noise());reel_drop_left=1300+(reel_rng>>20)%2600;}
 }
@@ -66,10 +67,10 @@ static void reel_block(unsigned n,float time_ms,float glide){
 static void reel_sample(float in,float feedback,float tone,float *left,float *right){
  const int h=reel_heads(),n=(h&1)+((h>>1)&1)+((h>>2)&1);
  static const float pans[3]={.3f,.5f,.7f};
- float sum=0,l=0,r=0;const float gain=n==1?1:n==2?.75f:.6f,live=fminf(1,reel_speed*3);
+ float sum=0,l=0,r=0;const float gain=n==1?1:n==2?.75f:.6f,live=fminf(1,fabsf(reel_speed)*3);
  reel_drop+=(reel_drop_target-reel_drop)*.004f;
  for(int k=0;k<3;k++)if(h>>k&1){
-  const float at=reel_pos-REEL_PATH*(k+1)/3,y=(reel_speed>2?reel_at_linear(at):reel_at(at))*live*reel_drop;sum+=y;
+  const float at=reel_pos-REEL_PATH*(k+1)/3,y=(fabsf(reel_speed)>2?reel_at_linear(at):reel_at(at))*live*reel_drop;sum+=y;
   const float pan=n==1?.5f:pans[k];l+=y*(1-pan)*gain;r+=y*pan*gain;
   if(fabsf(y)>reel_head_peak[k])reel_head_peak[k]=fabsf(y);}
  *left=l;*right=r;
@@ -81,13 +82,13 @@ static void reel_sample(float in,float feedback,float tone,float *left,float *ri
  const float level=fabsf(x);reel_env+=(level-reel_env)*(level>reel_env?.01f:.0002f);
  if(reel_env>1e-6f)x+=reel_noise()*(.0004f+.004f*reel_age)*fminf(1,reel_env*20); // hiss, under what is recorded (none on an empty tape)
  reel_lp+=(x-reel_lp)*reel_rec_coef;
- // The tape moves on; each tape sample the record head passes is written (unless FREEZE has lifted it).
+ // The tape moves on; each tape sample the record head passes is written (unless FREEZE or REWIND has lifted it).
  const float from=reel_pos,to=reel_pos+.5f*reel_speed*reel_mod;
  const int first=(int)from+1,last=(int)to; // positions are never negative
- if(reel_transport!=MD_TAPE_FREEZE&&last>=first){ // one encoding for the samples passed in this one (fast tape)
+ if(reel_transport!=MD_TAPE_FREEZE&&reel_transport!=MD_TAPE_REWIND&&last>=first){ // one encoding for the samples passed in this one (fast tape)
   const uint8_t code=reel_encode(reel_lp);
   for(int p=first;p<=last;p++)reel[p&REEL_MASK]=code;
   const unsigned col=((unsigned)last&REEL_MASK)>>8;const float v=fabsf(reel_lp);const uint8_t a=(uint8_t)fminf(255,v*600);
   if(col!=reel_trace_col){reel_trace_col=col;reel_trace[col]=0;}if(a>reel_trace[col])reel_trace[col]=a;if(v>reel_rec_peak)reel_rec_peak=v;}
- reel_pos=to>=REEL_N?to-REEL_N:to;
+ reel_pos=to>=REEL_N?to-REEL_N:to<0?to+REEL_N:to; // REWIND runs it backwards
 }

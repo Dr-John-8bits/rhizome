@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-enum { MD_TRACKS=6, MD_MODELS=8, MD_RATE=44100, MD_QUANTUM=64, MD_BIOMES=13, MD_TONE_PRESETS=128, MD_BLANK_BIOME=12 }; /* Rhizome: 12 Mondes and EMPTY SKY */
+enum { MD_TRACKS=6, MD_MODELS=8, MD_RATE=44100, MD_QUANTUM=64, MD_BIOMES=19, MD_TONE_PRESETS=128, MD_BLANK_BIOME=18 }; /* Rhizome: 18 Mondes and EMPTY SKY */
 /* Rhizome's eight voices, all from Plaits (Mutable Instruments, MIT), none of them Monades': no drums, no Rings or
  * Elements, which the other FM-1 plays. K1 TONE is Plaits' TIMBRE, K2 HARMONICS its HARMONICS, K3 SHAPE its MORPH. */
 enum { MD_STRINGS, MD_WAVETABLE, MD_TERRAIN, MD_SIXOP, MD_SWARM, MD_PD, MD_CHORDS, MD_FORMANT };
@@ -54,14 +54,14 @@ enum { MD_GAMAKA_OFF, MD_GAMAKA_KAN, MD_GAMAKA_MEEND, MD_GAMAKA_ANDOLAN, MD_GAMA
 typedef struct { int32_t source,dejavu,loop,spread; } md_gen;
 /* Rhizome orbits, per track. gates 0 = off (the track keeps its euclidean rhythm), 1..16 = a body crossing that many
  * gates per turn, spread as a euclidean rhythm on the turn's steps. period: index of md_orbit_steps (one turn in
- * sixteenths, 4 to 192). ecc 0..850 thousandths (0 = round: the exact euclidean rhythm). phase: the gates turn by
+ * sixteenths, 4 to 192; then eight free periods, 5.1 to 31.8 seconds whatever the tempo, which never fall together). ecc 0..850 thousandths (0 = round: the exact euclidean rhythm). phase: the gates turn by
  * 15 degree steps (0..23). pitch: where notes come from: the distance to the star, the track's phrase in order, or
  * the triad note above the previous track's last note (tintinnabuli).
  * Moons (0..3) circle the body: each note it plays spins them once around it, in moon_spin (index of md_orbit_moon_steps,
  * 1 to 16 sixteenths), and each moon plays an ornament as it passes the body's outer side, so the moons share the spin
  * evenly after the note. moon_interval: what they play from the note (the same note, scale steps up or down, thirds
  * up or down, or the harmonics octave, octave and fifth, two octaves). moon_level 0..100: their velocity, from the note's. */
-enum { MD_ORBIT_PERIODS=13, MD_ORBIT_PHASES=24, MD_ORBIT_ECC_MAX=850, MD_ORBIT_GATES_MAX=16, MD_MOONS_MAX=3, MD_MOON_SPINS=8 };
+enum { MD_ORBIT_PERIODS=21, MD_ORBIT_TEMPO_PERIODS=13, MD_ORBIT_PHASES=24, MD_ORBIT_ECC_MAX=850, MD_ORBIT_GATES_MAX=16, MD_MOONS_MAX=3, MD_MOON_SPINS=8 };
 enum { MD_PITCH_ORBIT, MD_PITCH_MOTIF, MD_PITCH_ECHO, MD_PITCH_SOURCES };
 /* The comet: one turn in 4 to 64 bars (orbit_comet 1..5, 0 = none), so eccentric that it spends most of it far away
  * and swings past the star in about a fifth of it. While it passes, the event (comet_event): the room swells (a longer
@@ -76,8 +76,9 @@ enum { MD_ORBIT_SYSTEMS=5 };
 /* Rhizome's tape echo (in place of the echo; delay_ms, delay_fb, echo_sync, echo_tone and the sends keep their roles).
  * tape_heads: which of the three playback heads play (bits 1, 2, 4: a third, two thirds, all of the path); delay_ms
  * (40..2860) is the time of the longest one, reached by the tape's speed (0.5 to 12 times the slowest). tape_wow, tape_drive, tape_age 0..1000.
- * MD_TAPE_TRANSPORT (not stored): RUN, FREEZE (the loop repeats, nothing recorded), STOP (the tape brakes). */
-enum { MD_TAPE_RUN, MD_TAPE_FREEZE, MD_TAPE_STOP, MD_TAPE_TRANSPORTS, MD_TAPE_MS_MAX=2860 };
+ * MD_TAPE_TRANSPORT (not stored): RUN, FREEZE (the loop repeats, nothing recorded), STOP (the tape brakes), REWIND (the
+ * record head lifts and the tape runs back three times as fast: the echoes play reversed, higher). */
+enum { MD_TAPE_RUN, MD_TAPE_FREEZE, MD_TAPE_STOP, MD_TAPE_REWIND, MD_TAPE_TRANSPORTS, MD_TAPE_MS_MAX=2860 };
 typedef struct { float speed,wow,path,head_peak[3],rec_peak; uint32_t pos,length; int32_t heads,transport; uint8_t trace[128]; } md_reel;
 void md_reel_view(md_reel *view);
 /* Rhizome's HALL (in place of the room; reverb_time, room_tone, room_diffusion and the sends keep their roles):
@@ -181,7 +182,8 @@ unsigned md_memory_bytes(void);
 int md_has_envelope(int model);
 int md_cutoff_hz(int value);
 int md_hit(unsigned step,unsigned hits,unsigned length,unsigned rotate);
-int md_orbit_steps(int period); /* one turn, in sixteenths */
+int md_orbit_steps(int period); /* one turn, in sixteenths (a free period: at the tempo now, rounded) */
+int md_orbit_tenths(int period); /* a free period's turn in tenths of a second, 0 for one that follows the tempo */
 int md_orbit_moon_steps(int spin); /* one spin of the moons, in sixteenths */
 const char *md_orbit_system_name(int system,int brief); /* JUPITER, KEPLER-223...; 0: OWN */
 const char *md_orbit_system_about(int system); /* its bodies and ratios, a line */

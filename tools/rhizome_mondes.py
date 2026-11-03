@@ -4,7 +4,9 @@
 Three families of four, from dusk to dawn, each showing one side of the orbital sequencer:
  DUSK  resonances: round or nearly round orbits whose periods are simple ratios, heard as slow polyrhythms;
  NIGHT eccentric orbits: rubato (fast near the star, hanging far away), precession and perturbation;
- DAWN  moons and comets: ornaments after each note, rare passages, conjunctions struck as chords.
+ DAWN  moons and comets: ornaments after each note, rare passages, conjunctions struck as chords;
+ DEEP  long forms: LFOs, generators, the form, real planetary systems, gamakas and free periods, Mondes that keep
+       changing for minutes (not all in one).
 Then EMPTY SKY, a blank start (no gates, silent).
 
 Each Monde reuses the FDDS writer (tools/fdds_mondes.py) for Monades' part of the patch, then adds Rhizome's: the six
@@ -12,7 +14,8 @@ orbits, the comet and conjunctions, the tape, the HALL and Beads. Sounds come fr
 the FM-1's 85 % ceiling, a Monde plays four or five of Rhizome's voices (tools/rhizome_tones.py)."""
 from fdds_mondes import fdds,c_patch
 
-PERIOD={4:0,6:1,8:2,12:3,16:4,24:5,32:6,48:7,64:8,96:9,112:10,128:11,192:12} # one turn, in sixteenths
+PERIOD={4:0,6:1,8:2,12:3,16:4,24:5,32:6,48:7,64:8,96:9,112:10,128:11,192:12, # one turn, in sixteenths
+ '5.1s':13,'7.3s':14,'11.6s':15,'17.8s':16,'20.1s':17,'23.5s':18,'29.9s':19,'31.8s':20} # free periods, in seconds
 SPIN={1:0,2:1,3:2,4:3,6:4,8:5,12:6,16:7} # one spin of the moons, in sixteenths
 PITCH={'ORBIT':0,'MOTIF':1,'ECHO':2}
 MOON={'SAME':0,'UP':1,'DOWN':2,'3RD+':3,'3RD-':4,'HARM':5}
@@ -20,8 +23,9 @@ COMET={0:0,4:1,8:2,16:3,32:4,64:5} # one turn, in bars
 EVENT={'SWELL':0,'FREEZE':1,'BOTH':2}
 CONJ={'OFF':0,'ACCENT':1,'CHORD':2}
 MEDIA={'DIRTY':0,'CLEAN':1,'DIGITAL':2}
-FAMILIES=['Dusk: resonances','Night: eccentric orbits','Dawn: moons and comets','Blank']
-SHORT=['DUSK','NIGHT','DAWN','BLANK']
+FAMILIES=['Dusk: resonances','Night: eccentric orbits','Dawn: moons and comets','Deep: long forms','Blank']
+SHORT=['DUSK','NIGHT','DAWN','DEEP','BLANK']
+SYSTEM={'OWN':0,'JUPITER':1,'KEPLER-223':2,'TRAPPIST-1':3,'PLUTO':4}
 
 # A silent track: no gates, no hits, muted.
 REST=('Soft Table',48,0,16,dict(level=0,mute=1))
@@ -122,16 +126,82 @@ MONDES=[
   phrase={1:[0,-1,4,-1,7,-1,9,-1,7,-1,4,-1,2,-1,-1,-1]},
   orbits={0:body(3,64),1:body(6,64,pitch='MOTIF',moons=2,spin=2,interval='HARM',moon_level=45),2:body(5,32,ecc=200,phase=3,moons=1,spin=3,interval='UP',moon_level=50),3:body(1,192)},
   sky=(0,0,4,'FREEZE',40,'CHORD'),tape=(3,120,100,150),hall=(650,25,500,300,0),beads=(500,800,200,'DIGITAL')),
+
+ # ---- DEEP: long forms ----
+ # The showcase: few steps (loops of 4 to 12 sixteenths), every kind of note (ORBIT, MOTIF mutated by its generator,
+ # ECHO), moons, two free periods that never fall in step, precession, perturbation, a comet, chords, slow LFOs, the form.
+ dict(name='COLD IN THE DARK',family=3,tempo=72,root='D',scale='MINOR',macro=[500,60,460,320],
+  echo='1/8 .',delay_fb=420,fx=480,room=700,diffusion=800,grain=(700,450,350),form=(600,2,2),
+  tracks=[('Low Hum',38,1,16,dict(level=380,send=100,room=150)),('Glass Rows',62,1,16,dict(level=230,echo=350,room=400,send=280)),
+   ('DX Vibe',69,2,16,dict(level=210,echo=300,room=450,send=250)),('Ensemble Haze',57,1,16,dict(level=200,attack=650,decay=950,room=500,send=220)),
+   ('Soft Swarm',45,1,16,dict(level=180,attack=700,decay=950,room=500,send=250)),REST],
+  phrase={1:[0,-1,3,-1,7,-1,10,-1,12,-1,10,-1,7,-1,5,-1]},
+  orbits={0:body(1,12),1:body(1,4,ecc=300,pitch='MOTIF',moons=2,spin=3,interval='UP',moon_level=45),2:body(2,6,ecc=450,phase=6,pitch='ECHO'),
+   3:body(1,'17.8s',phase=3),4:body(1,'29.9s',phase=15)},
+  lfo={(1,0):('FREE SLOW','SINE','TONE',500),(3,0):('8 BARS','S&H','HARMONICS',300),(2,0):('4 BARS','TRIANGLE','CUTOFF',350)},
+  gen={1:('MOTIF',700,8,7)},
+  sky=(40,25,16,'BOTH',50,'CHORD'),tape=(3,200,150,250),hall=(800,40,600,450,0),beads=(650,820,300,'CLEAN')),
+ # Kepler-223 as measured (3:4:6:8, its eccentricities), the wavetables' colour turning with a slow LFO.
+ dict(name='KEPLER NIGHT',family=3,tempo=60,root='A',scale='DORIAN',macro=[500,60,460,320],
+  echo='1/4',delay_fb=380,fx=480,room=720,diffusion=800,grain=(750,500,300),
+  tracks=[('Night Table',57,4,16,dict(level=230,echo=300,room=450,send=250)),('DX Cirrus',64,4,16,dict(level=210,room=500,send=250)),
+   ('Pale Orchestra',52,4,16,dict(level=200,attack=500,decay=930,room=500,send=220)),('Bell Phase',69,4,16,dict(level=210,echo=350,room=450,send=250)),
+   ('Drone Hive',33,1,16,dict(level=360,attack=800,decay=960,room=250,send=100)),REST],
+  phrase={0:[0,-1,2,-1,3,-1,7,-1,5,-1,3,-1,2,-1,-1,-1]},
+  orbits={0:body(4,48,ecc=78,pitch='MOTIF'),1:body(4,64,ecc=150),2:body(4,96,ecc=37),3:body(4,128,ecc=51),4:body(1,'31.8s')},
+  lfo={(0,0):('FREE SLOW','SINE','TONE',450),(0,1):('8 BARS','TRIANGLE','SHAPE',350),(2,0):('4 BARS','SINE','CUTOFF',300)},
+  sky=(10,0,0,'SWELL',60,'ACCENT','KEPLER-223'),tape=(3,150,100,200),hall=(850,45,650,400,0),beads=(700,800,250,'DIGITAL')),
+ # TRAPPIST-1's resonant chain (2:3:4:6), its notes drawn by generators that remember (deja-vu) and slowly let go.
+ dict(name='TRAPPIST DUST',family=3,tempo=66,root='E',scale='HIRAJOSHI',macro=[500,40,480,360],
+  echo='1/8 .',delay_fb=450,fx=500,room=680,grain=(650,450,400),
+  tracks=[('Wild Swarm',52,4,16,dict(level=200,room=400,send=300)),('Glass Vowel',64,4,16,dict(level=220,echo=300,room=450,send=280)),
+   ('Six Nine',57,4,16,dict(level=200,attack=300,room=450,send=250)),('Dust Table',69,4,16,dict(level=200,echo=350,room=450,send=280)),
+   ('Low Terrain',40,1,16,dict(level=360,send=100,room=200)),REST],
+  orbits={0:body(4,32,ecc=5),1:body(4,48,ecc=10,phase=4),2:body(4,64,ecc=3,phase=8),3:body(4,96,ecc=4,phase=12),4:body(1,192)},
+  gen={1:('RANDOM',800,8,7),3:('MARKOV',600,8,12)},
+  lfo={(0,0):('FREE SLOW','SMOOTH','HARMONICS',400)},
+  sky=(0,10,0,'SWELL',60,'ACCENT','TRAPPIST-1'),tape=(5,250,150,350),hall=(750,35,550,400,0),beads=(600,840,400,'DIRTY')),
+ # A raga at night (Bhairavi): a drone, a breath that sings the phrase with meend, a reed that sways (andolan), bells
+ # with kan; the pivot notes draw the generated ones.
+ dict(name='RAGA OF ASH',family=3,tempo=52,root='D',scale='BHAIRAVI',macro=[500,40,440,340],vadi=5,samvadi=0,
+  echo='1/4',delay_fb=350,fx=500,room=760,diffusion=850,grain=(800,500,350),
+  tracks=[('Throat Drone',38,1,16,dict(level=360,send=100,room=250)),('Breath Vowel',62,6,16,dict(level=250,attack=150,echo=300,room=450,send=250)),
+   ('Warm Reed',57,3,16,dict(level=220,attack=100,echo=300,room=450,send=250)),('DX Tub Bells',74,2,16,dict(level=190,echo=400,room=500,send=300)),
+   ('Organ Fifths',50,1,16,dict(level=200,attack=800,decay=960,room=450,send=200)),REST],
+  phrase={1:[0,-1,1,-1,5,-1,-1,-1,7,-1,5,-1,3,-1,1,-1]},
+  orbits={0:body(1,192),1:body(6,64,ecc=250,pitch='MOTIF'),2:body(3,96,ecc=400,phase=8),3:body(2,48,ecc=600,phase=16),4:body(1,128,phase=12)},
+  gamaka={1:('MEEND',700),2:('ANDOLAN',600),3:('KAN',500)},
+  gen={2:('MARKOV',500,8,7)},
+  sky=(15,10,0,'SWELL',60,'ACCENT'),tape=(1,150,100,200),hall=(900,50,650,450,0),beads=(750,780,300,'CLEAN')),
+ # The form: calm, build, peak, release, sixteen bars each, tracks falling silent and coming back; slow LFOs open and
+ # close the filters and move the voices across.
+ dict(name='SLOW TIDES',family=3,tempo=58,root='F',scale='MIXOLYDIAN',macro=[500,60,460,340],form=(900,3,3),
+  echo='1/8 .',delay_fb=400,fx=500,room=740,diffusion=800,grain=(750,450,350),
+  tracks=[('Low Strings',41,2,16,dict(level=380,send=100,room=200)),('Warm Ensemble',65,3,16,dict(level=210,attack=500,room=450,send=250)),
+   ('Mist Basin',60,3,16,dict(level=210,echo=300,room=450,send=280)),('DX Soundtrack',72,2,16,dict(level=200,echo=350,room=500,send=280)),
+   ('Breath Table',53,2,16,dict(level=200,attack=400,room=450,send=250)),REST],
+  orbits={0:body(2,128,ecc=200),1:body(3,64,ecc=350,phase=4),2:body(3,96,ecc=500,phase=10),3:body(2,48,ecc=600,phase=18),4:body(2,112,ecc=250,phase=14)},
+  lfo={(1,0):('8 BARS','SINE','CUTOFF',500),(2,0):('4 BARS','TRIANGLE','PAN',600),(3,0):('FREE SLOW','SINE','ROOM SEND',500),(4,0):('8 BARS','SMOOTH','TONE',400)},
+  sky=(30,10,0,'SWELL',60,'ACCENT'),tape=(3,200,100,250),hall=(850,45,600,450,0),beads=(700,800,300,'CLEAN')),
+ # Five free periods, in seconds whatever the tempo, each with one gate: the loops of Music for Airports 2/1 (Brian
+ # Eno's tape lengths), five voices that never fall together, so the music never repeats.
+ dict(name='LOOPS OF ASH',family=3,tempo=60,root='F',scale='MINOR',macro=[500,0,460,300],
+  echo='1/4',delay_fb=300,fx=520,room=800,diffusion=850,grain=(800,500,300),
+  tracks=[('Choir Ah',53,1,16,dict(level=230,attack=600,decay=920,room=500,send=200)),('Choir Oo',56,1,16,dict(level=220,attack=600,decay=920,room=500,send=200)),
+   ('Night Voice',60,1,16,dict(level=220,attack=600,decay=920,room=500,send=200)),('Solina Dusk',61,1,16,dict(level=200,attack=700,decay=940,room=500,send=200)),
+   ('Distant Strings',63,1,16,dict(level=200,attack=700,decay=940,room=500,send=200)),REST],
+  orbits={0:body(1,'17.8s'),1:body(1,'20.1s',phase=5),2:body(1,'23.5s',phase=10),3:body(1,'29.9s',phase=15),4:body(1,'31.8s',phase=20)},
+  sky=(0,0,0,'SWELL',60,'OFF'),tape=(4,100,50,150),hall=(900,60,650,400,0),beads=(750,780,250,'CLEAN')),
 ]
 # A blank start, as Monades' blank: no gates, no hits, the effects returned at zero.
-BLANK=dict(name='EMPTY SKY',family=3,tempo=64,root='C',scale='MINOR',macro=[500,0,500,0],fx=0,room=600,
+BLANK=dict(name='EMPTY SKY',family=4,tempo=64,root='C',scale='MINOR',macro=[500,0,500,0],fx=0,room=600,
  tracks=[('DX Vibe',48+i*7 if i<4 else 60,0,16,dict(level=300,room=0)) for i in range(6)],orbits={},
  phrase={i:[0 if j%4==0 else 7 if j%4==2 else -1 for j in range(16)] for i in range(6)}, # as Monades' blank: room for Marbles
  sky=(0,0,0,'SWELL',60,'ACCENT'),tape=(1,0,0,0),hall=(700,20,550,300,0),beads=(500,800,200,'DIGITAL'))
 
-# Levels: every Monde near -30 dB RMS over a minute (NO STARS, sparse by design, near -36), measured with Rhizome's
+# Levels: every Monde near -30 dB RMS over a minute (NO STARS and LOOPS OF ASH, sparse by design, near -36), measured with Rhizome's
 # voices by tests/next_features.cpp; the tracks' levels above are the balance inside a Monde, these the Monde's own.
-GAIN={'LAST LIGHT':2.07,'AMBER HOUR':1.58,'LONG SHADOWS':2.79,'SLOW EMBERS':1.22,'NIGHT SWALLOWS':1.55,'BLACK ORCHARD':1.76,'SLEEPLESS TIDE':1.51,'NO STARS':0.66,'FIRST BIRD':2.66,'PALE COMET':3.02,'CHOKED DAWN':1.01,'DAY BREAKS':1.16}
+GAIN={'LAST LIGHT':1.98,'AMBER HOUR':1.62,'LONG SHADOWS':2.79,'SLOW EMBERS':1.4,'NIGHT SWALLOWS':1.43,'BLACK ORCHARD':1.48,'SLEEPLESS TIDE':2.01,'NO STARS':0.95,'FIRST BIRD':2.75,'PALE COMET':2.95,'CHOKED DAWN':1.0,'DAY BREAKS':1.12,'COLD IN THE DARK':1.48,'KEPLER NIGHT':1.41,'TRAPPIST DUST':0.93,'RAGA OF ASH':2.0,'SLOW TIDES':2.69,'LOOPS OF ASH':1.4}
 
 # The HALL as a voice of its own: the melodic tracks' sends, raised from the values above (where it sat 15 to 20 dB under
 # the direct sound and went unheard) to about 10 dB under it; the bass keeps its small send, for a clear low end.
@@ -146,10 +216,11 @@ def rhizome(tones,fields):
    tr['level']=min(1000,round(tr['level']*GAIN.get(m['name'],1)))
    if i and m is not BLANK:b['ext']['tracks'][i]['reverb_send']=min(1000,round(b['ext']['tracks'][i]['reverb_send']*HALL)) # the bass stays dry
    if i in m['orbits']:tr['hits']=0 # a body plays its gates, not a rhythm
-  prec,pert,comet,event,amount,conj=m['sky']
-  b['v11']=dict(orbit=[m['orbits'].get(i,body(0,16)) for i in range(6)],sky=[prec,pert,COMET[comet],EVENT[event],amount,CONJ[conj],0],
+  prec,pert,comet,event,amount,conj=m['sky'][:6];system=SYSTEM[m['sky'][6]] if len(m['sky'])>6 else 0
+  b['v11']=dict(orbit=[m['orbits'].get(i,body(0,16)) for i in range(6)],sky=[prec,pert,COMET[comet],EVENT[event],amount,CONJ[conj],system],
    tape=list(m['tape']),hall=list(m['hall']),beads=list(m['beads'][:3])+[MEDIA[m['beads'][3]]])
   b['v10']=False;b['v11ok']=True
+  if m is BLANK:b['seed']=0x52485A00+12*7919 # EMPTY SKY keeps the seed it had as the 13th, before the DEEP Mondes
  return out
 
 def c_patch11(b,fields):

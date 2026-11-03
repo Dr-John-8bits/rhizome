@@ -544,4 +544,11 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 - **Trois défauts de Plaits corrigés en route** (voir `app/third_party/plaits/NOTICE.md`) : le WAVETABLE écrivait et lisait hors de sa table, et SIX-OP lisait une case trop loin à une vélocité de 1. Ils sont trouvés par un plantage pendant la DERIVE, puis par les sanitizers.
 - **Version de référence** gardée pour la première mesure : `M-VAVE FM1/flash/rhizome-0.0.1-reference.fwsc` (avant ce changement de voix).
 
+**REWIND, périodes libres, six Mondes DEEP** (3 novembre 2026) :
+- **REWIND** de la bande (TAPE ECHO / AGE, K4 TRANSPORT) : la tête d'enregistrement se lève, la bande repart en arrière trois fois plus vite (le moteur se retourne en un dixième de seconde), les échos reviennent à l'envers ; les bobines tournent à l'envers à l'écran.
+- **Le tempo libre, orbite par orbite** : après les 13 périodes en pas, PERIOD propose 8 périodes en secondes (5,1 à 31,8 s), qui ne suivent pas le tempo ; aucune ne divise une autre. Les cinq dernières sont les boucles de *Music for Airports*. Quand le tempo change, un corps libre reste où il était (testé : 17,8 s par tour à 140 puis à 60 BPM, changement compris, à 3 ms près). Le premier tour après PLAY part du premier pas (jusqu'à un pas de décalage).
+- **Les générateurs agissent sur les orbites** (ORBIT et MOTIF), avec leur mémoire déjà-vu, comme MOTION depuis le matin.
+- **Six Mondes DEEP** (13 à 18) : COLD IN THE DARK (la vitrine à peu de pas), KEPLER NIGHT, TRAPPIST DUST, RAGA OF ASH, SLOW TIDES, LOOPS OF ASH. EMPTY SKY devient le 19e, avec sa graine d'avant. Niveaux mesurés sur une minute (les formes longues commencent par leur calme). Écoute : `M-VAVE FM1/ecoutes/rhizome-6-mondes-deep.m4a`.
+- **Un effet de plus, à décider** : un *shimmer* dans la HALL (une octave au-dessus réinjectée dans la queue), le son des nappes d'Eno et Lanois. Petit tampon, peu de calcul ; la place du pool (24 Ko) est à surveiller.
+
 Chaque étape se développe d'abord sur le Mac (`tools/build_local.py host`), puis dans le navigateur, puis sur le FM-1.

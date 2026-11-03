@@ -252,17 +252,27 @@ int main(){
    int bodies=0,round=1,eccentric=0,moons=0;for(int i=0;i<6;i++){const md_orbit &o=p->orbit[i];if(!o.gates)continue;bodies++;round&=o.ecc<=250;eccentric+=o.ecc>=500;moons+=o.moons;}
    assert(bodies>=3);const char *fam=md_biome_family(id);
    if(!strcmp(fam,"DUSK"))assert(round);else if(!strcmp(fam,"NIGHT"))assert(eccentric>=2&&(p->orbit_prec||p->orbit_pert));
-   else{assert(!strcmp(fam,"DAWN"));assert(moons||p->orbit_comet||p->orbit_conj==MD_CONJ_CHORD);}
-   cmd(MD_PLAY,0,1);double e=0;float peak=0;for(int b=0;b<5200;b++){md_render(audio,128);for(int k=0;k<256;k++){peak=fmaxf(peak,fabsf(audio[k]));e+=audio[k]*audio[k];}}cmd(MD_PLAY,0,0);
-   level[id]=(float)(10*log10(e/(5200*256)));printf("  %-15s %-5s peak %.3f RMS %.1f dB\n",md_biome_name(id),fam,peak,level[id]);assert(peak>.01f&&peak<.95f);}
-  for(int a=0;a<MD_BLANK_BIOME;a++)for(int b=0;b<MD_BLANK_BIOME;b++)if(strcmp(md_biome_name(a),"NO STARS")&&strcmp(md_biome_name(b),"NO STARS"))assert(fabsf(level[a]-level[b])<6);
-  puts("PASS Rhizome Mondes: 12 v12 patches, three families of orbits, all audible and balanced");
+   else if(!strcmp(fam,"DAWN"))assert(moons||p->orbit_comet||p->orbit_conj==MD_CONJ_CHORD);
+   else{assert(!strcmp(fam,"DEEP"));int lfos=0,gens=0,gamakas=0,free=0;for(int i=0;i<6;i++){lfos+=p->lfo[i][0].depth||p->lfo[i][1].depth;gens+=p->gen[i].source!=0;gamakas+=p->gamaka[i]!=0;free+=p->orbit[i].gates&&md_orbit_tenths(p->orbit[i].period);}
+    assert(lfos||gens||gamakas||free||p->form||p->orbit_system);} // a long form: LFOs, generators, gamakas, free periods, the form or a real system
+   cmd(MD_PLAY,0,1);double e=0;float peak=0;for(int b=0;b<20700;b++){md_render(audio,128);for(int k=0;k<256;k++){peak=fmaxf(peak,fabsf(audio[k]));e+=audio[k]*audio[k];}}cmd(MD_PLAY,0,0);
+   level[id]=(float)(10*log10(e/(20700.0*256)));printf("  %-15s %-5s peak %.3f RMS %.1f dB\n",md_biome_name(id),fam,peak,level[id]);assert(peak>.01f&&peak<.95f);}
+  for(int a=0;a<MD_BLANK_BIOME;a++)for(int b=0;b<MD_BLANK_BIOME;b++){auto sparse=[](int id){return !strcmp(md_biome_name(id),"NO STARS")||!strcmp(md_biome_name(id),"LOOPS OF ASH");};if(!sparse(a)&&!sparse(b))assert(fabsf(level[a]-level[b])<6);}
+  puts("PASS Rhizome Mondes: 18 v12 patches, four families of orbits, all audible and balanced");
   // The home page's macros act on the orbits: DENSITY adds or takes gates (a body keeps its orbit), MOTION moves notes.
   {cmd(MD_SCENE,0,0);md_patch q=*md_state();float phi[MD_ORBIT_GATES_MAX];int n[3];
    for(int k=0;k<3;k++){q.macro[0]=k*500;n[k]=md_orbit_gate_angles(&q,2,phi);}
    assert(n[0]<n[1]&&n[1]==q.orbit[2].gates&&n[2]>n[1]&&n[2]<=MD_ORBIT_GATES_MAX);
    q=*md_state();q.macro[1]=0;const uint64_t still=hash(q);q.macro[1]=600;assert(hash(q)!=still);
-   puts("PASS DENSITY adds and takes gates, MOTION moves orbit notes");}
+   q.macro[1]=0;q.gen[2]={MD_GEN_RANDOM,0,8,12};assert(hash(q)!=still); // and its generator moves a body's notes too
+   puts("PASS DENSITY adds and takes gates, MOTION and the generator move orbit notes");}
+  // A free period keeps its seconds whatever the tempo, even when the tempo changes on the way.
+  {md_patch q=blank(MD_PD);for(int i=0;i<6;i++){q.orbit[i].gates=0;q.track[i].mute=i!=0;}
+   q.orbit[0]={1,MD_ORBIT_TEMPO_PERIODS+3,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};q.tempo=140;assert(md_validate(&q)&&md_orbit_tenths(q.orbit[0].period)==178);
+   md_init();assert(md_load(&q));cmd(MD_PLAY,0,1);uint32_t seen=md_status()->orbit_hits[0];double t=0,times[8];int n=0;
+   for(int b=0;b<345*100&&n<6;b++){if(b==345*30)cmd(MD_TEMPO,0,60);md_render(audio,128);t+=128.0/44100;if(md_status()->orbit_hits[0]!=seen){seen=md_status()->orbit_hits[0];times[n++]=t;}}
+   assert(n>=4);for(int k=1;k<n;k++)printf("  free 17.8 s orbit: %.3f s\n",times[k]-times[k-1]);for(int k=2;k<n;k++)assert(fabs(times[k]-times[k-1]-17.8)<.01); // the first turn after PLAY starts on the first step (up to one step off)
+   puts("PASS a free period: 17.8 s a turn at 140 and at 60 BPM, through the change");}
   // Every voice builds in its arena with room to spare (the wavetable once wrote past it).
   {md_init();cmd(MD_SCENE,0,MD_BLANK_BIOME);for(int m=0;m<MD_MODELS;m++)for(int t=0;t<6;t++)cmd(MD_MODEL,t,m);
    printf("  voice arena: %u bytes to spare at least\n",md_voice_arena_spare());assert(md_voice_arena_spare()>0);puts("PASS every voice fits its arena");}
@@ -456,6 +466,11 @@ int main(){
    energy(700);assert(md_command(MD_TRIGGER,0,48));energy(100);assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_FREEZE));
    energy(2000);assert(energy(1400)>1e-3); // two seconds later, without feedback, the loop still plays the pluck
    assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_STOP));energy(3000);md_reel r;md_reel_view(&r);assert(r.speed<.01f&&r.transport==MD_TAPE_STOP&&energy(700)<1e-6);
+   assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_RUN));energy(3000);md_reel_view(&r);assert(fabsf(r.speed-10500/(500*22.05f))<.05f);
+   // REWIND: the tape runs back three times as fast, the pluck comes back reversed, nothing is recorded; RUN again.
+   assert(md_command(MD_TRIGGER,0,48));energy(100);const uint32_t at=r.pos;(void)at;assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_REWIND));energy(3000);md_reel_view(&r);
+   assert(r.transport==MD_TAPE_REWIND&&fabsf(r.speed+3*10500/(500*22.05f))<.1f);
+   {const float rec=r.rec_peak;double back=energy(2000);md_reel_view(&r);assert(back>1e-4&&r.rec_peak<=rec+1e-6f);} // heard, reversed; the record head stays up
    assert(md_command(MD_TAPE_TRANSPORT,0,MD_TAPE_RUN));energy(3000);md_reel_view(&r);assert(fabsf(r.speed-10500/(500*22.05f))<.05f);
    md_patch bad=q;bad.tape_heads=0;assert(!md_validate(&bad));bad=q;bad.delay_ms=MD_TAPE_MS_MAX+1;assert(!md_validate(&bad));}
   // The HALL: the tail falls 60 dB in the time DECAY asks for (measured between -10 and -40 dB), at 44.1 kHz and in

@@ -438,12 +438,7 @@ static void tick() {
   stats.hits_now[i]=hits;stats.rotate_now[i]=rot;
   const bool hit=patch.ext[i].bass_mode==2||md_hit(local,hits,t.length,rot),rest=(dropped>>i)&1;
   bool pass=roll%1000<(unsigned)t.prob;int gen_off=0;const bool gen=patch.gen[i].source&&hit&&!t.mute&&!rest;
-  if(gen){GenState &g=gens[i];const unsigned len=(unsigned)bound(patch.gen[i].loop,1,16),pos=g.count%len;
-   const bool replay=((g.valid>>pos)&1)&&random_word(g.rng)%1000<(unsigned)patch.gen[i].dejavu;
-   if(replay){gen_off=g.off[pos];pass=(g.gate>>pos)&1;}
-   else{gen_off=gen_draw(i,g);g.off[pos]=gen_off;g.valid|=1u<<pos;g.gate=(g.gate&~(1u<<pos))|((unsigned)pass<<pos);}
-   g.prev=gen_off;g.count++;
-   stats.gen_valid[i]=g.valid;stats.gen_gate[i]=g.gate;stats.gen_pos[i]=pos;stats.gen_fresh[i]=!replay;memcpy(stats.gen_off[i],g.off,sizeof g.off);}
+  if(gen)gen_off=gen_step(i,pass);
   {const uint32_t bit=1u<<(local%(unsigned)t.length);
    stats.step_played[i]&=~bit;stats.step_skipped[i]&=~bit;if(hit&&!t.mute&&!rest){if(pass)stats.step_played[i]|=bit;else stats.step_skipped[i]|=bit;}}
   if(hit&&pass&&!t.mute&&!rest) {
@@ -633,7 +628,8 @@ static void quantum(float *lr,unsigned n) {
 }
 extern "C" {
 int md_hit(unsigned s,unsigned h,unsigned l,unsigned r) {if(!l||l>32)return 0;h=h>l?l:h;return (((s+r)%l)*h)%l<h;}
-int md_orbit_steps(int period){return orbit_steps_of[bound(period,0,MD_ORBIT_PERIODS-1)];}
+int md_orbit_steps(int period){return (int)(orbit_steps_at(period,patch.tempo)+.5f);}
+int md_orbit_tenths(int period){period=bound(period,0,MD_ORBIT_PERIODS-1);return period<MD_ORBIT_TEMPO_PERIODS?0:orbit_free_tenths[period-MD_ORBIT_TEMPO_PERIODS];}
 const char *md_orbit_system_name(int s,int brief){const OrbitSystem &y=orbit_systems[bound(s,0,MD_ORBIT_SYSTEMS-1)];return brief?y.brief:y.name;}
 const char *md_orbit_system_about(int s){return orbit_systems[bound(s,0,MD_ORBIT_SYSTEMS-1)].about;}
 int md_orbit_comet_steps(int comet){return orbit_comet_steps_of[bound(comet,0,MD_COMETS-1)];}
@@ -641,7 +637,7 @@ int md_orbit_moon_steps(int spin){return orbit_moon_steps_of[bound(spin,0,MD_MOO
 // The gates of a track: its turn's steps, the euclidean hits among them, each as a direction (top = -pi/2, clockwise).
 // DENSITY adds or takes gates as it adds or takes hits on a rhythm (up to a third of 16 each way); a body keeps its orbit.
 int md_orbit_gate_angles(const md_patch *p,int track,float *phi){
- const md_orbit &o=p->orbit[bound(track,0,5)];const int n=md_orbit_steps(o.period),most=n<MD_ORBIT_GATES_MAX?n:MD_ORBIT_GATES_MAX;
+ const md_orbit &o=p->orbit[bound(track,0,5)];const int n=md_orbit_tenths(o.period)?16:md_orbit_steps(o.period),most=n<MD_ORBIT_GATES_MAX?n:MD_ORBIT_GATES_MAX;
  const int k=o.gates?bound(o.gates+(p->macro[0]-500)*(most<16?most:16)/1500,0,most):0;int count=0;
  for(int s=0;s<n&&count<MD_ORBIT_GATES_MAX;s++)if((s*k)%n<k)phi[count++]=-1.57079633f+o.phase*.261799388f+ORBIT_TAU*s/n;
  return count;

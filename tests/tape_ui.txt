@@ -1,8 +1,8 @@
 wait 3400
 tap HOME
-turn PRESET 12
+turn PRESET 18
 wait 50
-expect biome 12
+expect biome 18
 tap FX
 expect page 34
 spin K3 6

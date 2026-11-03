@@ -11,7 +11,7 @@ static uint32_t tp_ms;
 static void tape_view_update(void){
  const uint32_t now=plat_ms(),dt=tp_ms?now-tp_ms:0;tp_ms=now;md_reel_view(&tp);
  // Revolutions a second: 0.2 at the slowest tape, 0.3 at 1, about 1.4 at the fastest (under a sixth of a turn a frame).
- if(dream_prefs.motion&&dt<200){const float v=fm_maxf(tp.speed,0),r=fm_sqrtf(v);tp_angle-=dt*.001f*6.2831853f*.3f*r*fm_sqrtf(fm_sqrtf(r));} // speed^0.625
+ if(dream_prefs.motion&&dt<200){const float v=fm_fabsf(tp.speed),r=fm_sqrtf(v),turn=dt*.001f*6.2831853f*.3f*r*fm_sqrtf(fm_sqrtf(r));tp_angle+=tp.speed<0?turn:-turn;} // speed^0.625
  if(tp_angle<-6.2831853f)tp_angle+=6.2831853f;
 }
 static void tp_fmt_ms(float ms,char *s){
@@ -39,7 +39,7 @@ static void tp_knob(const md_patch *p,int page,int k,const char **label,char *va
   if(k==0){*label="DRIVE";md_num(p->tape_drive/10,value);ov_append(info,p->tape_drive?"THE RECORD HEAD SATURATES":"CLEAN RECORDING");}
   else if(k==1){*label="AGE";md_num(p->tape_age/10,value);ov_append(info,p->tape_age?"HISS, DULLER, DROPOUTS":"A NEW TAPE");}
   else if(k==2){*label="TONE";md_num(p->echo_tone/10,value);ov_append(info,p->echo_tone<400?"EACH PASS MUCH DARKER":p->echo_tone>600?"BRIGHT REPEATS":"EACH PASS A LITTLE DARKER");}
-  else{static const char *const names[MD_TAPE_TRANSPORTS]={"RUN","FREEZE","STOP"},*const infos[MD_TAPE_TRANSPORTS]={"THE TAPE RUNS","REC HEAD UP: THE LOOP REPEATS","THE TAPE STOPS, THE SOUND DIVES"};
+  else{static const char *const names[MD_TAPE_TRANSPORTS]={"RUN","FREEZE","STOP","REWIND"},*const infos[MD_TAPE_TRANSPORTS]={"THE TAPE RUNS","REC HEAD UP: THE LOOP REPEATS","THE TAPE STOPS, THE SOUND DIVES","BACK, FAST: THE ECHOES REVERSED"};
    *label="TRANSPORT";ov_append(value,names[tp.transport]);ov_append(info,infos[tp.transport]);}
  }
 }

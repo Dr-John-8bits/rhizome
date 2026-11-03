@@ -132,9 +132,9 @@ expect playing 0
 tap HOME
 expect help -1
 expect page 0
-spin PRESET 12
+spin PRESET 18
 wait 30
-expect biome 12
+expect biome 18
 tap EDIT
 spin PRESET 1
 wait 30
@@ -144,10 +144,10 @@ wait 30
 expect tone_preset 0
 expect model 0
 tap HOME
-spin PRESET -12
+spin PRESET -18
 wait 30
 expect asking 0
-expect biome 12
+expect biome 18
 tap SEL
 wait 30
 expect asking -1

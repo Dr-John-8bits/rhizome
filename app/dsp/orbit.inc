@@ -7,7 +7,10 @@
  * lingers far from it (Kepler's second law): the same loop, with rubato. Precession turns each ellipse slowly, so the
  * rubato slides against the bar; two bodies aligned with the star (a conjunction) accent their next beat. Each note
  * spins the body's moons once around it; a moon plays an ornament as it passes the body's outer side. */
-static const int16_t orbit_steps_of[MD_ORBIT_PERIODS]={4,6,8,12,16,24,32,48,64,96,112,128,192};
+static const int16_t orbit_steps_of[MD_ORBIT_TEMPO_PERIODS]={4,6,8,12,16,24,32,48,64,96,112,128,192};
+// Free periods, in tenths of a second, whatever the tempo: none divides another, so they never fall together. The last
+// five are the tape loops of Brian Eno's Music for Airports 2/1.
+static const int16_t orbit_free_tenths[MD_ORBIT_PERIODS-MD_ORBIT_TEMPO_PERIODS]={51,73,116,178,201,235,299,318};
 static const int8_t orbit_moon_steps_of[MD_MOON_SPINS]={1,2,3,4,6,8,12,16};
 static const float ORBIT_TAU=6.28318531f,ORBIT_PI=3.14159265f;
 static const int16_t orbit_comet_steps_of[MD_COMETS]={0,64,128,256,512,1024};
@@ -17,6 +20,7 @@ static const float orbit_tilt[6]={-.6f,.5f,1.6f,2.7f,3.8f,4.9f}; // each periaps
 struct Orbit { float M0,w0,gate_M[MD_ORBIT_GATES_MAX];int gate_n,motif;float accent_until,moon_t0,moon_vel; };
 static Orbit orbits[6];
 static float orbit_step_len=5512.5f,orbit_since,orbit_prev=-1; // samples in the current step, since its tick; last position run
+static int orbit_gen(unsigned i); // generative.inc: the track's generator, for each note a body plays
 static unsigned orbit_rng=1,orbit_rest; // its own random stream (perturbation); tracks FORM rests this step
 static int orbit_prepared=-1;
 static float conj_d[15],conj_cool[15];static uint8_t conj_seen[15];
@@ -43,7 +47,11 @@ static float orbit_mean_of(float theta,float e){
  const float E=2*orbit_atan2(sqrtf(1-e)*sinf(theta*.5f),sqrtf(1+e)*cosf(theta*.5f));
  return E-e*sinf(E);
 }
-static int orbit_steps(unsigned i){return orbit_steps_of[bound(patch.orbit[i].period,0,MD_ORBIT_PERIODS-1)];}
+// One turn in sixteenths: a free period counts them at the tempo now (orbit_run keeps the bodies in place when it changes).
+static float orbit_steps_at(int period,int tempo){period=bound(period,0,MD_ORBIT_PERIODS-1);
+ return period<MD_ORBIT_TEMPO_PERIODS?(float)orbit_steps_of[period]:orbit_free_tenths[period-MD_ORBIT_TEMPO_PERIODS]*.1f*tempo*(1.0f/15);}
+static float orbit_steps(unsigned i){return orbit_steps_at(patch.orbit[i].period,patch.tempo);}
+static int orbit_tempo_seen;
 // Eccentricity now: the perturbation makes it breathe slowly (a round orbit stays round).
 static float orbit_e(unsigned i,float pos){
  float e=patch.orbit[i].ecc*.001f;
@@ -57,7 +65,7 @@ static float orbit_M(unsigned i,float pos){return orbits[i].M0+ORBIT_TAU*pos/orb
 static float orbit_pos_now(){return step?(float)(step-1)+fminf(orbit_since/orbit_step_len,.999f):-1.0f;}
 
 static void orbit_reset(){ // PLAY: every body starts at the top, together
- orbit_prev=-1;orbit_since=0;orbit_prepared=-1;orbit_rng=patch.seed|1;orbit_rest=0;
+ orbit_prev=-1;orbit_since=0;orbit_prepared=-1;orbit_rng=patch.seed|1;orbit_rest=0;orbit_tempo_seen=patch.tempo;
  for(unsigned i=0;i<6;i++){Orbit &o=orbits[i];o.w0=orbit_tilt[i];o.M0=orbit_mean_of(-1.57079633f-o.w0,orbit_e(i,0));o.accent_until=-1;o.motif=0;o.gate_n=0;o.moon_t0=-100;stats.motif_at[i]=0;
   stats.moon_t0[i]=-100;stats.moon_hit[i]=0;stats.orbit_hit_gate[i]=-1;stats.orbit_hit_pos[i]=-100;stats.orbit_hit_skip[i]=0;}
  comet_M0=ORBIT_PI;stats.comet_M=ORBIT_PI;comet_target=0; // the comet starts far away
@@ -153,6 +161,7 @@ static void orbit_fire(unsigned i,int gate,float pos){
    for(int k=0;k<deg;k++)pitch=scale_neighbour(pitch,1);for(int k=0;k>deg;k--)pitch=scale_neighbour(pitch,-1);}
   // MOTION, as on a rhythm: that share of the notes jumps by a scale step, a fourth, a fifth or an octave (not ECHO,
   // which answers the note it hears).
+  if(c.pitch!=MD_PITCH_ECHO&&patch.gen[i].source)pitch+=orbit_gen(i); // the track's generator, as on a rhythm (GENERATOR page)
   if(c.pitch!=MD_PITCH_ECHO&&patch.macro[1]){const unsigned m=random_word(orbit_rng);static const int8_t leap[7]={0,2,3,5,7,10,12};if(m%1000<(unsigned)patch.macro[1])pitch+=leap[(m>>12)%7];}
   pitch=quantize_any(pitch+patch.transpose,patch.root,patch.scale,0);
  }
@@ -183,6 +192,10 @@ static void orbit_moon_fire(unsigned i,int k){
 static void orbit_run(){
  const float pos=orbit_pos_now();if(pos<0)return;
  if(pos<orbit_prev||pos-orbit_prev>4)orbit_prev=pos-1e-4f; // a restart or a long gap: no burst
+ // A new tempo: the free periods keep their seconds, so each such body is put back where it was.
+ if(patch.tempo!=orbit_tempo_seen){if(orbit_tempo_seen>0&&orbit_prev>=0)for(unsigned i=0;i<6;i++)if(patch.orbit[i].period>=MD_ORBIT_TEMPO_PERIODS)
+   orbits[i].M0+=ORBIT_TAU*orbit_prev*(1/orbit_steps_at(patch.orbit[i].period,orbit_tempo_seen)-1/orbit_steps(i));
+  orbit_tempo_seen=patch.tempo;}
  if((int)step!=orbit_prepared){orbit_prepare(pos);orbit_prepared=(int)step;}
  float phi[6];bool on[6];
  for(unsigned i=0;i<6;i++){const Orbit &o=orbits[i];const float M1=orbit_M(i,orbit_prev),M2=orbit_M(i,pos),e=orbit_e(i,pos),w=orbit_w(i,pos);

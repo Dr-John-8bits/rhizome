@@ -23,7 +23,7 @@ Les boutons du FM-1 portent les noms du firmware d'origine de M-VAVE. Cinq bouto
 | Les lunes (ornements) | SEQ 3 fois | ORBIT / MOONS |
 | La comète, les conjonctions | SEQ 4 fois | ORBIT / COMET |
 | Le delay à bande | FX 1 fois | TAPE ECHO |
-| La saturation, l'usure, FREEZE et STOP de la bande | FX 2 fois | TAPE ECHO / AGE |
+| La saturation, l'usure, FREEZE, STOP et REWIND de la bande | FX 2 fois | TAPE ECHO / AGE |
 | La réverbe | FX 3 fois | HALL |
 | Les graves, les aigus, la diffusion, le mode vintage de la réverbe | FX 4 fois | HALL / COLOR |
 | Le niveau, la taille, la position et le retour des grains | FX 5 fois | GRANULAR BUS |
@@ -76,9 +76,9 @@ Deux différences :
 
 ## Les Mondes
 
-Rhizome a **12 Mondes**, écrits pour When Day Chokes The Night, en trois familles qui vont du crépuscule à l'aube. Chacune montre une idée du séquenceur orbital. Le 13e, **EMPTY SKY**, est une page blanche : aucune porte, aucun coup, les effets à zéro.
+Rhizome a **18 Mondes**, écrits pour When Day Chokes The Night. Les trois premières familles vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. La quatrième, DEEP, fait évoluer la musique sur plusieurs minutes. Le 19e, **EMPTY SKY**, est une page blanche : aucune porte, aucun coup, les effets à zéro.
 
-Tous sont réglés au même niveau d'écoute (sauf NO STARS, plus clairsemé, un peu plus bas). Sur le Mac, ils sont estimés entre 36 et 53 % du processeur du FM-1, Beads grand ouvert compris : loin de la limite de 85 %. Ce n'est qu'une estimation, que l'appareil devra confirmer.
+Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas). Sur le Mac, les douze premiers sont estimés entre 36 et 53 % du processeur du FM-1, Beads grand ouvert compris : loin de la limite de 85 %. Ce n'est qu'une estimation, que l'appareil devra confirmer.
 
 **DUSK, les résonances.** Des orbites rondes ou presque, dont les périodes sont des rapports simples. On entend des polyrythmes lents et réguliers.
 
@@ -107,6 +107,17 @@ Tous sont réglés au même niveau d'écoute (sauf NO STARS, plus clairsemé, un
 | 11 CHOKED DAWN | F# DORIAN · 56 | Les conjonctions frappent des accords. Bande saturée et usée, comète qui gonfle et fige. |
 | 12 DAY BREAKS | D MIXOLYDIAN · 84 | Une phrase ornée d'harmoniques, des accords aux conjonctions, une comète qui fige les grains. |
 
+**DEEP, les formes longues.** Des Mondes qui ne cessent de changer : LFO lents, générateurs, forme, systèmes réels, gamakas, périodes libres. Chacun en montre quelques-uns, pas tous.
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 13 COLD IN THE DARK | D MINOR · 72 | La vitrine : des boucles de quelques pas, les trois sources de notes, une phrase que son générateur fait muter, des lunes, deux périodes libres qui ne tombent jamais en place, la précession, une comète, des accords, des LFO lents et la forme. |
+| 14 KEPLER NIGHT | A DORIAN · 60 | Le système Kepler-223 tel qu'il a été mesuré (3:4:6:8), la couleur des tables d'ondes qui tourne avec un LFO lent, un drone en période libre. |
+| 15 TRAPPIST DUST | E HIRAJOSHI · 66 | La chaîne résonante de TRAPPIST-1 (2:3:4:6), ses notes tirées par des générateurs qui s'en souviennent (déjà-vu), puis les lâchent peu à peu. |
+| 16 RAGA OF ASH | D BHAIRAVI · 52 | Un raga de nuit : un bourdon, une voix soufflée qui chante sa phrase en meend, une anche qui ondule (andolan), des cloches avec kan, et les notes pivots. |
+| 17 SLOW TIDES | F MIXOLYDIAN · 58 | La forme : calme, montée, sommet, retombée, seize mesures chacun, des pistes qui se taisent et reviennent ; des LFO ouvrent les filtres et déplacent les voix. |
+| 18 LOOPS OF ASH | F MINOR · 60 | Cinq périodes libres, une porte chacune : les longueurs des boucles de bande de *Music for Airports* (Brian Eno). Cinq voix qui ne retombent jamais ensemble : la musique ne se répète jamais. |
+
 ## Les voix : les 8 moteurs
 
 Chaque piste fabrique son son avec un **moteur**, une méthode de synthèse calculée en direct. Rhizome a les siens, **huit moteurs de Plaits** (Mutable Instruments), et aucun de ceux de Monades : pas de batterie, pas de Rings ni d'Elements. Monades, sur l'autre FM-1, fait les notes et le rythme ; Rhizome fait les nappes, les drones et les textures. Chaque moteur va sur chaque piste : **ALGO** le change, **PRESET** (sur la page SOUND) choisit l'un des **128 sons** de la bibliothèque de Rhizome, 16 par moteur.
@@ -134,7 +145,7 @@ Le détail des pages héritées (filtres, enveloppes, LFO, gammes) est dans le [
 
 ## Premiers pas : faire tourner des orbites
 
-1. Écouter un Monde : PRESET, puis PLAY. Pour partir de zéro, aller au Monde 13, **EMPTY SKY**.
+1. Écouter un Monde : PRESET, puis PLAY. Pour partir de zéro, aller au Monde 19, **EMPTY SKY**.
 2. Appuyer sur **SEQ** : la page **ORBIT** s'ouvre. Tourner **K3 GATES** : la piste choisie devient un corps qui tourne autour de l'étoile, avec autant de portes que le réglage.
 3. Avec SELECT, passer à une autre piste et lui donner aussi des portes, avec une autre période (**K1**).
 4. Appuyer sur **PLAY**. Tous les corps partent du haut, ensemble.
@@ -149,7 +160,7 @@ Un séquenceur pas à pas fait tourner une boucle de pas, et certains pas jouent
 
 | Sur un séquenceur pas à pas | Sur le séquenceur orbital |
 |---|---|
-| La longueur de la boucle (le nombre de pas) | **PERIOD** (K1) : la durée d'un tour, de 1 temps à 12 mesures |
+| La longueur de la boucle (le nombre de pas) | **PERIOD** (K1) : la durée d'un tour, de 1 temps à 12 mesures, ou libre, en secondes |
 | Les pas qui jouent | **GATES** (K3) : de 1 à 16 portes par tour, réparties le plus régulièrement possible |
 | Décaler le motif | **PHASE** (K4) : faire tourner les portes |
 | Le swing, le même petit retard à chaque contretemps | **ECCENTRICITY** (K2) : le tour garde sa durée, mais les notes se resserrent d'un côté de l'orbite et s'étirent de l'autre |
@@ -158,7 +169,8 @@ Un séquenceur pas à pas fait tourner une boucle de pas, et certains pas jouent
 ![Du pas à pas à l'orbite : les 16 pas d'une mesure, enroulés autour de l'étoile. Les 5 pas qui jouent deviennent 5 portes ; le corps joue chaque fois qu'il en franchit une.](schemas/pas-a-orbite.svg)
 
 Concrètement :
-- **Le nombre de pas d'un tour**, c'est PERIOD. Ses 13 valeurs, en doubles croches : 4 (1 temps), 6, 8, 12, 16 (1 mesure), 24, 32, 48, 64, 96, 112, 128 et 192 (12 mesures).
+- **Le nombre de pas d'un tour**, c'est PERIOD. Ses 13 premières valeurs, en doubles croches : 4 (1 temps), 6, 8, 12, 16 (1 mesure), 24, 32, 48, 64, 96, 112, 128 et 192 (12 mesures).
+- **Au-delà, les périodes libres** : 5,1 s, 7,3 s, 11,6 s, 17,8 s, 20,1 s, 23,5 s, 29,9 s et 31,8 s, quel que soit le tempo. Aucune ne divise une autre : deux corps libres ne retombent jamais ensemble, et la musique ne se répète pas. Les cinq dernières sont les longueurs des boucles de bande de *Music for Airports* de Brian Eno. Sur une orbite libre, les portes sont placées sur 16 directions.
 - **Le nombre de notes par tour**, c'est GATES, de 1 à 16. Il ne peut pas dépasser le nombre de pas du tour : un tour d'un temps compte 4 pas, donc 4 portes au plus. À 0, la piste n'est plus un corps et reprend son rythme de la page RHYTHM.
 - **Les portes sont placées comme un rythme euclidien** : réparties le plus régulièrement possible sur les pas du tour. Par exemple, 5 portes sur un tour d'une mesure (16 pas) tombent sur les pas 1, 5, 8, 11 et 14 : c'est le rythme euclidien 5 sur 16. Avec 4 portes, on obtient quatre noires.
 
@@ -200,7 +212,7 @@ Quand on tourne un potard, une carte apparaît sur la moitié de l'écran où le
 ### ORBIT (piste choisie)
 | Potard | Réglage | Ce qu'il fait |
 |---|---|---|
-| K1 | PERIOD | La durée d'un tour : de 1 temps à 12 mesures, en 13 valeurs. La carte donne les rapports de toutes les orbites, par exemple 3:4:6:8. |
+| K1 | PERIOD | La durée d'un tour : de 1 temps à 12 mesures, en 13 valeurs, puis 8 périodes libres en secondes (FREE). La carte donne les rapports des orbites qui suivent le tempo, par exemple 3:4:6:8. |
 | K2 | ECCENTRICITY | De rond (0) à très ovale (0,85). La carte dit combien de fois plus vite le corps va près de l'étoile. |
 | K3 | GATES | Le nombre de portes par tour, de 0 (orbite coupée) à 16. |
 | K4 | PHASE | Fait tourner les portes par pas de 15°. |
@@ -216,6 +228,7 @@ Quand on tourne un potard, une carte apparaît sur la moitié de l'écran où le
 **Les trois sources de notes (K3 PITCH)** :
 - **ORBIT** : plus le corps est près de l'étoile, plus la note est aiguë. L'ellipse dessine donc une mélodie qui monte et descend, dans la gamme choisie sur HARMONY.
 - **MOTIF** : le corps joue, porte après porte, les notes écrites au clavier sur la page GENERATOR (comme le MOTIF de Monades). **Sur la page ORBIT, chaque porte que le corps va franchir affiche la note qu'elle jouera**, la prochaine en blanc.
+- **Les générateurs** (page GENERATOR) agissent aussi sur un corps : avec ORBIT ou MOTIF, chaque note reçoit le décalage du générateur de la piste (hasard, Markov ou motif qui mute), avec sa mémoire déjà-vu. Et **MOTION** fait sauter une part des notes, comme sur un rythme.
 - **ECHO** : le corps reprend la dernière note de la piste précédente, ramenée à la note de l'accord de la tonique juste au-dessus (l'idée du tintinnabuli d'Arvo Pärt).
 
 **Les systèmes réels (K4 SYSTEM)** : leurs périodes et excentricités sont mesurées, ramenées aux valeurs les plus proches du séquenceur sans changer les rapports. Chaque corps a 4 portes, donc les rapports s'entendent comme une polyrythmie.
@@ -283,14 +296,14 @@ La vitesse a de l'inertie : changer le temps fait glisser la hauteur, comme sur 
 | K1 | DRIVE | La saturation de la tête d'enregistrement. |
 | K2 | AGE | L'usure : souffle (seulement sous ce qui est enregistré), aigus perdus, chutes de niveau. |
 | K3 | TONE | Chaque répétition un peu plus sombre, ou beaucoup. |
-| K4 | TRANSPORT | RUN, **FREEZE** (la tête d'enregistrement se lève, la boucle se répète) ou **STOP** (la bande freine et le son plonge ; RUN la relance). |
+| K4 | TRANSPORT | RUN, **FREEZE** (la tête d'enregistrement se lève, la boucle se répète), **STOP** (la bande freine et le son plonge ; RUN la relance) ou **REWIND** (la tête se lève et la bande repart en arrière, trois fois plus vite : les échos reviennent à l'envers, plus aigus ; RUN la remet dans le bon sens). |
 
 À l'écran :
 - les **bobines** tournent à la vitesse de la bande, ralenties à l'affichage pour que les rayons ne semblent jamais tourner à l'envers ;
 - le **bras tendeur** bouge avec le wow ;
 - **ce que la tête d'enregistrement écrit est dessiné sur la bande et avance vers les têtes de lecture** : on voit l'écho arriver avant de l'entendre ;
 - chaque tête en service affiche son temps et devient blanche quand elle rejoue ;
-- sous FREEZE, la tête d'enregistrement se lève.
+- sous FREEZE et REWIND, la tête d'enregistrement se lève ; en REWIND, les bobines tournent à l'envers.
 
 ## La réverbe : HALL
 
@@ -384,6 +397,8 @@ Le bouton **LFO** fige la mémoire, et la comète peut la figer à son passage.
 - **Une nappe qui ne finit pas** : HALL K1 DECAY tout en haut (INFINITE) au moment voulu. La queue tient, le reste continue par-dessus. On redescend DECAY pour la relâcher.
 - **Un écho qui devient une bande lointaine** : TAPE ECHO, K3 HEADS sur 1+2+3, K1 TIME vers 2 s (la bande ralentit et s'assombrit), K2 FEEDBACK vers 60, puis AGE à 30 et DRIVE à 30.
 - **Le geste de la bande qui s'arrête** : TAPE ECHO / AGE, K4 sur STOP en fin de phrase, puis RUN.
+- **Un retour en arrière** : après une phrase dans la bande (K3 HEADS sur 1+2+3, FEEDBACK vers 50), K4 sur REWIND quelques secondes : les échos remontent à l'envers ; puis RUN.
+- **Une musique qui ne se répète jamais** : deux ou trois pistes en périodes libres (PERIOD au-delà de 12 mesures), une porte chacune, des notes longues.
 - **Un ciel qui tourne lentement** : SEQ 2 fois, K4 SYSTEM sur KEPLER-223, puis PRECESSION à 20 et PERTURBATION à 10.
 - **Un rare événement** : SEQ 4 fois, COMET sur 16 mesures, EVENT sur BOTH. Toutes les 16 mesures, la salle gonfle et les grains se figent au passage.
 - **Des grains qui scintillent au-dessus** : TAPE / MOTION K1 PITCH à +12, BEADS K1 DENSITY vers 85, K2 SHAPE en cloche, K4 MEDIA sur CLEAN TAPE.
@@ -399,7 +414,7 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 
 ## Points de vigilance
 
-- **La charge du processeur.** Comme pour Monades, **la limite de 85 % ne doit jamais être atteinte**, même dans le pire cas. Sur le Mac, les 12 Mondes de Rhizome sont estimés entre 36 et 53 %, Beads grand ouvert compris. Un Monde fait à la main peut être plus lourd : six voix toutes jouées, avec la bande, la HALL et Beads grand ouverts, par exemple. Seule une mesure sur l'appareil le dira.
+- **La charge du processeur.** Comme pour Monades, **la limite de 85 % ne doit jamais être atteinte**, même dans le pire cas. Sur le Mac, les Mondes de Rhizome sont estimés entre 36 et 53 %, Beads grand ouvert compris. Un Monde fait à la main peut être plus lourd : six voix toutes jouées, avec la bande, la HALL et Beads grand ouverts, par exemple. Seule une mesure sur l'appareil le dira.
 - **Si la charge ne tient pas, Rhizome renoncera à un effet plutôt que de risquer le FM-1.** La première candidate est la HALL : sa mémoire et son calcul serviraient à enrichir le delay ou à un effet plus léger.
 - En cas de surcharge, le firmware passe déjà de lui-même en mode économie, et la HALL en VINTAGE.
 
@@ -411,6 +426,7 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 | **Étoile** | Le centre autour duquel tournent les corps. Elle ne joue pas ; tout se mesure par rapport à elle. |
 | **Orbite** | Le chemin d'un corps : un cercle, ou un ovale (une ellipse) dont l'étoile n'occupe pas le centre mais un foyer. |
 | **Période** (PERIOD) | La durée d'un tour, de 1 temps à 12 mesures. C'est la longueur de la boucle. |
+| **Période libre** | Une période en secondes, qui ne suit pas le tempo (5,1 à 31,8 s). Deux périodes libres ne retombent jamais ensemble. |
 | **Porte** (GATES) | Une direction, vue de l'étoile, où le corps joue en passant. Les portes d'un corps sont réparties comme un rythme euclidien. |
 | **Rythme euclidien** | N coups répartis le plus régulièrement possible sur un nombre de pas : 5 sur 16 donne les pas 1, 5, 8, 11, 14. |
 | **Phase** (PHASE) | Fait tourner toutes les portes d'un corps : décale son motif. |
@@ -422,6 +438,11 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 | **Polyrythmie** | Plusieurs boucles de longueurs différentes en même temps ; elles ne se retrouvent qu'après un certain nombre de tours. |
 | **Lune** | Un petit satellite d'un corps : après chaque note, elle tourne autour de lui et joue un ornement en passant. |
 | **Comète** | Un objet très ovale, qui passe rarement près de l'étoile ; à son passage, la salle gonfle ou les grains se figent. |
+| **LFO** | Un mouvement lent et régulier (ou au hasard) qui fait varier un réglage tout seul : la couleur d'un son, un filtre, le panoramique. Deux par piste (pages LFO A et LFO B). |
+| **Générateur** | Fabrique les notes d'une piste : au hasard, en suivant les probabilités de la phrase (Markov), ou en faisant muter la phrase. Il se souvient de ce qu'il a joué (déjà-vu) et peut le rejouer. Page GENERATOR ; il agit aussi sur un corps. |
+| **Forme** | Une grande respiration : calme, montée, sommet, retombée, quelques mesures chacun ; des pistes se taisent et reviennent. Page FORM. |
+| **Gamaka** | Un ornement de la musique indienne autour d'une note : kan (une note frôlée avant), meend (un glissé depuis la note d'avant), andolan (une lente oscillation). Page RAGA / GAMAKA. |
+| **REWIND** | La bande qui repart en arrière : les échos reviennent à l'envers. |
 | **ORBIT, MOTIF, ECHO** | D'où viennent les notes d'un corps : de sa distance à l'étoile, d'une phrase jouée dans l'ordre, ou de l'accord au-dessus de la piste précédente. |
 | **Tintinnabuli** | Une voix qui répond à une mélodie par les notes de l'accord (la manière d'Arvo Pärt) : c'est ECHO. |
 | **Système réel** | Les périodes et les formes d'orbites de vraies planètes (Jupiter, Kepler-223, TRAPPIST-1, Pluton), chargées sur les pistes. |

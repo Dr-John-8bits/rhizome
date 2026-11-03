@@ -89,8 +89,11 @@ static void ov_fmt_bar(int num,int den,char *s){ // a fraction of a bar, reduced
 static void ov_knob(const md_patch *p,int page,int k,const char **label,char *value,char *info,int brief){
  const int tr=dream_ui.track;const md_orbit *o=&p->orbit[tr];info[0]=0;
  if(page==ORBIT){
-  if(k==0){*label="PERIOD";ov_fmt_period(md_orbit_steps(o->period),value,brief);
-   int g=0,n=0,v[6];for(int i=0;i<6;i++)if(p->orbit[i].gates||i==tr){v[n]=md_orbit_steps(p->orbit[i].period);g=ov_gcd(g,v[n]);n++;}
+  if(k==0){*label="PERIOD";
+   if(md_orbit_tenths(o->period)){const int t=md_orbit_tenths(o->period);char d[3]={'.',(char)('0'+t%10),0};md_num(t/10,value);ov_append(value,d);ov_append(value," S");
+    ov_append(info,"FREE: SECONDS, NEVER IN STEP");return;} // a free period: in seconds, whatever the tempo
+   ov_fmt_period(md_orbit_steps(o->period),value,brief);
+   int g=0,n=0,v[6];for(int i=0;i<6;i++)if((p->orbit[i].gates||i==tr)&&!md_orbit_tenths(p->orbit[i].period)){v[n]=md_orbit_steps(p->orbit[i].period);g=ov_gcd(g,v[n]);n++;}
    ov_append(info,"RATIO ");for(int i=0;i<n;i++){char b[8];md_num(v[i]/(g?g:1),b);if(i)ov_append(info,":");ov_append(info,b);}}
   else if(k==1){*label="ECCENTRICITY";if(!o->ecc){ov_append(value,"ROUND");ov_append(info,"EVEN BEATS: EUCLIDEAN");}
    else{ov_fmt_milli(o->ecc,value);const float e=o->ecc*.001f,f=(1+e)*(1+e)/((1-e)*(1-e));char b[12];md_num((int)f,b);ov_append(info,"X");ov_append(info,b);
