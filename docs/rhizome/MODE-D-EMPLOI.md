@@ -107,6 +107,36 @@ Tous sont réglés au même niveau d'écoute (sauf NO STARS, plus clairsemé, un
 | 11 CHOKED DAWN | F# DORIAN · 56 | Les conjonctions frappent des accords. Bande saturée et usée, comète qui gonfle et fige. |
 | 12 DAY BREAKS | D MIXOLYDIAN · 84 | Une phrase ornée d'harmoniques, des accords aux conjonctions, une comète qui fige les grains. |
 
+## Les voix : les 12 moteurs
+
+Chaque piste fabrique son son avec un **moteur**, une méthode de synthèse calculée en direct. Les douze sont ceux de Monades, et chacun va sur chaque piste : **ALGO** le change, **PRESET** (sur la page SOUND) choisit l'un des 224 sons tout faits.
+
+Huit viennent du code publié par Mutable Instruments (six de Plaits, un de Rings, un d'Elements). Quatre ont été écrits pour Mutable Dreams.
+
+Sur la page **SOUND** (EDIT 1 fois), K1 à K3 règlent le moteur de la piste choisie et K4 son niveau. Ce que fait chaque potard dépend du moteur.
+
+| Moteur | Ce qu'il fait | K1 TONE | K2 HARMONICS | K3 | Calcul |
+|---|---|---|---|---|---|
+| PLAITS KICK | Une grosse caisse analogique simulée. | Couleur | Claquement de l'attaque | DECAY : longueur | léger |
+| PLAITS SNARE | Une caisse claire : une peau qui résonne et le bruit du timbre. | Couleur | Part du timbre | DECAY : longueur | moyen |
+| PLAITS HAT | Une charleston : un son métallique mêlé de bruit. | Couleur | Part du bruit | DECAY : longueur | léger |
+| PLAITS FM | Deux ondes dont l'une fait vibrer l'autre : cloches, piano électrique, métal. | Brillance | Rapport des deux ondes (le caractère) | SHAPE : réinjection, vers le grain | moyen |
+| PLAITS VA | Deux oscillateurs analogiques simulés, comme sur un synthé classique. | Forme de l'onde carrée | Écart d'accord entre les deux | SHAPE : forme de la dent de scie | léger |
+| PLAITS HARMONIC | Synthèse additive : des harmoniques qu'on additionne, comme les tirettes d'un orgue. | L'harmonique mise en avant | Nombre d'harmoniques | SHAPE : groupe large ou pointu | moyen |
+| RINGS MODAL | Un objet qui vibre (corde, plaque, cloche), frappé à chaque note. | Brillance | De la corde (harmonieux) à la cloche (inharmonique) | DECAY : amortissement | **lourd** |
+| ELEMENTS STRIKE | Un excitateur et un corps qui résonne. | Brillance | Géométrie du corps | EXCITER : maillet, médiator, particules | **lourd** |
+| SINE CHOIR | Trois sinus qui chantent un accord, ramené dans la gamme. | Volume des deux voix du haut | L'accord : mineur, majeur, suspendu, quinte et octave | SHAPE : écart d'accord (chœur plus large) | léger |
+| ROUND BASS | Une basse ronde en sons purs. | Ajoute l'octave au-dessus | Ajoute l'octave en dessous | sans effet (longueur : page ENVELOPE) | léger |
+| MELLOW DRIFT | Deux sons purs qui se désaccordent lentement : un son doux qui flotte. | Harmoniques douces | Ajoute l'octave | SHAPE : ampleur de la dérive | léger |
+| SATIN MORPH | Deux oscillateurs qui glissent entre des formes d'onde arrondies. | Du son pur à la forme choisie | Passe d'une forme à la suivante | SHAPE : dérive entre les deux | moyen |
+
+- **La colonne « Calcul »** donne l'estimation de Monades, qui sert à sa garde automatique. Les Mondes de Rhizome n'utilisent pas d'ELEMENTS et un seul RINGS (dans BLACK ORCHARD). Plusieurs moteurs lourds ensemble, plus la bande, la HALL et Beads, c'est le pire cas à surveiller (voir « Points de vigilance »).
+- **KICK, SNARE, HAT et RINGS** règlent leur longueur avec DECAY ; les autres ont une enveloppe (page **ENVELOPE** : attaque et déclin).
+- **En ECO** (page SYSTEM), FM, VA et HARMONIC sont calculés à mi-cadence pour soulager le processeur. Les Mondes de Rhizome se chargent en ECO.
+- **Les batteries ne jouent pas de mélodie** : sur une orbite, elles ignorent la source des notes (ORBIT, MOTIF, ECHO) et leurs lunes répètent le même coup.
+
+Le détail des pages héritées (filtres, enveloppes, LFO, gammes) est dans le [mode d'emploi de Monades](https://dr-john-8bits.github.io/rhizome/monades/manuel/). Dans Rhizome, les cibles de LFO **ECHO** visent la bande, **ROOM** la HALL et **GRAIN** Beads.
+
 ## Premiers pas : faire tourner des orbites
 
 1. Écouter un Monde : PRESET, puis PLAY. Pour partir de zéro, aller au Monde 13, **EMPTY SKY**.
@@ -130,6 +160,8 @@ Un séquenceur pas à pas fait tourner une boucle de pas, et certains pas jouent
 | Le swing, le même petit retard à chaque contretemps | **ECCENTRICITY** (K2) : le tour garde sa durée, mais les notes se resserrent d'un côté de l'orbite et s'étirent de l'autre |
 | Une piste, une boucle | Une piste, un corps. Plusieurs corps aux périodes différentes font une polyrythmie qui se réaligne |
 
+![Du pas à pas à l'orbite : les 16 pas d'une mesure, enroulés autour de l'étoile. Les 5 pas qui jouent deviennent 5 portes ; le corps joue chaque fois qu'il en franchit une.](schemas/pas-a-orbite.svg)
+
 Concrètement :
 - **Le nombre de pas d'un tour**, c'est PERIOD. Ses 13 valeurs, en doubles croches : 4 (1 temps), 6, 8, 12, 16 (1 mesure), 24, 32, 48, 64, 96, 112, 128 et 192 (12 mesures).
 - **Le nombre de notes par tour**, c'est GATES, de 1 à 16. Il ne peut pas dépasser le nombre de pas du tour : un tour d'un temps compte 4 pas, donc 4 portes au plus. À 0, la piste n'est plus un corps et reprend son rythme de la page RHYTHM.
@@ -146,10 +178,15 @@ L'étoile ne joue pas. C'est le centre de gravité : **tout se mesure par rappor
 ### Rond, puis ovale
 - **Une orbite ronde** : le corps tourne à vitesse constante et passe ses portes à intervalles réguliers. C'est exactement le rythme euclidien.
 - **Une orbite ovale** : il passe toujours le même nombre de portes en un tour de la même durée, donc la boucle reste calée sur la mesure. Mais il les passe vite du côté de l'étoile et lentement de l'autre. Les notes se resserrent puis s'espacent, comme un musicien qui presse puis retient : un rubato qui revient à chaque tour.
+![À gauche, une orbite ronde : les 5 notes tombent régulièrement sur le tour. À droite, la même orbite ovale : mêmes portes, même durée de tour, mais les notes se pressent près de l'étoile et s'espacent loin d'elle.](schemas/rond-ovale.svg)
+
 - **Avec la précession**, l'ovale tourne lentement sur lui-même. Le moment où les notes se resserrent glisse alors peu à peu par rapport à la mesure, et la phrase change sans hasard.
 
 ### Plusieurs corps
-Chaque piste a sa propre orbite. Avec des périodes différentes, les corps se retrouvent tous les N tours. Par exemple, un tour de 3 mesures et un tour de 4 mesures se réalignent toutes les 12 mesures. Ce sont les rapports que montre la carte de PERIOD (par exemple 3:4:6:8), et c'est le principe des systèmes réels de K4 SYSTEM.
+Chaque piste a sa propre orbite. Avec des périodes différentes, les corps se retrouvent tous les N tours.
+
+![Deux corps, un tour de 3 mesures et un tour de 4 : leurs notes ne tombent ensemble que toutes les 12 mesures.](schemas/plusieurs-corps.svg)
+ Par exemple, un tour de 3 mesures et un tour de 4 mesures se réalignent toutes les 12 mesures. Ce sont les rapports que montre la carte de PERIOD (par exemple 3:4:6:8), et c'est le principe des systèmes réels de K4 SYSTEM.
 
 Le mouvement suit le tempo, le swing et l'horloge MIDI reçue. PLAY fait repartir tous les corps du haut.
 
@@ -286,6 +323,27 @@ Une réverbe de la famille des grandes réverbes « hall » numériques, celle d
 
 Les réglages DECAY, TREBLE et DIFFUSION sont aussi sur les pages SHARED SPACE et SPACE TONE, héritées de Monades.
 
+### Entendre la HALL
+Une réverbe s'entend surtout **dans ce qui reste après la note**, et la HALL arrive par un envoi et un retour. Elle reste donc muette tant que l'un des deux est bas. Dans les Mondes d'usine, elle est volontairement discrète, à 15 ou 20 dB sous le son direct : on la sent plus qu'on ne l'entend, d'autant que la bande et les grains jouent par-dessus.
+
+**Pour l'entendre seule**, depuis n'importe quel Monde :
+1. **Couper les grains** : LIVE (HOME), K4 SPACE à 0.
+2. **Garder une seule piste** : choisir une piste mélodique. Couper les autres une à une : SELECT pour aller sur chacune, puis SEL.
+3. **L'envoyer à la HALL et pas à la bande** : EDIT 5 fois (GLOBAL MIXER), K4 vers la réverbe à 100, K3 vers la bande à 0.
+4. **Ouvrir le retour** : FX 8 fois (SHARED SPACE), K4 RETURN à 100. Ce retour sert aussi à la bande, coupée ici par son envoi.
+5. **PLAY, puis PLAY de nouveau pour arrêter** : la séquence s'arrête, et ce qu'on entend ensuite, c'est la salle seule qui s'éteint.
+
+**Puis, sur la page HALL (FX 3 fois), un réglage à la fois** :
+- **K1 DECAY** : à 30, une pièce ; vers 60, une grande salle (4 à 6 s) ; tout en haut, INFINITE : la queue ne s'éteint plus.
+- **K3 PRE-DELAY** vers 100 ms : la note sèche d'abord, puis la salle qui répond. C'est le réglage qui fait le mieux entendre où commence la réverbe.
+- **K2 SIZE** : petite, la queue grésille un peu (on entend la boucle) ; grande, elle devient lisse.
+- **K4 MOD** : sur une note tenue, un léger chatoiement, comme un chorus dans la queue. À 0, la queue est plus fixe et plus métallique.
+- **Sur HALL / COLOR** : BASS en haut, les graves traînent (une salle de pierre) ; TREBLE en bas, la queue s'assombrit vite (une salle de bois) ; VINTAGE, plus sombre et deux fois plus grande.
+
+**L'écran aide** : si les points ne montent pas sur les trois droites, rien n'entre dans la salle. En haut de la page, « RETURN AT 0 » ou « NO SEND » dit ce qui manque.
+
+**Dans un morceau**, la HALL se règle surtout par piste : une nappe ou une cloche bien envoyées (K4 à 60–100), une basse ou une batterie peu ou pas envoyées, pour garder le grave net.
+
 ## Les grains : Beads
 
 Le granulaire est celui du module Beads de Mutable Instruments, réduit pour le FM-1 : 6 grains au plus et 128 Ko de mémoire, en mono. Les pistes y envoient du son (GLOBAL MIXER, K2), et SPACE règle le niveau des grains (LIVE K4, ou GRANULAR BUS K1). **Quand SPACE est à 0, Beads se repose et ne calcule rien.**
@@ -347,6 +405,40 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 - **La charge du processeur.** Comme pour Monades, **la limite de 85 % ne doit jamais être atteinte**, même dans le pire cas. Sur le Mac, les 12 Mondes de Rhizome sont estimés entre 36 et 58 %, Beads grand ouvert compris. Mais on peut charger un Monde plus lourd : six voix Rings, par exemple. Seule une mesure sur l'appareil le dira.
 - **Si la charge ne tient pas, Rhizome renoncera à un effet plutôt que de risquer le FM-1.** La première candidate est la HALL : sa mémoire et son calcul serviraient à enrichir le delay ou à un effet plus léger.
 - En cas de surcharge, le firmware passe déjà de lui-même en mode économie, et la HALL en VINTAGE.
+
+## Glossaire
+
+| Mot | Ce que c'est |
+|---|---|
+| **Corps** | Une piste qui a des portes : elle tourne sur son orbite et joue en passant ses portes. Voir [le séquenceur orbital](#le-séquenceur-orbital). |
+| **Étoile** | Le centre autour duquel tournent les corps. Elle ne joue pas ; tout se mesure par rapport à elle. |
+| **Orbite** | Le chemin d'un corps : un cercle, ou un ovale (une ellipse) dont l'étoile n'occupe pas le centre mais un foyer. |
+| **Période** (PERIOD) | La durée d'un tour, de 1 temps à 12 mesures. C'est la longueur de la boucle. |
+| **Porte** (GATES) | Une direction, vue de l'étoile, où le corps joue en passant. Les portes d'un corps sont réparties comme un rythme euclidien. |
+| **Rythme euclidien** | N coups répartis le plus régulièrement possible sur un nombre de pas : 5 sur 16 donne les pas 1, 5, 8, 11, 14. |
+| **Phase** (PHASE) | Fait tourner toutes les portes d'un corps : décale son motif. |
+| **Excentricité** (ECCENTRICITY) | À quel point l'orbite est ovale. 0 : rond, notes régulières ; plus haut : notes pressées près de l'étoile, retenues loin d'elle. |
+| **Rubato** | Presser puis retenir le temps, comme un musicien. Ici, c'est l'excentricité qui le donne, de la même façon à chaque tour. |
+| **Précession** | L'ovale tourne lentement sur lui-même : le moment où les notes se pressent glisse peu à peu dans la mesure. |
+| **Perturbation** | Un peu de désordre : des portes qui sautent, des notes voisines, une orbite qui respire. |
+| **Conjonction** | Deux corps alignés avec l'étoile. Selon le réglage, rien, un accent, ou un accord. |
+| **Polyrythmie** | Plusieurs boucles de longueurs différentes en même temps ; elles ne se retrouvent qu'après un certain nombre de tours. |
+| **Lune** | Un petit satellite d'un corps : après chaque note, elle tourne autour de lui et joue un ornement en passant. |
+| **Comète** | Un objet très ovale, qui passe rarement près de l'étoile ; à son passage, la salle gonfle ou les grains se figent. |
+| **ORBIT, MOTIF, ECHO** | D'où viennent les notes d'un corps : de sa distance à l'étoile, d'une phrase jouée dans l'ordre, ou de l'accord au-dessus de la piste précédente. |
+| **Tintinnabuli** | Une voix qui répond à une mélodie par les notes de l'accord (la manière d'Arvo Pärt) : c'est ECHO. |
+| **Système réel** | Les périodes et les formes d'orbites de vraies planètes (Jupiter, Kepler-223, TRAPPIST-1, Pluton), chargées sur les pistes. |
+| **Monde** | Un réglage complet du FM-1 : sons, orbites, effets, tempo, gamme. PRESET passe de l'un à l'autre. |
+| **Macro** | Les quatre potards de l'accueil, qui agissent sur tout le Monde : DENSITY, MOTION, COLOUR, SPACE. |
+| **Moteur** | La méthode de synthèse d'une piste (ALGO). Voir [les 12 moteurs](#les-voix-les-12-moteurs). |
+| **Envoi** | La part du son d'une piste qui part vers un effet (GLOBAL MIXER). |
+| **Retour** | Le niveau auquel l'effet revient dans le mélange (SHARED SPACE K4 pour la bande et la HALL, SPACE pour les grains). |
+| **Têtes** | Les points de lecture de la bande : chacune rejoue ce qui a été enregistré, plus ou moins tard. |
+| **Pré-délai** | Le silence entre la note et le début de la réverbe. |
+| **RT60** | Le temps qu'il faut à une réverbe pour baisser de 60 dB : sa longueur. C'est DECAY. |
+| **Grain** | Un court morceau de son relu dans la mémoire de Beads. |
+| **Média** | Le grain de la mémoire de Beads : DIGITAL, CLEAN TAPE, DIRTY TAPE. |
+| **ECO, FULL** | Deux qualités de calcul : ECO soulage le processeur, FULL calcule tout à pleine cadence. |
 
 ## Crédits
 

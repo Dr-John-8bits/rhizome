@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Rhizome: writes site/manuel/index.html from docs/rhizome/MODE-D-EMPLOI.md (one source for the repository and the
 site). A small Markdown reader for what the manual uses: headings, paragraphs, lists (two levels), numbered lists,
-tables, quotes, bold, italics, code and links. Then run tools/site_nav.py for the menu."""
+tables, quotes, bold, italics, code, links and SVG diagrams (inlined). Then run tools/site_nav.py for the menu."""
 from pathlib import Path
 import html,re
 R=Path(__file__).resolve().parents[1]
@@ -27,6 +27,10 @@ def render(md):
    n=len(m.group(1));text=m.group(2);sid=slug(text)
    if n==2:toc.append((sid,text))
    out.append(f'<h{n} id="{sid}">{inline(text)}</h{n}>');i+=1;continue
+  m=re.match(r'!\[([^\]]*)\]\(([^)]+\.svg)\)$',l.strip())
+  if m: # a diagram: inlined, so it takes the site's colours and theme; the alt text is its caption
+   svg=(SRC.parent/m.group(2)).read_text().strip()
+   out.append(f'<figure class="schema">{svg}<figcaption>{inline(m.group(1))}</figcaption></figure>');i+=1;continue
   if l.startswith('|'):
    rows=[]
    while i<len(lines) and lines[i].startswith('|'):rows.append([c.strip() for c in lines[i].strip('|').split('|')]);i+=1
@@ -71,6 +75,7 @@ page=f"""<!doctype html>
 .manual td:first-child{{white-space:nowrap}}
 .manual blockquote{{margin:1.2em 0;padding:.6em 1em;border-left:3px solid var(--mark);background:color-mix(in srgb,var(--paper) 85%,var(--mark))}}
 .manual code{{font-family:var(--mono);font-size:.9em}}
+.manual figure.schema{{margin:1.6em 0}} .manual figure.schema svg{{display:block;width:100%;max-width:540px;height:auto}} .manual figcaption{{color:var(--muted);font-size:.9em;margin-top:.4em}}
 .toc{{margin:1.5em 0 2em}} .toc p{{color:var(--muted);margin:0 0 .3em}} .toc ol{{margin:0;padding-left:1.3em}}
 </style>
 </head>
