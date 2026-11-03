@@ -109,14 +109,17 @@ MONDES=[
   phrase={2:[0,-1,4,-1,6,7,-1,-1,11,-1,7,-1,6,-1,4,-1]},gen={2:('MOTIF',500,8,5)}),
 ]
 
-def fdds(tones,fields,first_id):
- """Catalog entries for generate_presets.py: the 1.1 fields plus an 'ext' block written as a complete v10 patch."""
+def fdds(tones,fields,first_id,mondes=MONDES,family=9,seed=0xFD05000):
+ """Catalog entries for generate_presets.py: the 1.1 fields plus an 'ext' block written as a complete v10 patch.
+ Rhizome builds its own Mondes with it too (tools/rhizome_mondes.py): a tone is a name or a tone bank index."""
  by_name={}
  for t in tones:by_name.setdefault(t['name'],t)
+ for t in tones:by_name[t['id']]=t
  out=[]
- for k,m in enumerate(MONDES):
-  b=dict(name=m['name'],family=9,tempo=m['tempo'],root=NOTE[m['root']],scale=SCALE[m['scale']],seed=0xFD05000+k*7919,macro=m['macro'],
-   locked=1,freeze=0,grain_size=650,grain_pos=300,feedback=250,quality=0,transpose=0,swing=m.get('swing',0),grain_pitch=0,reverse=0,
+ for k,m in enumerate(mondes):
+  g=m.get('grain',(650,300,250))
+  b=dict(name=m['name'],family=m.get('family',family),tempo=m['tempo'],root=NOTE[m['root']],scale=SCALE[m['scale']],seed=seed+k*7919,macro=m['macro'],
+   locked=1,freeze=0,grain_size=g[0],grain_pos=g[1],feedback=g[2],quality=0,transpose=0,swing=m.get('swing',0),grain_pitch=m.get('grain_pitch',0),reverse=0,
    duck_source=-1,duck_amount=0,duck_release=500,tracks=[],tones=[-1]*6,v10=True)
   ext=[];
   for i,(tone_name,note,hits,length,over) in enumerate(m['tracks']):

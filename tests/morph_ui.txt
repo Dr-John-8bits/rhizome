@@ -9,10 +9,10 @@ expect page 27
 expect morph_on 0
 tap REC
 expect morph_on 0
-spin PRESET 80
+spin PRESET 9
 wait 30
 expect morph_on 1
-expect morph_target 80
+expect morph_target 9
 expect morph_pos 0
 expect biome 0
 spin K2 25
@@ -28,7 +28,7 @@ spin K4 -2
 spin K2 25
 wait 30
 expect morph_pos 1000
-expect biome 80
+expect biome 9
 tap ENV
 wait 30
 expect morph_pos 0
@@ -38,7 +38,7 @@ wait 30
 tap REC
 wait 30
 expect morph_on 0
-expect biome 80
+expect biome 9
 tap HOME
 expect page 28
 tap HOME

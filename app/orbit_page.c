@@ -10,6 +10,11 @@
 enum { OV_CX=120, OV_CY=119, OV_RING=78, OV_TRAIL=10, OV_MOON=9 };
 typedef struct { int on; float a,e,w,x,y,tx[OV_TRAIL],ty[OV_TRAIL],out,mx[MD_MOONS_MAX],my[MD_MOONS_MAX]; } OrbitView;
 static OrbitView ov[6],ov_comet; // the comet: a fixed ellipse, periapsis 8 pixels from the star, down and to the left
+// Where the system is drawn: the ORBIT pages, or smaller on the home page and the start-up (orbit_frame). ov_fit is the
+// outermost reach in pixels; ov_top and ov_bottom keep the ellipses off the title and the strip; ov_demo, in sixteenths,
+// moves the stopped bodies along their real orbits at their real speeds (the start-up, before anything plays).
+static float ov_cx=OV_CX,ov_cy=OV_CY,ov_fit=72,ov_top=42,ov_bottom=196,ov_demo;
+static void orbit_frame(float cx,float cy,float fit,float top,float bottom,float demo){ov_cx=cx;ov_cy=cy;ov_fit=fit;ov_top=top;ov_bottom=bottom;ov_demo=demo;}
 static float ov_pos,ov_level;
 static uint32_t ov_hits_seen[6],ov_hit_ms[6],ov_conj_seen,ov_conj_ms,ov_touch_ms,ov_moon_seen[6],ov_moon_ms[6];
 static int ov_moon_k[6];
@@ -20,7 +25,7 @@ static void orbit_touch(int knob){ov_touch=knob;ov_touch_page=dream_ui.page;ov_t
 // Where a body is, from its mean anomaly (Kepler's equation), on the screen: x right, y down, the star at the focus.
 static void ov_point(const OrbitView *o,float M,float *x,float *y){
  const float E=md_orbit_eccentric(M,o->e),ex=o->a*(fm_cosf(E)-o->e),ey=o->a*fm_sqrtf(1-o->e*o->e)*fm_sinf(E);
- const float c=fm_cosf(o->w),s=fm_sinf(o->w);*x=OV_CX+ex*c-ey*s;*y=OV_CY+ex*s+ey*c;
+ const float c=fm_cosf(o->w),s=fm_sinf(o->w);*x=ov_cx+ex*c-ey*s;*y=ov_cy+ex*s+ey*c;
 }
 // The mean anomaly where a body sits at direction phi (stopped: all at the top, where PLAY starts them).
 static float ov_mean_at(float phi,float w,float e){const float t=(phi-w)*.5f,E=2*md_atan2(fm_sqrtf(1-e)*fm_sinf(t),fm_sqrtf(1+e)*fm_cosf(t));return E-e*fm_sinf(E);}
@@ -33,20 +38,20 @@ static void orbit_view_update(void){
   o->a=hi-lo<1e-3f?46:24+38*(p23[i]-lo)/(hi-lo);if(o->a<24)o->a=24;if(o->a>62)o->a=62;
   o->e=md_playing()?ms->orbit_e[i]:p->orbit[i].ecc*.001f;o->w=ms->orbit_w[i];
   if(o->on&&o->a*(1+o->e)>ext)ext=o->a*(1+o->e);}
- const float fit=fm_minf(1.2f,72/ext);
+ const float fit=fm_minf(1.2f*ov_fit/72,ov_fit/ext),moon=OV_MOON*ov_fit/72;
  for(int i=0;i<6;i++){OrbitView *o=&ov[i];o->a*=fit;if(!o->on)continue;
-  const float M=md_playing()?ms->orbit_M[i]:ov_mean_at(-1.5707963f,o->w,o->e);ov_point(o,M,&o->x,&o->y);
+  const float M=md_playing()?ms->orbit_M[i]:ov_mean_at(-1.5707963f,o->w,o->e)+6.2831853f*ov_demo/md_orbit_steps(p->orbit[i].period);ov_point(o,M,&o->x,&o->y);
   for(int k=0;k<OV_TRAIL;k++)ov_point(o,M-(k+1)*(6.2831853f/9/OV_TRAIL),&o->tx[k],&o->ty[k]); // a ninth of a turn behind
   if(ms->orbit_hits[i]!=ov_hits_seen[i]||ms->orbit_hit_gate[i]!=ov_hit_gate[i]){ // a note (or a refused gate) since the last frame
    if(ms->orbit_hits[i]!=ov_hits_seen[i]){ov_hit_ms[i]=plat_ms();ov_hit_x[i]=o->x;ov_hit_y[i]=o->y;ov_hit_vel[i]=ms->track_peak[i];}
    ov_hits_seen[i]=ms->orbit_hits[i];ov_hit_gate[i]=ms->orbit_hit_gate[i];ov_hit_skip[i]=ms->orbit_hit_skip[i];if(ov_hit_skip[i])ov_hit_ms[i]=plat_ms();}
   // Moons: parked behind the outer side, evenly; a note spins them once round, so moon k passes it k/(n+1) of the way.
-  {const int n=p->orbit[i].moons;o->out=md_atan2(o->y-OV_CY,o->x-OV_CX);float f=0;
+  {const int n=p->orbit[i].moons;o->out=md_atan2(o->y-ov_cy,o->x-ov_cx);float f=0;
    if(md_playing()&&ms->moon_t0[i]>-100){f=(ms->orbit_pos-ms->moon_t0[i])/md_orbit_moon_steps(p->orbit[i].moon_spin);f=f<0?0:f>1?1:f;}
-   for(int k=0;k<n;k++){const float a=o->out+6.2831853f*(f-(k+1)/(float)(n+1));o->mx[k]=o->x+OV_MOON*fm_cosf(a);o->my[k]=o->y+OV_MOON*fm_sinf(a);}
+   for(int k=0;k<n;k++){const float a=o->out+6.2831853f*(f-(k+1)/(float)(n+1));o->mx[k]=o->x+moon*fm_cosf(a);o->my[k]=o->y+moon*fm_sinf(a);}
    if(ms->moon_hits[i]!=ov_moon_seen[i]){ov_moon_seen[i]=ms->moon_hits[i];ov_moon_ms[i]=plat_ms();ov_moon_k[i]=ms->moon_hit[i];}}}
- {OrbitView *c=&ov_comet;c->on=p->orbit_comet>0;c->e=MD_COMET_ECC_MILLI*.001f;c->a=8/(1-c->e);c->w=2.3561945f;
-  ov_point(c,ms->comet_M,&c->x,&c->y);c->out=md_atan2(c->y-OV_CY,c->x-OV_CX);}
+ {OrbitView *c=&ov_comet;c->on=p->orbit_comet>0;c->e=MD_COMET_ECC_MILLI*.001f;c->a=8*ov_fit/72/(1-c->e);c->w=2.3561945f;
+  ov_point(c,ms->comet_M,&c->x,&c->y);c->out=md_atan2(c->y-ov_cy,c->x-ov_cx);}
  if(ms->conj_count!=ov_conj_seen){ov_conj_seen=ms->conj_count;ov_conj_ms=plat_ms();ov_conj_a=ms->conj_a;ov_conj_b=ms->conj_b;}
  ov_level=fm_maxf(ms->out_peak[0],ms->out_peak[1]);
 }
@@ -61,10 +66,10 @@ static void ov_seg(float x0,float y0,float x1,float y1,uint16_t ink){ // an anti
  for(int k=0;k<=n;k++)md_soft_point(x0+dx*k/n,y0+dy*k/n,ink);
 }
 static void ov_ellipse(const OrbitView *o,uint16_t ink,float step){ // kept between the title and the strip
- const float b=o->a*fm_sqrtf(1-o->e*o->e),cx=OV_CX-o->a*o->e*fm_cosf(o->w),cy=OV_CY-o->a*o->e*fm_sinf(o->w);
+ const float b=o->a*fm_sqrtf(1-o->e*o->e),cx=ov_cx-o->a*o->e*fm_cosf(o->w),cy=ov_cy-o->a*o->e*fm_sinf(o->w);
  if(!ov_band(cy-o->a,cy+o->a))return;
  const float c=fm_cosf(o->w),s=fm_sinf(o->w);const int n=(int)(6.2831853f*fm_sqrtf((o->a*o->a+b*b)*.5f)/step)+12;
- for(int k=0;k<n;k++){const float t=k*6.2831853f/n,ex=o->a*fm_cosf(t),ey=b*fm_sinf(t),y=cy+ex*s+ey*c;if(y>=42&&y<=196)md_soft_point(cx+ex*c-ey*s,y,ink);}
+ for(int k=0;k<n;k++){const float t=k*6.2831853f/n,ex=o->a*fm_cosf(t),ey=b*fm_sinf(t),y=cy+ex*s+ey*c;if(y>=ov_top&&y<=ov_bottom)md_soft_point(cx+ex*c-ey*s,y,ink);}
 }
 static void ov_fmt_period(int steps,char *s,int brief){ // in beats below a bar, in bars above
  const int bar=steps>=16,whole=bar?steps/16:steps/4,half=bar?(steps%16)!=0:(steps%4)!=0;
@@ -91,7 +96,7 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
    else{ov_fmt_milli(o->ecc,value);const float e=o->ecc*.001f,f=(1+e)*(1+e)/((1-e)*(1-e));char b[12];md_num((int)f,b);ov_append(info,"X");ov_append(info,b);
     ov_append(info,".");b[0]=(char)('0'+(int)(f*10)%10);b[1]=0;ov_append(info,b);ov_append(info," FASTER AT THE STAR");}}
   else if(k==2){*label="GATES";if(!o->gates){ov_append(value,"OFF");ov_append(info,"BACK ON ITS RHYTHM PAGE");}
-   else{const int n=md_orbit_steps(o->period),g=o->gates<n?o->gates:n;md_num(g,value);char b[8];ov_append(info,"E(");md_num(g,b);ov_append(info,b);ov_append(info,",");md_num(n,b);ov_append(info,b);ov_append(info,") A TURN");}}
+   else{float phi[MD_ORBIT_GATES_MAX];const int n=md_orbit_steps(o->period),g=md_orbit_gate_angles(p,tr,phi);md_num(g,value);char b[8];ov_append(info,"E(");md_num(g,b);ov_append(info,b);ov_append(info,",");md_num(n,b);ov_append(info,b);ov_append(info,") A TURN");}}
   else{*label="PHASE";md_num(o->phase*15,value);ov_append(info,"DEGREES: THE GATES TURN");}
  }else if(page==ORBIT_SYS){
   if(k==0){*label="PRECESSION";if(!p->orbit_prec){ov_append(value,"OFF");ov_append(info,"THE ELLIPSES STAY STILL");}
@@ -162,7 +167,7 @@ static void ov_motif_labels(const md_patch *p,int tr,uint16_t col){
  for(int a=1;a<n;a++)for(int b=a;b>0&&delta[order[b]]<delta[order[b-1]];b--){int t=order[b];order[b]=order[b-1];order[b-1]=t;}
  int at=playing?md_status()->motif_at[tr]:0;const int shown=n<8?n:8;
  for(int k=0;k<shown;k++){int found=-1;for(int j=0;j<16&&found<0;j++)if(p->ext[tr].notes[(at+j)%16]>=0)found=(at+j)%16;at=(found+1)%16;
-  const float f=phi[order[k]],r=o->a*(1-o->e*o->e)/(1+o->e*fm_cosf(f-o->w))+11,x=OV_CX+r*fm_cosf(f),y=OV_CY+r*fm_sinf(f);if(y<48||y>192)continue;
+  const float f=phi[order[k]],r=o->a*(1-o->e*o->e)/(1+o->e*fm_cosf(f-o->w))+11,x=ov_cx+r*fm_cosf(f),y=ov_cy+r*fm_sinf(f);if(y<48||y>192)continue;
   char s[8];ov_note_name(md_quantize_pitch((float)(p->track[tr].note+p->ext[tr].notes[found]+p->transpose),p->root,p->scale),s);
   ov_label(x,y,s,k==0?MD_INK:md_tint(MD_BG,col,(unsigned)(28-k*2)));}
 }
@@ -171,27 +176,27 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  const int touched=ov_touch>=0&&ov_touch_page==page&&now-ov_touch_ms<1500;const int hk=touched?ov_touch:-1;
  if(page==ORBIT_MOONS)ov_closeup(p,tr,hk,now);else{
  // The bar: a ring, four beats, a dot where the sequence is.
- ov_ring(OV_CX,OV_CY,OV_RING,md_tint(MD_BG,MD_EDGE,20),1.4f);
- for(int k=0;k<4;k++){const float a=-1.5707963f+k*1.5707963f;ov_seg(OV_CX+(OV_RING-3)*fm_cosf(a),OV_CY+(OV_RING-3)*fm_sinf(a),OV_CX+(OV_RING+3)*fm_cosf(a),OV_CY+(OV_RING+3)*fm_sinf(a),k?MD_EDGE:MD_DIM);}
- if(md_playing()){float b=ov_pos-16*fm_floorf(ov_pos/16);const float a=-1.5707963f+b*(6.2831853f/16);md_circle((int)(OV_CX+OV_RING*fm_cosf(a)+.5f),(int)(OV_CY+OV_RING*fm_sinf(a)+.5f),2,MD_INK,1);}
+ ov_ring(ov_cx,ov_cy,OV_RING,md_tint(MD_BG,MD_EDGE,20),1.4f);
+ for(int k=0;k<4;k++){const float a=-1.5707963f+k*1.5707963f;ov_seg(ov_cx+(OV_RING-3)*fm_cosf(a),ov_cy+(OV_RING-3)*fm_sinf(a),ov_cx+(OV_RING+3)*fm_cosf(a),ov_cy+(OV_RING+3)*fm_sinf(a),k?MD_EDGE:MD_DIM);}
+ if(md_playing()){float b=ov_pos-16*fm_floorf(ov_pos/16);const float a=-1.5707963f+b*(6.2831853f/16);md_circle((int)(ov_cx+OV_RING*fm_cosf(a)+.5f),(int)(ov_cy+OV_RING*fm_sinf(a)+.5f),2,MD_INK,1);}
  // Ellipses: the selected one bright; with no gates, dotted and faint.
  for(int pass=0;pass<2;pass++)for(int i=0;i<6;i++){const OrbitView *o=&ov[i];if(!o->on||(i==tr)!=(pass==1))continue;
   const int lit=i==tr&&page==ORBIT&&(hk==0||hk==1);
   ov_ellipse(o,md_tint(MD_BG,dream_colors[i],p->orbit[i].gates?(i==tr?(lit?32u:22u):15u):7u),p->orbit[i].gates?(lit?.8f:1.2f):3.0f);
   // Where it is fastest (the periapsis), while the precession is being turned.
-  if(page==ORBIT_SYS&&hk==0&&o->e>.01f){const float r=o->a*(1-o->e);md_circle((int)(OV_CX+r*fm_cosf(o->w)+.5f),(int)(OV_CY+r*fm_sinf(o->w)+.5f),2,dream_colors[i],0);}}
+  if(page==ORBIT_SYS&&hk==0&&o->e>.01f){const float r=o->a*(1-o->e);md_circle((int)(ov_cx+r*fm_cosf(o->w)+.5f),(int)(ov_cy+r*fm_sinf(o->w)+.5f),2,dream_colors[i],0);}}
  // Gates: a short radial stroke on the ellipse, white while it plays, grey when refused.
  for(int i=0;i<6;i++){const OrbitView *o=&ov[i];if(!o->on||!p->orbit[i].gates)continue;float phi[MD_ORBIT_GATES_MAX];const int n=md_orbit_gate_angles(p,i,phi);
   const int lit_ms=ov_hit_gate[i]>=0&&now-ov_hit_ms[i]<260;
   for(int g=0;g<n;g++){const float r=o->a*(1-o->e*o->e)/(1+o->e*fm_cosf(phi[g]-o->w)),c=fm_cosf(phi[g]),s=fm_sinf(phi[g]);
    const int on=lit_ms&&g==ov_hit_gate[i],big=i==tr&&page==ORBIT&&(hk==2||hk==3);const float d=big?5:3.5f;
    const uint16_t ink=on?(ov_hit_skip[i]?MD_EDGE:MD_INK):md_tint(MD_BG,dream_colors[i],i==tr?30u:16u);
-   ov_seg(OV_CX+(r-d)*c,OV_CY+(r-d)*s,OV_CX+(r+d)*c,OV_CY+(r+d)*s,ink);if(on||big)ov_seg(OV_CX+(r-d)*c+s*.7f,OV_CY+(r-d)*s-c*.7f,OV_CX+(r+d)*c+s*.7f,OV_CY+(r+d)*s-c*.7f,ink);}}
+   ov_seg(ov_cx+(r-d)*c,ov_cy+(r-d)*s,ov_cx+(r+d)*c,ov_cy+(r+d)*s,ink);if(on||big)ov_seg(ov_cx+(r-d)*c+s*.7f,ov_cy+(r-d)*s-c*.7f,ov_cx+(r+d)*c+s*.7f,ov_cy+(r+d)*s-c*.7f,ink);}}
  // MOTIF: the notes the selected body will play, written by the gates it will cross next, in order (the next brightest).
  if(page!=ORBIT_COMET)ov_motif_labels(p,tr,col);
  // A conjunction: the line from the star through both bodies, fading over 1.2 s.
- if(ov_conj_a>=0&&now-ov_conj_ms<1200){const OrbitView *a=&ov[ov_conj_a],*b=&ov[ov_conj_b];const OrbitView *far=(a->x-OV_CX)*(a->x-OV_CX)+(a->y-OV_CY)*(a->y-OV_CY)>(b->x-OV_CX)*(b->x-OV_CX)+(b->y-OV_CY)*(b->y-OV_CY)?a:b;
-  ov_seg(OV_CX,OV_CY,far->x,far->y,md_tint(MD_BG,MD_INK,(unsigned)(32-(now-ov_conj_ms)*26/1200)));}
+ if(ov_conj_a>=0&&now-ov_conj_ms<1200){const OrbitView *a=&ov[ov_conj_a],*b=&ov[ov_conj_b];const OrbitView *far=(a->x-ov_cx)*(a->x-ov_cx)+(a->y-ov_cy)*(a->y-ov_cy)>(b->x-ov_cx)*(b->x-ov_cx)+(b->y-ov_cy)*(b->y-ov_cy)?a:b;
+  ov_seg(ov_cx,ov_cy,far->x,far->y,md_tint(MD_BG,MD_INK,(unsigned)(32-(now-ov_conj_ms)*26/1200)));}
  // ECHO: a dotted thread to the track it answers.
  for(int i=0;i<6;i++){const int s=(i+5)%6;if(!ov[i].on||!ov[s].on||p->orbit[i].pitch!=MD_PITCH_ECHO||!p->orbit[i].gates||!p->orbit[s].gates)continue;
   const float dx=ov[s].x-ov[i].x,dy=ov[s].y-ov[i].y;const int n=(int)(fm_sqrtf(dx*dx+dy*dy)/4);const uint16_t ink=md_tint(MD_BG,dream_colors[i],i==tr&&page==ORBIT_SYS&&hk==2?30u:14u);
@@ -209,16 +214,16 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  // long as its passage acts); beyond, a mark on the ring in its direction, brighter as it nears.
  if(ov_comet.on){const OrbitView *c=&ov_comet;
   if(page==ORBIT_COMET&&hk==0)ov_ellipse(c,md_tint(MD_BG,MD_INK,10),3);
-  const float dx=c->x-OV_CX,dy=c->y-OV_CY,r=fm_sqrtf(dx*dx+dy*dy),co=fm_cosf(c->out),si=fm_sinf(c->out);
+  const float dx=c->x-ov_cx,dy=c->y-ov_cy,r=fm_sqrtf(dx*dx+dy*dy),co=fm_cosf(c->out),si=fm_sinf(c->out);
   if(r<OV_RING-4){const float tail=4+30*md_status()->comet_now;
    for(int k=0;k<3;k++){const float o=(k-1)*.8f;ov_seg(c->x-si*o,c->y+co*o,c->x+co*tail-si*o,c->y+si*tail+co*o,md_tint(MD_BG,MD_INK,k==1?18u:9u));}
    if(ov_band(c->y-3,c->y+3))md_circle((int)(c->x+.5f),(int)(c->y+.5f),2,MD_INK,1);}
-  else{const float x=OV_CX+OV_RING*co,y=OV_CY+OV_RING*si,near=fm_minf(1,(OV_RING+80)/(r+1)-.5f);
+  else{const float x=ov_cx+OV_RING*co,y=ov_cy+OV_RING*si,near=fm_minf(1,(OV_RING+80)/(r+1)-.5f);
    if(ov_band(y-3,y+3))md_circle((int)(x+.5f),(int)(y+.5f),2,md_tint(MD_BG,MD_INK,(unsigned)(10+16*fm_maxf(0,near))),0);}}
  // The star glows with what is playing; the perturbation shows as a halo while it is turned.
- {const float g=4+fm_minf(9,ov_level*30);ov_ring(OV_CX,OV_CY,g,md_tint(MD_BG,MD_INK,8),1.2f);ov_ring(OV_CX,OV_CY,g*.6f,md_tint(MD_BG,MD_INK,14),1.2f);
-  if(page==ORBIT_SYS&&hk==1&&p->orbit_pert)ov_ring(OV_CX,OV_CY,10+p->orbit_pert*.12f,md_tint(MD_BG,MD_INK,16),3);
-  md_circle(OV_CX,OV_CY,2,MD_INK,1);}
+ {const float g=4+fm_minf(9,ov_level*30);ov_ring(ov_cx,ov_cy,g,md_tint(MD_BG,MD_INK,8),1.2f);ov_ring(ov_cx,ov_cy,g*.6f,md_tint(MD_BG,MD_INK,14),1.2f);
+  if(page==ORBIT_SYS&&hk==1&&p->orbit_pert)ov_ring(ov_cx,ov_cy,10+p->orbit_pert*.12f,md_tint(MD_BG,MD_INK,16),3);
+  md_circle(ov_cx,ov_cy,2,MD_INK,1);}
  }
  // Words only where they help.
  if(page==ORBIT_COMET){if(!p->orbit_comet)md_text(10,44,"K1 COMET: A RARE PASSAGE",MD_DIM);else if(!md_playing())md_text(10,44,"PLAY: IT STARTS FAR AWAY",MD_DIM);}
@@ -234,9 +239,41 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
  // The card of the knob being turned, in the corner opposite the body it changes.
  // A full-width card, on the half of the screen away from the body, with a thread to it.
  if(touched){const char *label;char value[24]={0},info[48];ov_knob(p,page,hk,&label,value,info,0);
-  const OrbitView *o=&ov[tr];const int body=page==ORBIT||(page==ORBIT_SYS&&hk==2),y=page==ORBIT_MOONS||(body&&o->y<OV_CY)||(page==ORBIT_COMET&&ov_comet.on&&ov_comet.y<OV_CY)?164:42;
+  const OrbitView *o=&ov[tr];const int body=page==ORBIT||(page==ORBIT_SYS&&hk==2),y=page==ORBIT_MOONS||(body&&o->y<ov_cy)||(page==ORBIT_COMET&&ov_comet.on&&ov_comet.y<ov_cy)?164:42;
   char head[24]={'K',(char)('1'+hk),' ',0};ov_append(head,label);
   cv_rect(6,y,228,33,MD_CARD);cv_rect(6,y,228,1,col);cv_text(12,y+3,&FONT_XS,head,MD_DIM);
   cv_text(228-text_w(&FONT_B,value),y+2,&FONT_B,value,col);cv_text(12,y+18,&FONT_XS,info,MD_INK);
-  if(body&&o->on&&page!=ORBIT_MOONS)ov_seg(o->x,o->y,o->x,y<OV_CY?(float)y+33:(float)y,md_tint(MD_BG,col,14));}
+  if(body&&o->on&&page!=ORBIT_MOONS)ov_seg(o->x,o->y,o->x,y<ov_cy?(float)y+33:(float)y,md_tint(MD_BG,col,14));}
+}
+// The system in miniature, for the home page, the start-up and LOOK / STARTUP (orbit_frame sets where): the same engine
+// state as the ORBIT page, without words. The ellipses, the gates (white as they play), each body where it is with a
+// ripple for each note, a line for a conjunction, the comet while it is near, the star glowing with what plays; around
+// it all, the SPACE macro as a ring of dust. arrive (0..1): at the start-up the bodies fall in from far away onto their
+// own orbits, and the ellipses appear as they arrive.
+static void md_orbit_mini(const md_patch *p,float arrive,int live){
+ const int tr=dream_ui.track;const uint32_t now=plat_ms();const float fall=1+2.4f*(1-arrive)*(1-arrive);const unsigned fade=(unsigned)(32*arrive);
+ if(live){const float r=ov_fit+3+p->macro[3]*.006f;const unsigned dust=(unsigned)(4+p->macro[3]*20/1000);
+  if(ov_band(ov_cy-r,ov_cy+r)){const int n=(int)(r*1.6f);for(int k=0;k<n;k++){const float t=k*6.2831853f/n;md_soft_point(ov_cx+r*fm_cosf(t),ov_cy+r*fm_sinf(t),md_tint(MD_BG,MD_DIM,dust));}}}
+ for(int i=0;i<6;i++){const OrbitView *o=&ov[i];if(!o->on)continue;const int has=p->orbit[i].gates>0,mute=p->track[i].mute;
+  if(!has&&!live)continue;
+  ov_ellipse(o,md_tint(MD_BG,mute?MD_EDGE:dream_colors[i],(has?(i==tr&&live?20u:12u):6u)*fade/32),has?1.5f:3.5f);
+  if(!has)continue;
+  float phi[MD_ORBIT_GATES_MAX];const int n=md_orbit_gate_angles(p,i,phi),lit=ov_hit_gate[i]>=0&&now-ov_hit_ms[i]<260;
+  for(int g=0;g<n;g++){const float r=o->a*(1-o->e*o->e)/(1+o->e*fm_cosf(phi[g]-o->w)),x=ov_cx+r*fm_cosf(phi[g]),y=ov_cy+r*fm_sinf(phi[g]);
+   if(!ov_band(y-2,y+2))continue;const int on=lit&&g==ov_hit_gate[i];
+   if(on)md_circle((int)(x+.5f),(int)(y+.5f),1,ov_hit_skip[i]?MD_EDGE:MD_INK,1);else md_soft_point(x,y,md_tint(MD_BG,mute?MD_EDGE:dream_colors[i],22*fade/32));}}
+ if(arrive>=1&&ov_conj_a>=0&&now-ov_conj_ms<1200){const OrbitView *a=&ov[ov_conj_a],*b=&ov[ov_conj_b];
+  const OrbitView *far=(a->x-ov_cx)*(a->x-ov_cx)+(a->y-ov_cy)*(a->y-ov_cy)>(b->x-ov_cx)*(b->x-ov_cx)+(b->y-ov_cy)*(b->y-ov_cy)?a:b;
+  ov_seg(ov_cx,ov_cy,far->x,far->y,md_tint(MD_BG,MD_INK,(unsigned)(26-(now-ov_conj_ms)*22/1200)));}
+ for(int i=0;i<6;i++){const OrbitView *o=&ov[i];if(!o->on||!p->orbit[i].gates)continue;
+  const uint16_t c=p->track[i].mute?MD_EDGE:dream_colors[i];const float x=ov_cx+(o->x-ov_cx)*fall,y=ov_cy+(o->y-ov_cy)*fall;
+  if(dream_prefs.motion&&!ov_hit_skip[i]&&now-ov_hit_ms[i]<700&&md_playing()){const float k=(now-ov_hit_ms[i])/700.0f;ov_ring(x,y,3+(5+8*fm_minf(1,ov_hit_vel[i]*3))*fm_sqrtf(k),md_tint(MD_BG,c,(unsigned)(28*(1-k))),1.3f);}
+  if(y<ov_top+3||y>ov_bottom-3||!ov_band(y-6,y+6))continue; // falling in: hidden until inside the frame
+  if(live&&i==tr)md_circle((int)(x+.5f),(int)(y+.5f),5,md_tint(MD_BG,c,24),0);
+  md_circle((int)(x+.5f),(int)(y+.5f),i==tr&&live?3:2,c,1);}
+ if(ov_comet.on&&arrive>=1){const OrbitView *c=&ov_comet;const float dx=c->x-ov_cx,dy=c->y-ov_cy,r=fm_sqrtf(dx*dx+dy*dy);
+  if(r<ov_fit){const float tail=3+18*md_status()->comet_now,co=fm_cosf(c->out),si=fm_sinf(c->out);
+   ov_seg(c->x,c->y,c->x+co*tail,c->y+si*tail,md_tint(MD_BG,MD_INK,14));if(ov_band(c->y-2,c->y+2))md_circle((int)(c->x+.5f),(int)(c->y+.5f),1,MD_INK,1);}}
+ {const float g=3+fm_minf(7,ov_level*24);ov_ring(ov_cx,ov_cy,g,md_tint(MD_BG,MD_INK,8),1.2f);ov_ring(ov_cx,ov_cy,g*.6f,md_tint(MD_BG,MD_INK,14),1.2f);
+  if(ov_band(ov_cy-3,ov_cy+3))md_circle((int)ov_cx,(int)ov_cy,arrive<1?(int)(1+arrive):2,MD_INK,1);}
 }

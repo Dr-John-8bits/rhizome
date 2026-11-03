@@ -225,7 +225,7 @@ static void md_space(void){
  uint32_t now=plat_ms();if(md_playing()&&dream_prefs.motion)star_drift+=(now-star_clock)*md_state()->tempo*(1.0f/60000);while(star_drift>=60)star_drift-=60;star_clock=now; // one star-unit per beat
  for(int k=0;k<90;k++){int d=stars[k].depth,x=(int)(stars[k].x-star_drift*d*4)%240;if(x<0)x+=240;int y=stars[k].y;
   if(y+cv_oy<0||y+cv_oy>=40)continue;uint16_t c=d==3?MD_DIM:d==2?MD_EDGE:md_tint(MD_BG,MD_EDGE,18);cv_pset(x,y,c);if(d==3&&k%4==0){cv_pset(x+1,y,MD_EDGE);cv_pset(x,y+1,MD_EDGE);}}
- if(!dream_prefs.motion||orbit_page(dream_ui.page)||tape_echo_page(dream_ui.page)||hall_page(dream_ui.page)||dream_ui.page==BEADS)return; /* the orbits show the notes themselves */
+ if(!dream_prefs.motion||orbit_page(dream_ui.page)||dream_ui.page==LIVE||dream_ui.page==APPEARANCE||tape_echo_page(dream_ui.page)||hall_page(dream_ui.page)||dream_ui.page==BEADS)return; /* the orbits show the notes themselves */
  for(int i=0;i<6;i++){uint32_t fired=pulse_until[i]-160;if(!pulse_until[i]||now-fired>900)continue; // pulse_until marks each new event
   float head=236-(now-fired)*.26f;int y=58+i*28;if(y+cv_oy<-1||y+cv_oy>=41)continue;
   for(int tl=0;tl<22;tl++){float x=head+tl;if(x<0||x>239)continue;md_soft_point(x,(float)y,md_tint(MD_BG,dream_colors[i],(unsigned)(28-tl)));}}
@@ -253,11 +253,10 @@ static void md_draw_all(void) {
  md_num(p->tempo,s);md_text(186,25,s,MD_INK);md_text(211,25,"BPM",MD_DIM);
  if(intro_until&&plat_ms()<intro_until&&dream_ui.help<0){
   float progress=(plat_ms()-intro_start)/3200.0f;
-  // The fleet arrives from deep space and takes its formation around the star.
-  {float e=progress>1?1:progress,arrive=1-(1-e)*(1-e);md_circle(120,100,(int)(2+4*arrive),MD_INK,1);
-   md_fleet(120,100,30+(1-arrive)*24,progress*1.2f,md_state(),0);}
+  // The Monde's own system: its bodies fall in from far away onto their orbits, at their own speeds (orbit_frame).
+  {float e=progress>1?1:progress;md_orbit_mini(md_state(),1-(1-e)*(1-e)*(1-e),0);}
   cv_text(120-text_w(&FONT_B,"RHIZOME")/2,158,&FONT_B,"RHIZOME",MD_INK);md_text(120-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT")/2,180,"WHEN DAY CHOKES THE NIGHT",col);
-  md_text(120-text_w(&FONT_XS,"90 MONDES / 224 TONES")/2,200,"90 MONDES / 224 TONES",MD_DIM);
+  {char m[32];md_num(MD_BIOMES-1,m);char *q=m;while(*q)q++;for(const char *f=" MONDES / 224 TONES";*f;)*q++=*f++;*q=0;md_text(120-text_w(&FONT_XS,m)/2,200,m,MD_DIM);}
   cv_rect(32,220,(int)(176*progress),2,col);md_text(48,223,"ANY CONTROL TO BEGIN",MD_DIM);return;
  }
  if(dream_asking()&&dream_ui.help<0){
@@ -674,17 +673,15 @@ static void md_draw_all(void) {
    md_value_span(8,158,"K1 STEP",e->edit_step+1,1,16,col);md_value_span(124,158,"K2 NOTE / REST",e->notes[e->edit_step],-1,24,col);md_value(8,194,"K3 ACCENT",t->accent/10,col);md_value(124,194,"K4 CHANCE",t->prob/10,col);
   }
  }else if(dream_ui.page==LIVE) {
-  // The fleet around its star. Space = the dust ring, Colour = how bright the hulls are (see md_fleet).
-  {float hr=42+p->macro[3]*.012f;for(int k=0;k<96;k++){float b=k*.065449847f;if(k%2)md_soft_point(51+fm_cosf(b)*hr,95+fm_sinf(b)*hr,md_tint(MD_BG,MD_DIM,(unsigned)(4+p->macro[3]*22/1000)));}}
-  md_circle(51,95,4,MD_INK,1);md_circle(51,95,6,md_tint(MD_BG,MD_INK,12),0);
-  md_fleet(51,95,26,flower_time*.00012f,p,1);
+  // The Monde's system in miniature, as it plays (md_orbit_mini); SPACE is the ring of dust around it.
+  md_orbit_mini(p,1,1);
   for(i=0;i<6;i++){
    if(i==dream_ui.track)cv_rect(94,45+i*17,137,16,MD_CARD);
    md_num(i+1,s);md_text(98,46+i*17,s,dream_colors[i]);md_text(112,46+i*17,md_model_name(p->track[i].model),p->track[i].mute?MD_DIM:MD_INK);
    {int lit=md_segments(md_status()->track_peak[i]*1.9f)/2;for(int sg=0;sg<12;sg++)cv_rect(206+sg*2,56+i*17,1,3,sg<lit?(sg>=11?MD_HOT:dream_colors[i]):MD_CARD);}
    if(i==dream_ui.track)cv_rect(94,48+i*17,2,9,col);
   }
-  md_text(12,141,md_tone_name(p->tone_preset[dream_ui.track]),col);md_text(140,141,md_biome_family(p->biome_id),MD_DIM);
+  md_text(12,145,md_tone_name(p->tone_preset[dream_ui.track]),col);md_text(140,145,md_biome_family(p->biome_id),MD_DIM);
   const char *labels[]={"K1 DENSITY","K2 MOTION","K3 COLOUR","K4 SPACE"};for(i=0;i<4;i++)md_value(8+(i%2)*116,158+(i/2)*36,labels[i],p->macro[i]/10,dream_colors[i]);
  } else if(dream_ui.page==SYSTEM) {
   md_text(10,48,"RHIZOME " APP_VERSION,MD_INK);md_text(238-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT"),48,"WHEN DAY CHOKES THE NIGHT",col);md_text(10,69,p->quality?"FULL  24 MODES / 4 GRAINS":"ECO / ADAPTIVE MODES / 2 GRAINS",col);
@@ -699,7 +696,7 @@ static void md_draw_all(void) {
   md_text(10,166,"K1 TEMPO   K2 ECO / FULL",MD_INK);md_text(10,188,"REC: PANIC / CLEAR TAPE",col);
   md_text(10,211,"K3: DUCK RELEASE / K4: RESET",MD_DIM);
  } else if(dream_ui.page==APPEARANCE) {
-  md_circle(120,98,3,MD_INK,1);md_fleet(120,98,28,flower_time*.0003f,p,0); /* Motion LIVING: the fleet turns; STILL: it holds */
+  md_orbit_mini(p,1,0); /* Motion LIVING: the bodies turn; STILL: they hold */
   md_text(24,140,"SAVE KEEPS THESE SETTINGS",MD_DIM);
   md_named(8,158,"K1 MOTION",dream_prefs.motion?"LIVING":"STILL",col);md_named(124,158,"K2 START SOUND",dream_prefs.boot_sound?"ON":"OFF",col);
   md_named(8,194,"K3 INTRO","REPLAY",col);md_named(124,194,"K4 CPU MAX","RESET",col);
@@ -1071,6 +1068,12 @@ void app_input_only(void) {
 void app_ui_init(void) {dream_ui.dirty=1;dream_ui.next=0;if(intro_pending){intro_pending=0;dream_intro();}}
 void app_frame(void) {
  unsigned y;app_input_only();if(md_status()->quality_reductions!=quality_notice){quality_notice=md_status()->quality_reductions;app_say("ECO: DENSE PATCH","");}flower_time=dream_prefs.motion?plat_ms():0;for(int i=0;i<6;i++){if(md_status()->events[i]!=last_events[i]){last_events[i]=md_status()->events[i];pulse_until[i]=plat_ms()+160;if(i==dream_ui.track)dream_note_key(md_status()->last_note[i]);}if(md_status()->midi_out_track[i]!=last_out[i]){last_out[i]=md_status()->midi_out_track[i];chan_out_until[i]=plat_ms()+200;}}if(plat_ms()<dream_ui.next&&!dream_ui.dirty)return;dream_ui.next=plat_ms()+80;dream_ui.dirty=0;
+ {static uint32_t demo_at;static float demo;const uint32_t now=plat_ms();const int intro=intro_until&&now<intro_until&&dream_ui.help<0; /* Rhizome: where the system is drawn */
+  if(intro||dream_ui.page==APPEARANCE){demo+=(now-demo_at)*md_state()->tempo*(1.0f/15000);while(demo>=2688)demo-=2688;}else demo=0; /* sixteenths; 2688 steps bring every period round */
+  if(intro&&now-intro_start<60)demo=0;demo_at=now;
+  if(intro)orbit_frame(120,98,52,42,152,demo);else if(dream_ui.page==LIVE)orbit_frame(47,92,40,42,140,0);
+  else if(dream_ui.page==APPEARANCE)orbit_frame(120,96,44,42,136,dream_prefs.motion?demo:0);else orbit_frame(OV_CX,OV_CY,72,42,196,0);
+  if(intro||dream_ui.page==LIVE||dream_ui.page==APPEARANCE)orbit_view_update();}
  if(orbit_page(dream_ui.page))orbit_view_update();else if(tape_echo_page(dream_ui.page))tape_view_update();else if(hall_page(dream_ui.page))hall_view_update(); /* once a frame, before the bands */
  for(y=0;y<240;y+=40){cv_begin(240,40,MD_BG);cv_oy=-(int)y;md_draw_all();cv_blit(0,y);}
  {uint32_t dim;const uint32_t lit=dream_lights(&dim);plat_lights(lit,dream_key_lights(),dim,0,1);}

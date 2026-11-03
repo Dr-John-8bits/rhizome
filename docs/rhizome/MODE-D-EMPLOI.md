@@ -8,7 +8,7 @@ Rhizome est un firmware pour le M-VAVE FM-1, écrit pour **When Day Chokes The N
 
 Il est complémentaire de Monades (le premier FM-1, qui fait les notes) et joue aussi très bien seul.
 
-> **État au 2 novembre 2026.** Rhizome tourne dans le simulateur. **Il n'a pas encore été compilé ni mesuré sur un FM-1** : ne l'installez pas sur votre appareil avant que la charge du processeur ait été vérifiée (voir « Points de vigilance »).
+> **État au 3 novembre 2026.** Rhizome tourne dans le simulateur et se compile pour le FM-1. **Il n'a pas encore été mesuré sur un FM-1** : ne l'installez pas sur votre appareil avant que la charge du processeur ait été vérifiée (voir « Points de vigilance »).
 
 Rhizome repart du code de **Monades 0.1.3**. Tout ce que Monades sait faire est encore là : voix, filtres, rythmes, phrases, générateurs, gammes, MIDI, sauvegardes. Ce mode d'emploi décrit ce que Rhizome ajoute ou change. Pour les pages héritées, voir le [mode d'emploi de Monades](https://dr-john-8bits.github.io/rhizome/monades/manuel/).
 
@@ -58,9 +58,58 @@ Deux différences :
 - sur les pages de Rhizome, **REC** ne tire pas la page au sort : il donne une nouvelle variation, comme sur LIVE ;
 - le bouton **LFO** fige la mémoire de Beads.
 
+## L'accueil : le système du Monde
+
+**LIVE MONDE** (HOME) montre, à gauche, le système orbital du Monde en miniature, tel qu'il joue :
+- l'**étoile** au centre, qui brille de ce qu'on entend ;
+- l'**ellipse** de chaque piste qui a des portes, dans sa couleur, et ses **portes** en pointillé, qui s'allument en blanc quand le corps les franchit ;
+- chaque **corps** là où il est, avec une onde à chaque note ; la piste choisie est cerclée ;
+- un trait de l'étoile vers deux corps **en conjonction** ;
+- la **comète** quand elle passe dans le cadre ;
+- autour, l'**anneau de poussière**, dont la taille et l'éclat suivent **SPACE**.
+
+À droite, les six pistes et leur moteur, avec un vumètre. En bas, les quatre macros :
+- **K1 DENSITY** ajoute ou retire des portes à toutes les orbites, comme elle ajoute ou retire des coups à un rythme (jusqu'à cinq portes de chaque côté). Une orbite garde toujours sa période et sa forme ;
+- **K2 MOTION**, **K3 COLOUR** et **K4 SPACE** gardent leur rôle de Monades : variation des notes, couleur du son, niveau des grains.
+
+**Au démarrage**, les corps du Monde chargé tombent de loin sur leurs orbites, puis tournent à leurs vraies vitesses (un tour à son tempo). Avec **LOOK** (GLO 4 fois), K1 MOTION choisit si les corps tournent (LIVING) ou restent immobiles (STILL), et K3 rejoue le démarrage.
+
+## Les Mondes
+
+Rhizome a **12 Mondes**, écrits pour When Day Chokes The Night, en trois familles qui vont du crépuscule à l'aube. Chacune montre une idée du séquenceur orbital. Le 13e, **EMPTY SKY**, est une page blanche : aucune porte, aucun coup, les effets à zéro.
+
+Tous sont réglés au même niveau d'écoute (sauf NO STARS, plus clairsemé, un peu plus bas). Sur le Mac, ils sont estimés entre 36 et 58 % du processeur du FM-1, Beads grand ouvert compris : loin de la limite de 85 %. Ce n'est qu'une estimation, que l'appareil devra confirmer.
+
+**DUSK, les résonances.** Des orbites rondes ou presque, dont les périodes sont des rapports simples. On entend des polyrythmes lents et réguliers.
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 1 LAST LIGHT | D DORIAN · 64 | Cinq corps en 8:3:4:6:12 : la basse fait le 8, la nappe le 12. |
+| 2 AMBER HOUR | A MINOR PENT · 72 | Une résonance de Laplace : 1:2:4, comme Io, Europe et Ganymède. Des cloches FM. |
+| 3 LONG SHADOWS | F LYDIAN · 60 | Trois corps de cinq portes en 6:7:8 : ils se décalent lentement, puis se retrouvent. |
+| 4 SLOW EMBERS | E MINOR · 54 | Tintinnabuli : une flûte joue sa phrase (MOTIF), un sinus lui répond sur l'accord (ECHO). |
+
+**NIGHT, les orbites excentriques.** Le rubato : les corps pressent près de l'étoile et restent suspendus loin d'elle. Les ellipses tournent (précession), certaines portes sautent (perturbation).
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 5 NIGHT SWALLOWS | C PHRYGIAN · 58 | Deux corps très excentriques, des notes qui se précipitent puis attendent. |
+| 6 BLACK ORCHARD | G KUMOI · 66 | La perturbation la plus forte : des portes qui respirent et se taisent. Bande usée, grains sales. |
+| 7 SLEEPLESS TIDE | D JUST MINOR · 50 | Une marée : les ellipses tournent vite, les notes montent près de l'étoile. |
+| 8 NO STARS | B LOCRIAN · 46 | Presque rien. Une comète toutes les 32 mesures fige les grains. |
+
+**DAWN, les lunes et les comètes.** Des ornements après les notes, des passages rares, des accords quand les corps s'alignent.
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 9 FIRST BIRD | G MAJOR PENT · 76 | Des lunes qui montent la gamme et par tierces : des appels d'oiseaux. |
+| 10 PALE COMET | E LYDIAN · 62 | Une comète toutes les 16 mesures : la salle gonfle à son passage. |
+| 11 CHOKED DAWN | F# DORIAN · 56 | Les conjonctions frappent des accords. Bande saturée et usée, comète qui gonfle et fige. |
+| 12 DAY BREAKS | D MIXOLYDIAN · 84 | Une phrase ornée d'harmoniques, des accords aux conjonctions, une comète qui fige les grains. |
+
 ## Premiers pas : faire tourner des orbites
 
-1. Choisir un Monde avec PRESET, par exemple le 61 (Quiet Lanterns).
+1. Écouter un Monde : PRESET, puis PLAY. Pour partir de zéro, aller au Monde 13, **EMPTY SKY**.
 2. Appuyer sur **SEQ** : la page **ORBIT** s'ouvre. Tourner **K3 GATES** : la piste choisie devient un corps qui tourne autour de l'étoile, avec autant de portes que le réglage.
 3. Avec SELECT, passer à une autre piste et lui donner aussi des portes, avec une autre période (**K1**).
 4. Appuyer sur **PLAY**. Tous les corps partent du haut, ensemble.
@@ -295,7 +344,7 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 
 ## Points de vigilance
 
-- **La charge du processeur.** Comme pour Monades, **la limite de 85 % ne doit jamais être atteinte**, même dans le pire cas. Sur le Mac, la bande, la HALL et Beads réunis placent les Mondes les plus lourds de Monades trop près de cette limite. Seule une mesure sur l'appareil le dira.
+- **La charge du processeur.** Comme pour Monades, **la limite de 85 % ne doit jamais être atteinte**, même dans le pire cas. Sur le Mac, les 12 Mondes de Rhizome sont estimés entre 36 et 58 %, Beads grand ouvert compris. Mais on peut charger un Monde plus lourd : six voix Rings, par exemple. Seule une mesure sur l'appareil le dira.
 - **Si la charge ne tient pas, Rhizome renoncera à un effet plutôt que de risquer le FM-1.** La première candidate est la HALL : sa mémoire et son calcul serviraient à enrichir le delay ou à un effet plus léger.
 - En cas de surcharge, le firmware passe déjà de lui-même en mode économie, et la HALL en VINTAGE.
 

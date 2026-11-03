@@ -15,6 +15,7 @@ static float reel_pos,reel_speed=1,reel_mod=1,reel_wow_phase,reel_flutter_phase,
  reel_drop=1,reel_drop_target=1,reel_head_peak[3],reel_rec_peak,reel_wow_now,reel_env;
 static unsigned reel_rng=0x5eed1234u,reel_drop_left,reel_trace_col;
 static int reel_transport;
+static bool reel_snap; // after a reset the empty tape starts at its speed, without a slide
 static uint8_t reel_trace[128]; // the level written on each 256-sample stretch of the loop, for the screen
 static uint8_t reel_encode(float x){
  int s=(int)(x*32767);const int sign=s<0?0x80:0;if(s<0)s=-s;if(s>32635)s=32635;s+=132;
@@ -24,6 +25,7 @@ static uint8_t reel_encode(float x){
 static void reel_reset(){
  for(int u=0;u<256;u++){const int x=~u&0xFF;int t=((x&0x0F)<<3)+132;t<<=(x&0x70)>>4;reel_decode[u]=(int16_t)((x&0x80)?132-t:t-132);}
  memset(reel,reel_encode(0),sizeof reel);memset(reel_trace,0,sizeof reel_trace);memset(reel_head_peak,0,sizeof reel_head_peak);
+ reel_rng=0x5eed1234u;reel_wow_phase=reel_flutter_phase=0;reel_mod=1;reel_snap=true; // the same Monde always sounds the same
  reel_pos=0;reel_env=0;reel_lp=reel_tone_lp=reel_hp=reel_rec_peak=reel_wow_now=reel_drift=0;reel_drop=reel_drop_target=1;reel_drop_left=0;
 }
 static int reel_heads(){const int h=patch.tape_heads&7;return h?h:4;}
@@ -47,6 +49,7 @@ static float reel_rec_coef,reel_age;
 static void reel_block(unsigned n,float time_ms,float glide){
  const float target=reel_transport==MD_TAPE_STOP?0:fminf(REEL_SPEED_MAX,fmaxf(REEL_SPEED_MIN,reel_longest()/(time_ms*22.05f)));
  const float g=reel_transport==MD_TAPE_STOP||reel_speed<REEL_SPEED_MIN*.9f?.00025f:glide;
+ if(reel_snap){reel_snap=false;reel_speed=target;}
  for(unsigned k=0;k<n;k++)reel_speed+=(target-reel_speed)*g; // per sample, as before: the same slide
  const float wow=patch.tape_wow*.001f;
  reel_wow_phase+=n*(.55f/MD_RATE);if(reel_wow_phase>=1)reel_wow_phase-=1;reel_flutter_phase+=n*(7.3f/MD_RATE);if(reel_flutter_phase>=1)reel_flutter_phase-=1;

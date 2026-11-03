@@ -22,6 +22,7 @@ static HallSet hall_set;
 static void hall_reset(){
  memset(hall_buf,0,sizeof hall_buf);unsigned b=0;for(int k=0;k<HALL_LINES;k++){hall_base[k]=(uint16_t)b;b+=hall_len[k];}
  hall_wp=0;hall_lp1=hall_lp2=hall_lo1=hall_lo2=hall_in_acc=hall_l=hall_r=hall_l_prev=hall_r_prev=hall_split_lo=hall_split_hi=0;memset(hall_env,0,sizeof hall_env);hall_odd=false;
+ hall_lfo_phase[0]=hall_lfo_phase[1]=hall_lfo[0]=hall_lfo[1]=0; // the same Monde always sounds the same
 }
 static inline float hall_read(int k,float d){const int i=(int)d;const float f=d-(float)i;const unsigned at=hall_wp+hall_base[k]+(unsigned)i;
  return (hall_buf[at&HALL_MASK]*(1-f)+hall_buf[(at+1)&HALL_MASK]*f)*(1.0f/32768.0f);}

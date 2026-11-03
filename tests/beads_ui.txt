@@ -1,8 +1,8 @@
 wait 3400
 tap HOME
-turn PRESET 61
+turn PRESET 12
 wait 50
-expect biome 61
+expect biome 12
 tap FX
 tap FX
 tap FX

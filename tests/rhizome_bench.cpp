@@ -75,14 +75,23 @@ static void add(const char *group, const char *name, double ns) {
 }
 
 /* ---------- Monades, the yardstick ---------- */
-static int monde_id(const char *name) {
-  for (int i = 0; i < MD_BIOMES; i++) if (contains(md_biome_name(i), name)) return i;
-  fprintf(stderr, "no Monde %s\n", name); exit(1);
-}
+// Rhizome no longer carries Monades' Mondes: the two measured ones are kept as v10 patches (tools/generate_presets.py).
+#include "monades_yardstick.inc"
 static double monades(const char *name) {
   static float st[2 * Q];
-  const int id = monde_id(name);
-  return measure([&] { md_init(); md_command(MD_SCENE, 0, id); md_command(MD_QUALITY, 0, 0); md_command(MD_PLAY, 0, 1); },
+  int k = 0;
+  while (k < 2 && !contains(yardstick_names[k], name)) k++;
+  if (k == 2) { fprintf(stderr, "no yardstick %s\n", name); exit(1); }
+  return measure([&] { md_init(); if (!md_import(&yardstick[k], sizeof(md_patch_v10))) { fprintf(stderr, "yardstick %s refused\n", name); exit(1); }
+                       md_command(MD_QUALITY, 0, 0); md_command(MD_PLAY, 0, 1); },
+                 [&](unsigned) { md_render(st, Q); });
+}
+// Rhizome's own Mondes, as they load; "worst": SPACE fully open, so Beads always runs, on CLEAN TAPE (its heaviest).
+static double rhizome_monde(int id, bool worst) {
+  static float st[2 * Q];
+  return measure([&] { md_init(); md_command(MD_SCENE, 0, id);
+                       if (worst) { md_command(MD_MACRO, 3, 1000); md_command(MD_BEADS_MEDIA, 0, MD_BEADS_CLEAN_TAPE); }
+                       md_command(MD_PLAY, 0, 1); },
                  [&](unsigned) { md_render(st, Q); });
 }
 
@@ -244,6 +253,12 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Monades (yardstick)\n");
     add("ref", "Monades 87 CLOUDEE (FM-1: 69 %)", monades("CLOUDEE"));
     add("ref", "Monades 89 ALCHIMISTE (FM-1: 76 %)", monades("ALCHIMISTE"));
+    fprintf(stderr, "Rhizome's Mondes\n");
+    for (int id = 0; id < MD_BLANK_BIOME; id++) {
+      char name[96];
+      snprintf(name, sizeof name, "MONDE %d %s", id + 1, md_biome_name(id)); add("mondes", name, rhizome_monde(id, false));
+      snprintf(name, sizeof name, "MONDE %d %s, SPACE 100 CLEAN TAPE", id + 1, md_biome_name(id)); add("mondes", name, rhizome_monde(id, true));
+    }
     fprintf(stderr, "Plaits, one voice\n");
     add("plaits", "VA (in Monades)", run_plaits<plaits::VirtualAnalogEngine>());
     add("plaits", "FM 2-op (in Monades)", run_plaits<plaits::FMEngine>());

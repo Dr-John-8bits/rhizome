@@ -1,7 +1,7 @@
 wait 3400
 tap HOME
-turn PRESET 80
-expect biome 80
+turn PRESET 9
+expect biome 9
 wait 1600
 tap HOME
 tap HOME

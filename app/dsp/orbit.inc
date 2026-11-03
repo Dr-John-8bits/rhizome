@@ -151,6 +151,9 @@ static void orbit_fire(unsigned i,int gate,float pos){
    if((r>>10)%1000<(unsigned)(pert*500))deg+=(r>>20)&1?1:-1;
    pitch=quantize_any(pitch,patch.root,patch.scale,0);
    for(int k=0;k<deg;k++)pitch=scale_neighbour(pitch,1);for(int k=0;k>deg;k--)pitch=scale_neighbour(pitch,-1);}
+  // MOTION, as on a rhythm: that share of the notes jumps by a scale step, a fourth, a fifth or an octave (not ECHO,
+  // which answers the note it hears).
+  if(c.pitch!=MD_PITCH_ECHO&&patch.macro[1]){const unsigned m=random_word(orbit_rng);static const int8_t leap[7]={0,2,3,5,7,10,12};if(m%1000<(unsigned)patch.macro[1])pitch+=leap[(m>>12)%7];}
   pitch=quantize_any(pitch+patch.transpose,patch.root,patch.scale,0);
  }
  const float velocity=o.accent_until>pos?1.0f:.55f+.15f*(1-rn);

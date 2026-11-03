@@ -464,6 +464,8 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 - **La charge du processeur, avant tout.** Il faut être certain que Rhizome ne fasse pas de mal au FM-1 : pas de surcharge, pas de craquements, pas de blocage.
   - **La règle, comme pour Monades : les 85 % ne doivent jamais être atteints**, même dans le pire cas (les Mondes les plus lourds, avec la bande, la HALL et Beads ouverts ensemble). Ce n'est pas un objectif mais un plafond, et il faut garder une marge en dessous.
   - Monades a déjà montré pourquoi : son audio USB craquait sur les Mondes chargés (70 à 80 % du temps de rendu) jusqu'à la réserve agrandie `FELUCCA_UAC_DEEP`, que Rhizome a gardée.
+  - **Le 3 novembre 2026, les 12 Mondes de Rhizome sont estimés entre 36 et 58 % sur le Mac, pire cas compris** (SPACE à 100, Beads en CLEAN TAPE). Mais un Monde de l'utilisateur peut être bien plus lourd : six voix Rings, par exemple.
+  - **La garde automatique ne connaît pas encore les effets de Rhizome.** Avant de jouer en FULL, le firmware estime le coût des voix et des effets de Monades, et passe en ECO au-delà d'un seuil. Elle ne compte ni la bande, ni la HALL, ni Beads : à recaler avec la mesure sur l'appareil. Les Mondes de Rhizome se chargent en ECO.
   - Les estimations faites sur le Mac le 2 novembre 2026 placent les Mondes les plus lourds de Monades près du plafond de 85 %, voire au-dessus. Ce sont les additions de la bande (+4 à 5 %), de la HALL (+2,5 à 4,5 %) et de Beads (+6 à 9 % quand SPACE est ouvert).
   - **Ce ne sont que des estimations : seule une mesure sur l'appareil compte.** À faire dès la première compilation, Monde par Monde, avec la bande, la HALL et Beads ouverts ensemble, dans le pire des cas.
   - La sécurité existe déjà : en cas de surcharge, le firmware passe en ECO et la HALL en VINTAGE (moitié du calcul).
@@ -520,5 +522,14 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 - le simulateur est compilé par GitHub Actions (`.github/workflows/pages.yml`, avec le WASI SDK 34) et publié avec le site sur GitHub Pages.
 
 **Première compilation pour le FM-1** (2 novembre 2026) : `rhizome-0.0.1.fwsc`, 610 136 octets, identité `FM-1_968000001`. Flash 561 720 octets sur 602 112, RAM 85 848 sur 98 304, pool 276 852 sur 344 064. Revue avant flash et chiffres détaillés : `docs/rhizome/REVUE-AVANT-FLASH.md`. **Pas encore installé ni mesuré sur l'appareil.**
+
+**Accueil et Mondes de Rhizome** (3 novembre 2026, en attendant le FM-1 de Rhizome) :
+- **L'accueil (LIVE MONDE)** montre le système du Monde en miniature, à la place de la flotte de Monades : ellipses, portes qui s'allument, corps et ondes des notes, conjonctions, comète, étoile qui brille de ce qu'on entend, anneau de poussière pour SPACE. Même état du moteur que la page ORBIT (`md_orbit_mini` dans `app/orbit_page.c`). **Au démarrage**, les corps du Monde tombent sur leurs orbites et tournent à leurs vraies vitesses ; LOOK (MOTION) les fait tourner ou les fige.
+- **DENSITY et MOTION agissent sur les orbites** : DENSITY ajoute ou retire jusqu'à cinq portes, MOTION fait sauter une part des notes (un pas de la gamme, une quarte, une quinte, une octave), comme sur un rythme. Avant, ces deux macros de l'accueil ne faisaient rien aux orbites.
+- **12 Mondes propres à Rhizome** à la place des 91 de Monades, plus EMPTY SKY (page blanche) : DUSK (résonances), NIGHT (orbites excentriques), DAWN (lunes et comètes). Écrits dans `tools/rhizome_mondes.py`, en patchs v11 complets. Tous à −30 dB RMS (NO STARS à −37). La table des Mondes passe de 153 à 26 Ko de flash.
+- **Charge estimée sur le Mac** (banc `tools/bench_rhizome.py`, étalonné sur CLOUDEE et ALCHIMISTE, gardés à part dans `tests/monades_yardstick.inc`) : de 36 à 53 % tels qu'ils se chargent, de 36 à 58 % avec SPACE à 100 et Beads en CLEAN TAPE. Les Mondes de Monades montaient à 77–83 %.
+- **Deux défauts corrigés en route** : la bande (hasard, pleurage, vitesse) et la HALL (phase de modulation) gardaient un état d'une écoute à l'autre. Le même Monde ne sonnait donc pas deux fois pareil après un retour au départ. La bande démarre aussi à sa vitesse, sans glissement, quand on change de Monde.
+- Une écoute des 12 Mondes, 30 s chacun : `M-VAVE FM1/ecoutes/rhizome-12-mondes.m4a`.
+- **Reste à faire** : la MORPH et la DERIVE montrent encore la flotte de Monades pour les Mondes A et B.
 
 Chaque étape se développe d'abord sur le Mac (`tools/build_local.py host`), puis dans le navigateur, puis sur le FM-1.

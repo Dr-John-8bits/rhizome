@@ -11,7 +11,7 @@
 static float audio[256];
 static double run(int blocks){double e=0;for(int b=0;b<blocks;b++){md_render(audio,128);for(float x:audio){assert(std::isfinite(x)&&fabsf(x)<1);e+=x*x;}}return e;}
 static void cmd(int c,int t,int v){assert(md_command(c,t,v));run(1);}
-static md_patch blank(int model){md_init();cmd(MD_SCENE,0,64);md_patch p=*md_state();p.track[0].mute=0;p.track[0].model=model;p.track[0].note=36;p.track[0].level=650;p.track[0].decay=200;p.track[0].attack=0;p.track[0].hits=16;p.track[0].length=16;p.track[0].prob=1000;p.macro[0]=500;p.macro[1]=0;p.macro[2]=500;p.macro[3]=0;return p;}
+static md_patch blank(int model){md_init();cmd(MD_SCENE,0,MD_BLANK_BIOME);md_patch p=*md_state();p.track[0].mute=0;p.track[0].model=model;p.track[0].note=36;p.track[0].level=650;p.track[0].decay=200;p.track[0].attack=0;p.track[0].hits=16;p.track[0].length=16;p.track[0].prob=1000;p.macro[0]=500;p.macro[1]=0;p.macro[2]=500;p.macro[3]=0;return p;}
 static uint64_t hash(const md_patch &p){md_init();assert(md_load(&p));cmd(MD_PLAY,0,1);uint64_t h=1469598103934665603ull;for(int b=0;b<2200;b++){md_render(audio,128);for(float x:audio){uint32_t u;memcpy(&u,&x,4);h=(h^u)*1099511628211ull;}}return h;}
 int main(){
  static_assert(sizeof(md_patch)==1976,"Browser patch size must match");
@@ -256,19 +256,29 @@ int main(){
   puts("PASS dice: every page in range, protected settings kept, other tracks untouched, ENV undoes, effects always heard");
  }
  {
-  // FDDS Mondes keep their Monades settings (a 1.1 Monde loads them neutral); each one validates and sounds.
-  int lfo=0,gen=0,gam=0,form=0,micro=0;
-  for(int id=77;id<MD_BIOMES;id++){cmd(MD_SCENE,0,id);const md_patch *p=md_state();assert(md_validate(p)&&p->biome_id==id&&!strcmp(md_biome_family(id),"FDDS"));
-   for(int i=0;i<6;i++){lfo+=p->lfo[i][0].depth!=0||p->lfo[i][1].depth!=0;gen+=p->gen[i].source!=0;gam+=p->gamaka[i]!=0;}form+=p->form>0;micro+=p->scale>=79;
-   cmd(MD_PLAY,0,1);float peak=0;for(int b=0;b<700;b++){md_render(audio,128);for(int k=0;k<256;k++)peak=fmaxf(peak,fabsf(audio[k]));}cmd(MD_PLAY,0,0);assert(peak>.01f&&peak<1.01f);}
-  assert(lfo>=10&&gen>=12&&gam>=5&&form>=4&&micro>=4);
-  cmd(MD_SCENE,0,3);for(int i=0;i<6;i++)assert(md_state()->lfo[i][0].depth==0&&md_state()->gen[i].source==0);assert(md_state()->fx_level==0);
-  puts("PASS FDDS Mondes: 14 complete v10 patches with LFOs, generators, gamakas, form, microtonal scales; all audible");
+  // Rhizome's Mondes: valid, audible, each with at least three bodies; DUSK keeps its orbits nearly round, NIGHT has
+  // eccentric ones and moving ellipses, DAWN has moons, a comet or chords; all within 6 dB of each other but NO STARS.
+  float level[MD_BIOMES]={};
+  for(int id=0;id<MD_BLANK_BIOME;id++){cmd(MD_SCENE,0,id);const md_patch *p=md_state();assert(md_validate(p)&&p->biome_id==id&&p->version==11);
+   int bodies=0,round=1,eccentric=0,moons=0;for(int i=0;i<6;i++){const md_orbit &o=p->orbit[i];if(!o.gates)continue;bodies++;round&=o.ecc<=250;eccentric+=o.ecc>=500;moons+=o.moons;}
+   assert(bodies>=3);const char *fam=md_biome_family(id);
+   if(!strcmp(fam,"DUSK"))assert(round);else if(!strcmp(fam,"NIGHT"))assert(eccentric>=2&&(p->orbit_prec||p->orbit_pert));
+   else{assert(!strcmp(fam,"DAWN"));assert(moons||p->orbit_comet||p->orbit_conj==MD_CONJ_CHORD);}
+   cmd(MD_PLAY,0,1);double e=0;float peak=0;for(int b=0;b<5200;b++){md_render(audio,128);for(int k=0;k<256;k++){peak=fmaxf(peak,fabsf(audio[k]));e+=audio[k]*audio[k];}}cmd(MD_PLAY,0,0);
+   level[id]=(float)(10*log10(e/(5200*256)));printf("  %-15s %-5s peak %.3f RMS %.1f dB\n",md_biome_name(id),fam,peak,level[id]);assert(peak>.01f&&peak<.95f);}
+  for(int a=0;a<MD_BLANK_BIOME;a++)for(int b=0;b<MD_BLANK_BIOME;b++)if(strcmp(md_biome_name(a),"NO STARS")&&strcmp(md_biome_name(b),"NO STARS"))assert(fabsf(level[a]-level[b])<6);
+  puts("PASS Rhizome Mondes: 12 v11 patches, three families of orbits, all audible and balanced");
+  // The home page's macros act on the orbits: DENSITY adds or takes gates (a body keeps its orbit), MOTION moves notes.
+  {cmd(MD_SCENE,0,0);md_patch q=*md_state();float phi[MD_ORBIT_GATES_MAX];int n[3];
+   for(int k=0;k<3;k++){q.macro[0]=k*500;n[k]=md_orbit_gate_angles(&q,2,phi);}
+   assert(n[0]<n[1]&&n[1]==q.orbit[2].gates&&n[2]>n[1]&&n[2]<=MD_ORBIT_GATES_MAX);
+   q=*md_state();q.macro[1]=0;const uint64_t still=hash(q);q.macro[1]=600;assert(hash(q)!=still);
+   puts("PASS DENSITY adds and takes gates, MOTION moves orbit notes");}
  }
  {
-  // Morph MACHIN (78) -> CHRISTELE (81): numbers glide, choices switch half way, every step valid; ENV back to A.
-  cmd(MD_SCENE,0,77);const md_patch A=*md_state();md_patch B;{cmd(MD_SCENE,0,80);B=*md_state();cmd(MD_SCENE,0,77);}
-  md_morph_state ms;cmd(MD_MORPH_TO,0,80);md_morph_view(&ms,0,0);assert(ms.on&&ms.target==80&&ms.pos==0&&md_state()->tempo==A.tempo);
+  // Morph LAST LIGHT (1) -> PALE COMET (10): numbers glide, choices switch half way, every step valid; ENV back to A.
+  cmd(MD_SCENE,0,0);const md_patch A=*md_state();md_patch B;{cmd(MD_SCENE,0,9);B=*md_state();cmd(MD_SCENE,0,0);}
+  md_morph_state ms;cmd(MD_MORPH_TO,0,9);md_morph_view(&ms,0,0);assert(ms.on&&ms.target==9&&ms.pos==0&&md_state()->tempo==A.tempo);
   for(int pos=0;pos<=1000;pos+=50){cmd(MD_MORPH,0,pos);const md_patch *p=md_state();assert(md_validate(p));
    assert(p->tempo==A.tempo+(int)floorf((float)(B.tempo-A.tempo)*(pos*.001f)+.5f));
    for(int j=0;j<6;j++)assert(p->track[j].model==(pos>=md_morph_point(j)?B.track[j].model:A.track[j].model));assert(p->scale==(pos>=500?B.scale:A.scale));}
@@ -278,8 +288,8 @@ int main(){
    assert(md_state()->track[j].level==A.track[j].level+(int)floorf((float)(B.track[j].level-A.track[j].level)*((md_morph_point(j)+100)*.001f)+.5f));}
   // REC in a fade keeps the track at its full level.
   {int j=0;while(j<6&&A.track[j].model==B.track[j].model)j++;assert(j<6);cmd(MD_MORPH,0,md_morph_point(j)+10);assert(md_state()->track[j].level<A.track[j].level/2+B.track[j].level/2);
-   cmd(MD_MORPH_KEEP,0,0);assert(md_state()->track[j].level>0);cmd(MD_RETURN,0,0);cmd(MD_MORPH_TO,0,80);}
-  cmd(MD_MORPH,0,1000);assert(md_state()->biome_id==80&&md_state()->lfo[0][0].depth==B.lfo[0][0].depth&&md_state()->gamaka[0]==B.gamaka[0]);
+   cmd(MD_MORPH_KEEP,0,0);assert(md_state()->track[j].level>0);cmd(MD_RETURN,0,0);cmd(MD_MORPH_TO,0,9);}
+  cmd(MD_MORPH,0,1000);assert(md_state()->biome_id==9&&md_state()->lfo[0][0].depth==B.lfo[0][0].depth&&md_state()->gamaka[0]==B.gamaka[0]);
   cmd(MD_RETURN,0,0);assert(!memcmp(md_state(),&A,sizeof A));md_morph_view(&ms,0,0);assert(ms.on&&ms.pos==0);
   // Scope RHYTHM: the tempo moves, the engines stay on A.
   cmd(MD_MORPH_SCOPE,0,MD_MORPH_RHYTHM);cmd(MD_MORPH,0,1000);assert(md_state()->tempo==B.tempo&&md_state()->track[0].model==A.track[0].model&&md_state()->biome_id==-1);
@@ -292,9 +302,9 @@ int main(){
   puts("PASS morph: glide, tracks switch one after the other inside a fade, valid all along, scope, 4-bar auto morph, keep, ENV back to A");
  }
  {
-  // DERIVE from CHRISTELE: 12 minutes of 8-bar glides. On a leash around home, scale / root / transpose never move,
+  // DERIVE from PALE COMET: 12 minutes of 8-bar glides. On a leash around home, scale / root / transpose never move,
   // tempo within 10 %, valid and audible all along; ENV back home exactly, REC a new home, OFF stops where it is.
-  cmd(MD_SCENE,0,80);const md_patch H=*md_state();cmd(MD_DRIFT_AMOUNT,0,2);cmd(MD_DRIFT_SLOW,0,1);cmd(MD_PLAY,0,1);
+  cmd(MD_SCENE,0,9);const md_patch H=*md_state();cmd(MD_DRIFT_AMOUNT,0,2);cmd(MD_DRIFT_SLOW,0,1);cmd(MD_PLAY,0,1);
   md_drift_state ds;md_drift_view(&ds,0);assert(ds.on&&ds.slow==1);int glides=0,last_pos=0,rests=0,notes=0;
   for(int sec=0;sec<720;sec++){float peak=0;for(int b=0;b<345;b++){md_render(audio,128);for(int k=0;k<256;k++)peak=fmaxf(peak,fabsf(audio[k]));}
    const md_patch *p=md_state();assert(md_validate(p)&&p->root==H.root&&p->scale==H.scale&&p->transpose==H.transpose);
@@ -317,21 +327,21 @@ int main(){
   // Review 2: a knob turned during DERIVE stays and moves home; DICE during DERIVE lasts the glide and ENV still goes
   // home; a new Monde turns K2 back to OFF; a silent track stays silent; an unlocked seed keeps varying during a morph.
   md_drift_state ds;const md_patch *home;
-  cmd(MD_SCENE,0,80);cmd(MD_DRIFT_SLOW,0,6);cmd(MD_PLAY,0,1);for(int b=0;b<2000;b++)md_render(audio,128);
+  cmd(MD_SCENE,0,9);cmd(MD_DRIFT_SLOW,0,6);cmd(MD_PLAY,0,1);for(int b=0;b<2000;b++)md_render(audio,128);
   cmd(MD_CUTOFF,2,123);for(int b=0;b<3000;b++)md_render(audio,128);md_drift_view(&ds,&home);
   assert(md_state()->track[2].cutoff==123&&home->track[2].cutoff==123);
   const int tone_home=home->track[1].tone;cmd(MD_DICE,1,MD_DICE_SOUND);for(int b=0;b<500;b++)md_render(audio,128);
   md_drift_view(&ds,&home);assert(home->track[1].tone==tone_home);cmd(MD_RETURN,0,0);assert(!memcmp(md_state(),home,sizeof(md_patch)));
-  cmd(MD_SCENE,0,81);md_drift_view(&ds,0);assert(!ds.on&&ds.slow==0);cmd(MD_PLAY,0,0);
+  cmd(MD_SCENE,0,10);md_drift_view(&ds,0);assert(!ds.on&&ds.slow==0);cmd(MD_PLAY,0,0);
   // The Blank Monde under a far drift: no track starts playing.
   cmd(MD_SCENE,0,MD_BLANK_BIOME);cmd(MD_DRIFT_AMOUNT,0,2);cmd(MD_DRIFT_SLOW,0,1);cmd(MD_PLAY,0,1);
   for(int sec=0;sec<90;sec++){for(int b=0;b<345;b++)md_render(audio,128);for(int j=0;j<6;j++)assert(md_state()->track[j].hits==0);}
   cmd(MD_DRIFT_SLOW,0,0);cmd(MD_PLAY,0,0);
   // A knob turned during an auto morph stays.
-  cmd(MD_SCENE,0,77);cmd(MD_MORPH_TO,0,80);cmd(MD_MORPH_BARS,0,3);cmd(MD_PLAY,0,1);for(int b=0;b<1500;b++)md_render(audio,128);
+  cmd(MD_SCENE,0,0);cmd(MD_MORPH_TO,0,9);cmd(MD_MORPH_BARS,0,3);cmd(MD_PLAY,0,1);for(int b=0;b<1500;b++)md_render(audio,128);
   cmd(MD_RESONANCE,0,321);for(int b=0;b<1500;b++)md_render(audio,128);assert(md_state()->track[0].resonance==321);
   // Unlocked: the sequencer changes the seed every 32 steps and the morph no longer puts it back.
-  cmd(MD_PLAY,0,0);cmd(MD_SCENE,0,77);cmd(MD_LOCK,0,0);const unsigned seed0=md_state()->seed;cmd(MD_MORPH_TO,0,80);cmd(MD_MORPH_BARS,0,5);cmd(MD_PLAY,0,1);
+  cmd(MD_PLAY,0,0);cmd(MD_SCENE,0,0);cmd(MD_LOCK,0,0);const unsigned seed0=md_state()->seed;cmd(MD_MORPH_TO,0,9);cmd(MD_MORPH_BARS,0,5);cmd(MD_PLAY,0,1);
   while(md_status()->step<100)md_render(audio,128);assert(md_state()->seed!=seed0);cmd(MD_PLAY,0,0);cmd(MD_MORPH_BARS,0,0);
   puts("PASS review 2: knobs stay during DERIVE and auto morph, DICE keeps home, OFF after a new Monde, silent tracks stay silent, unlocked seed varies");
  }
@@ -339,8 +349,8 @@ int main(){
   // External review: loading a patch ends a morph and a drift; an overload is not an edit and, in ECO, sheds effects;
   // the same clock source changes nothing; PANIC sends All Notes Off; clock out switched while playing sends Start;
   // a malformed LFO track and a huge MIDI note are ignored or bounded.
-  md_morph_state ms;md_drift_state ds;cmd(MD_SCENE,0,80);const md_patch P=*md_state();
-  cmd(MD_MORPH_TO,0,77);cmd(MD_DRIFT_SLOW,0,0);assert(md_load(&P));md_morph_view(&ms,0,0);assert(!ms.on);
+  md_morph_state ms;md_drift_state ds;cmd(MD_SCENE,0,9);const md_patch P=*md_state();
+  cmd(MD_MORPH_TO,0,0);cmd(MD_DRIFT_SLOW,0,0);assert(md_load(&P));md_morph_view(&ms,0,0);assert(!ms.on);
   cmd(MD_DRIFT_SLOW,0,2);assert(md_load(&P));md_drift_view(&ds,0);assert(!ds.on&&ds.slow==0);
   {md_patch q=P;q.quality=1;q.edited_mask=0;assert(md_load(&q));const unsigned before=md_status()->quality_reductions;
    cmd(MD_OVERLOAD,0,0);assert(md_state()->quality==0&&md_state()->edited_mask==0&&md_status()->quality_reductions==before+1);

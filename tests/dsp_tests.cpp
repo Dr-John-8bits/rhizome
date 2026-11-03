@@ -12,6 +12,9 @@
 #include "plaits/dsp/engine/virtual_analog_engine.h"
 #include "plaits/dsp/engine/additive_engine.h"
 static float out[256];
+// Rhizome: its first Monde plays orbits through the effects; the tests below want Monades' first Monde: euclidean
+// tracks, all unmuted, the echo and the room returned at zero.
+static void no_orbits(md_patch &p){for(int i=0;i<6;i++){p.orbit[i].gates=0;p.track[i].mute=0;}p.fx_level=p.room_diffusion=p.chorus=p.send_hp=0;}
 static void render(unsigned blocks){for(unsigned i=0;i<blocks;i++){md_render(out,128);for(float x:out)if(!std::isfinite(x)||fabsf(x)>=1.0f){fprintf(stderr,"BAD OUTPUT %.9g frames %u nonfinite %u\n",x,md_status()->frames,md_status()->nonfinite);fflush(stderr);exit(2);}}}
 static unsigned test_hash(){md_init();md_command(MD_SCENE,0,1);md_command(MD_PLAY,0,1);unsigned h=2166136261u;for(int i=0;i<1500;i++){md_render(out,128);for(float x:out){unsigned u;memcpy(&u,&x,4);h=(h^u)*16777619u;}}return h;}
 template<class E> static void aux_equivalence(){
@@ -44,18 +47,18 @@ int main(){
  }puts("PASS all 8 scales / 12 roots / out-of-range notes / idempotence");
  // Old v1 data remains readable, with explicit neutral defaults for new features.
  struct OldPatch{uint32_t magic,version,seed;int32_t macro[4],tempo,locked,freeze,grain_size,grain_pos,feedback,quality;int32_t tracks[6][14];}old={};
- md_init();p=*md_state();memcpy(&old,&p,56);old.version=1;for(int i=0;i<6;i++)memcpy(old.tracks[i],&p.track[i],56);
+ md_init();p=*md_state();no_orbits(p);memcpy(&old,&p,56);old.version=1;for(int i=0;i<6;i++)memcpy(old.tracks[i],&p.track[i],56);
  assert(md_import(&old,sizeof old));assert(md_state()->version==11&&md_state()->track[5].ratchet==1);assert(md_state()->duck_source==-1);old.tracks[0][7]=0;assert(!md_import(&old,sizeof old));
  puts("PASS v1 patch migration and corrupt legacy rejection");
  // Import the exact v2 layout, preserving its parameter values and migration shape.
  struct V2Patch{uint32_t magic,version,seed;int32_t head[11];int32_t tracks[6][17];int32_t globals[9];}v2={};
- md_init();p=*md_state();memcpy(&v2,&p,56);v2.version=2;memcpy(v2.globals,&p.root,36);
+ md_init();p=*md_state();no_orbits(p);memcpy(&v2,&p,56);v2.version=2;memcpy(v2.globals,&p.root,36);
  for(int i=0;i<6;i++){memcpy(v2.tracks[i],&p.track[i],68);v2.tracks[i][0]=3;v2.tracks[i][3]=777;}
  assert(md_import(&v2,sizeof v2));assert(md_state()->track[5].shape==777&&md_state()->track[5].decay==777&&md_state()->version==11);
  v2.tracks[0][0]=99;assert(!md_import(&v2,sizeof v2));puts("PASS v2 patch migration / corrupt model rejection");
 
  // Exact v3 prefix is preserved; unknown names remain explicitly custom.
- md_init();p=*md_state();unsigned char v3[620];memcpy(v3,&p,620);((uint32_t*)v3)[1]=3;
+ md_init();p=*md_state();no_orbits(p);unsigned char v3[620];memcpy(v3,&p,620);((uint32_t*)v3)[1]=3;
  assert(md_import(v3,sizeof v3));assert(md_state()->version==11&&md_state()->biome_id==-1&&md_state()->tone_preset[0]==-1);
  assert(!memcmp((const unsigned char*)md_state()+8,v3+8,612));puts("PASS v3 migration preserves all 153 parameter words / marks custom names");
  // Every factory Biome must be valid, audible and genuinely different; Blank stays silent even after frozen tape.
@@ -84,7 +87,7 @@ int main(){
  // A low cutoff must remove high-frequency energy, not just turn everything down.
  double roughness[2]={};
  for(int filtered=0;filtered<2;filtered++){
-  md_init();p=*md_state();p.macro[3]=0;
+  md_init();p=*md_state();no_orbits(p);p.macro[3]=0;
   for(int i=0;i<6;i++){p.track[i].model=MD_VA;p.track[i].mute=i!=0;p.track[i].tone=800;p.track[i].shape=900;p.track[i].filter=filtered?2:0;p.track[i].cutoff=350;p.track[i].resonance=0;p.track[i].breathe=0;p.track[i].attack=0;}
   assert(md_load(&p));md_command(MD_TRIGGER,0,60);render(100);double e=0,d=0;float last=0;
   for(int b=0;b<300;b++){md_render(out,128);for(int k=0;k<256;k+=2){e+=out[k]*out[k];d+=(out[k]-last)*(out[k]-last);last=out[k];}}
@@ -93,7 +96,7 @@ int main(){
  assert(roughness[1]<roughness[0]*.2);printf("PASS LP24 reduces normalized HF energy: %.6f -> %.6f\n",roughness[0],roughness[1]);
  // New filters at extreme resonance and modulated cutoff, all eight engines / six slots.
  for(int m=0;m<MD_MODELS;m++)for(int mode=1;mode<=3;mode++){
-  md_init();p=*md_state();p.quality=1;p.tempo=220;p.feedback=850;p.macro[3]=1000;
+  md_init();p=*md_state();no_orbits(p);p.quality=1;p.tempo=220;p.feedback=850;p.macro[3]=1000;
   for(int i=0;i<6;i++){p.track[i].model=m;p.track[i].filter=mode;p.track[i].resonance=1000;p.track[i].breathe=1000;p.track[i].cutoff=i%2?0:1000;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;p.track[i].ratchet=4;}
   assert(md_load(&p));md_command(MD_PLAY,0,1);render(3446);assert(!md_status()->nonfinite&&!md_status()->dropped_commands);
  }
@@ -103,26 +106,26 @@ int main(){
  puts("PASS inactive voice DSP skipped / exact startup silence");
  // Four repeats per event must result in exactly 64 attacks in a 16-step bar.
  for(int repeats=1;repeats<=4;repeats++){
-  md_init();p=*md_state();p.tempo=120;p.swing=0;p.macro[0]=500;
+  md_init();p=*md_state();no_orbits(p);p.tempo=120;p.swing=0;p.macro[0]=500;
   for(int i=0;i<6;i++){p.track[i].mute=i!=0;p.track[i].model=0;p.track[i].length=16;p.track[i].hits=16;p.track[i].speed=1;p.track[i].prob=1000;p.track[i].ratchet=repeats;}
   assert(md_load(&p));md_command(MD_PLAY,0,1);unsigned left=88200;while(left){unsigned n=left>128?128:left;md_render(out,n);left-=n;}
   assert(md_status()->events[0]==(unsigned)(16*repeats));md_command(MD_PLAY,0,0);render(1);unsigned events=md_status()->events[0];render(100);assert(md_status()->events[0]==events);
  }
  puts("PASS exact 1/2/3/4 ratchet counts / stop cancels pending attacks");
- md_init();p=*md_state();p.tempo=120;p.swing=600;p.macro[0]=500;
+ md_init();p=*md_state();no_orbits(p);p.tempo=120;p.swing=600;p.macro[0]=500;
  for(int i=0;i<6;i++){p.track[i].mute=i!=0;p.track[i].model=0;p.track[i].length=16;p.track[i].hits=16;p.track[i].speed=1;p.track[i].prob=1000;}
  assert(md_load(&p));md_command(MD_PLAY,0,1);unsigned event=0,times[3]={};
  for(unsigned frame=0;event<3;frame++){md_render(out,1);if(md_status()->events[0]>event)times[event++]=frame;assert(frame<12000);}
  assert(times[0]==0&&times[1]>=7166&&times[1]<=7167&&times[2]==11025);
  puts("PASS swing 65:35 / pair duration unchanged to one sample");
  double attackenergy[2]={};
- for(int slow=0;slow<2;slow++){md_init();p=*md_state();p.macro[3]=0;for(int i=0;i<6;i++){p.track[i].mute=i!=0;p.track[i].model=MD_VA;p.track[i].attack=slow?1000:0;}assert(md_load(&p));md_command(MD_TRIGGER,0,60);for(int b=0;b<70;b++){md_render(out,128);for(float x:out)attackenergy[slow]+=x*x;}}
+ for(int slow=0;slow<2;slow++){md_init();p=*md_state();no_orbits(p);p.macro[3]=0;for(int i=0;i<6;i++){p.track[i].mute=i!=0;p.track[i].model=MD_VA;p.track[i].attack=slow?1000:0;}assert(md_load(&p));md_command(MD_TRIGGER,0,60);for(int b=0;b<70;b++){md_render(out,128);for(float x:out)attackenergy[slow]+=x*x;}}
  assert(attackenergy[1]<attackenergy[0]*.01&&attackenergy[1]>0);puts("PASS 8-second attack attenuates first 200ms / remains audible");
  // Ducking never ducks its dry source; any other track can be the source.
  double duckenergy[3]={};
  for(int mode=0;mode<3;mode++){
-  md_init();p=*md_state();p.macro[3]=0;p.duck_source=mode==2?5:0;p.duck_amount=mode?1000:0;p.duck_release=1000;
-  for(int i=0;i<6;i++){p.track[i].model=MD_VA;p.track[i].attack=0;p.track[i].level=i==0?600:0;}
+  md_init();p=*md_state();no_orbits(p);p.macro[3]=0;p.duck_source=mode==2?5:0;p.duck_amount=mode?1000:0;p.duck_release=1000;
+  for(int i=0;i<6;i++){p.track[i].model=MD_VA;p.track[i].attack=0;p.track[i].level=i==0?600:0;p.track[i].mute=0;}
   assert(md_load(&p));md_command(MD_TRIGGER,0,60);md_command(MD_TRIGGER,5,60);
   for(int b=0;b<35;b++){md_render(out,128);for(float x:out)duckenergy[mode]+=x*x;}
  }
@@ -139,7 +142,7 @@ int main(){
  }
  assert(grainhash[0]!=grainhash[1]&&grainhash[0]!=grainhash[2]);puts("PASS frozen tape audible / reverse and octave change audio");
  for(int quality=0;quality<2;quality++)for(int m=0;m<MD_MODELS;m++){
-  md_init();md_command(MD_SCENE,0,1);for(int t=0;t<6;t++){md_command(MD_MODEL,t,m);md_command(MD_HITS,t,16);md_command(MD_DECAY,t,1000);md_command(MD_PROB,t,1000);md_command(MD_SEND,t,1000);md_command(MD_NOTE,t,36+t*7);}
+  md_init();md_command(MD_SCENE,0,1);for(int t=0;t<6;t++){md_command(MD_ORBIT_GATES,t,0);md_command(MD_MUTE,t,0);md_command(MD_LEVEL,t,500);md_command(MD_MODEL,t,m);md_command(MD_HITS,t,16);md_command(MD_DECAY,t,1000);md_command(MD_PROB,t,1000);md_command(MD_SEND,t,1000);md_command(MD_NOTE,t,36+t*7);}
   render(1);for(int t=0;t<6;t++){md_command(MD_RATCHET,t,4);md_command(MD_ACCENT,t,1000);md_command(MD_ATTACK,t,quality?1000:0);}
   md_command(MD_GRAIN_PITCH,0,quality?24:-24);md_command(MD_REVERSE,0,quality);md_command(MD_DUCK_SOURCE,0,3);md_command(MD_DUCK,0,1000);md_command(MD_SWING,0,600);md_command(MD_QUALITY,0,quality);md_command(MD_FEEDBACK,0,850);md_command(MD_MACRO,3,1000);md_command(MD_TEMPO,0,220);md_command(MD_PLAY,0,1);
   auto start=std::chrono::steady_clock::now();render(20672);double sec=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
@@ -154,7 +157,7 @@ int main(){
  for(int model: {MD_FM,MD_VA,MD_HARMONIC}){
   int crossings[2]={};
   for(int quality=0;quality<2;quality++){
-   md_init();p=*md_state();p.quality=quality;p.scale=0;p.macro[2]=500;p.macro[3]=0;
+   md_init();p=*md_state();no_orbits(p);p.quality=quality;p.scale=0;p.macro[2]=500;p.macro[3]=0;
    for(int i=0;i<6;i++){p.track[i].model=model;p.track[i].mute=i!=0;p.track[i].attack=0;p.track[i].decay=1000;p.track[i].filter=0;p.track[i].tone=0;p.track[i].harm=model==MD_VA?500:0;p.track[i].shape=model==MD_FM?500:model==MD_HARMONIC?1000:150;}
    assert(md_load(&p));md_command(MD_TRIGGER,0,69);render(100);float prev=out[254];unsigned left=44100,part=0;
    const unsigned fragments[]={127,1,31,97};
@@ -165,17 +168,17 @@ int main(){
  }
  puts("PASS ECO pitch compensation / odd fragment continuity");
  for(int voices=2;voices<=3;voices++){
-  md_init();p=*md_state();p.quality=1;for(int i=0;i<6;i++){p.track[i].model=MD_RINGS;p.track[i].mute=i>=voices;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
+  md_init();p=*md_state();no_orbits(p);p.quality=1;for(int i=0;i<6;i++){p.track[i].model=MD_RINGS;p.track[i].mute=i>=voices;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
   assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==(voices==2));assert(md_status()->quality_reductions==(unsigned)(voices==3));
  }
  puts("PASS FULL admission guard keeps 2 Rings / sends 3 Rings to ECO before render");
  for(int model : {MD_FM,MD_HARMONIC})for(int count : {4,5}){
-  md_init();p=*md_state();p.quality=1;for(int i=0;i<6;i++){p.track[i].model=model;p.track[i].mute=i>=count;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
+  md_init();p=*md_state();no_orbits(p);p.quality=1;for(int i=0;i<6;i++){p.track[i].model=model;p.track[i].mute=i>=count;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
   assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==(count==4));assert(md_status()->quality_reductions==(unsigned)(count==5));
  }
  puts("PASS measured FULL limits: 4 FM/Harmonic stay FULL, 5 use ECO before render");
  for(int kind=0;kind<2;kind++){
-  md_init();p=*md_state();p.quality=1;const int techno[6]={0,2,1,3,5,0};
+  md_init();p=*md_state();no_orbits(p);p.quality=1;const int techno[6]={0,2,1,3,5,0};
   for(int i=0;i<6;i++){p.track[i].model=kind?techno[i]:MD_SNARE;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
   assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==0&&md_status()->quality_reductions==1);
  }

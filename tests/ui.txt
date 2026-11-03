@@ -29,7 +29,7 @@ tap EDIT
 expect page 6
 spin K1 10
 wait 20
-expect attack 450
+expect attack 650
 wait 100
 shot envelope.png
 tap EDIT
@@ -74,7 +74,7 @@ expect help 4
 tap HOME
 expect help -1
 spin SELECT 5
-spin ALGO -7
+spin ALGO -11
 wait 20
 expect track 5
 expect model 0
@@ -82,7 +82,7 @@ tap GLO
 expect page 9
 spin K2 1
 wait 20
-expect scale 2
+expect scale 7
 wait 100
 shot harmony.png
 tap GLO
@@ -98,6 +98,6 @@ wait 50
 reboot
 wait 100
 expect density 600
-expect scale 2
+expect scale 7
 expect invalid 0
 expect queue_drops 0
