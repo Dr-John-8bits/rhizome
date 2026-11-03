@@ -13,7 +13,9 @@ static const int16_t orbit_steps_of[MD_ORBIT_TEMPO_PERIODS]={4,6,8,12,16,24,32,4
 static const int16_t orbit_free_tenths[MD_ORBIT_PERIODS-MD_ORBIT_TEMPO_PERIODS]={51,73,116,178,201,235,299,318};
 static const int8_t orbit_moon_steps_of[MD_MOON_SPINS]={1,2,3,4,6,8,12,16};
 static const float ORBIT_TAU=6.28318531f,ORBIT_PI=3.14159265f;
-static const int16_t orbit_comet_steps_of[MD_COMETS]={0,64,128,256,512,1024};
+static const int16_t orbit_comet_steps_of[MD_COMETS]={0,64,128,256,512,1024,256}; // WANDER: the first turn; then drawn
+static float comet_wander=256; // WANDER: the current turn, in sixteenths (4 to 32 bars, drawn at each passage)
+static int8_t shock_kind[6];static uint8_t shock_left[6];
 static const float COMET_E=MD_COMET_ECC_MILLI*.001f;
 static float comet_M0=ORBIT_PI,comet_target,comet_swell,comet_strength,comet_open=1; // its mean anomaly at PLAY; what its passage asks for now, followed; FILTER: how open (0..1)
 static const float orbit_tilt[6]={-.6f,.5f,1.6f,2.7f,3.8f,4.9f}; // each periapsis in its own direction (radians)
@@ -69,6 +71,7 @@ static void orbit_reset(){ // PLAY: every body starts at the top, together
  for(unsigned i=0;i<6;i++){Orbit &o=orbits[i];o.w0=orbit_tilt[i];o.M0=orbit_mean_of(-1.57079633f-o.w0,orbit_e(i,0));o.accent_until=-1;o.motif=0;o.gate_n=0;o.moon_t0=-100;stats.motif_at[i]=0;
   stats.moon_t0[i]=-100;stats.moon_hit[i]=0;stats.orbit_hit_gate[i]=-1;stats.orbit_hit_pos[i]=-100;stats.orbit_hit_skip[i]=0;}
  comet_M0=ORBIT_PI;stats.comet_M=ORBIT_PI;comet_target=0; // the comet starts far away
+ comet_wander=256;memset(shock_left,0,sizeof shock_left);memset(stats.shock_left,0,sizeof stats.shock_left);
  memset(conj_cool,0,sizeof conj_cool);memset(conj_seen,0,sizeof conj_seen);stats.conj_a=stats.conj_b=-1;stats.conj_pos=-100;stats.orbit_pos=0;
 }
 // A new period or precession keeps each body where it is (no jump, no burst of gates).
@@ -76,10 +79,11 @@ static void orbit_rebase_period(unsigned i,int period){
  const float pos=orbit_pos_now()<0?0:orbit_pos_now(),M=orbit_M(i,pos);
  patch.orbit[i].period=period;orbits[i].M0=M-ORBIT_TAU*pos/orbit_steps(i);orbit_prepared=-1;
 }
-static float orbit_comet_M(float pos){const int n=orbit_comet_steps_of[bound(patch.orbit_comet,0,MD_COMETS-1)];return n?comet_M0+ORBIT_TAU*pos/n:comet_M0;}
+static float orbit_comet_steps(int comet){return comet==MD_COMET_WANDER?comet_wander:(float)orbit_comet_steps_of[bound(comet,0,MD_COMETS-1)];}
+static float orbit_comet_M(float pos){const float n=orbit_comet_steps(patch.orbit_comet);return n>0?comet_M0+ORBIT_TAU*pos/n:comet_M0;}
 static void orbit_rebase_comet(int comet){
  const float pos=orbit_pos_now()<0?0:orbit_pos_now(),M=orbit_comet_M(pos);patch.orbit_comet=comet;
- const int n=orbit_comet_steps_of[comet];comet_M0=n?M-ORBIT_TAU*pos/n:M;
+ const float n=orbit_comet_steps(comet);comet_M0=n>0?M-ORBIT_TAU*pos/n:M;
 }
 // How strongly the comet acts: nothing beyond its mean distance, all of it at the star (smooth in between): about a
 // fifth of its turn.
@@ -150,6 +154,7 @@ static void orbit_fire(unsigned i,int gate,float pos){
  if(t.mute||((orbit_rest>>i)&1))return;
  const unsigned r=random_word(orbit_rng);const float pert=patch.orbit_pert*.01f;
  if(r%1000<(unsigned)(pert*250))return; // the perturbation refuses a quarter of the gates at most
+ int shocked=0;if(shock_left[i]){shocked=shock_kind[i];shock_left[i]--;stats.shock_left[i]=shock_left[i];if(shocked==1)return;} // WANDER: a note skipped
  const float e=orbit_e(i,pos),E=orbit_E(orbit_M(i,pos),e),rn=e<.01f?.5f:.5f-.5f*cosf(E); // 0 at the star, 1 farthest
  float pitch=(float)t.note;
  { // Rhizome: every voice is melodic
@@ -163,6 +168,7 @@ static void orbit_fire(unsigned i,int gate,float pos){
    for(int k=0;k<deg;k++)pitch=scale_neighbour(pitch,1);for(int k=0;k>deg;k--)pitch=scale_neighbour(pitch,-1);}
   // MOTION, as on a rhythm: that share of the notes jumps by a scale step, a fourth, a fifth or an octave (not ECHO,
   // which answers the note it hears).
+  if(shocked==3){const int k=1+(int)((r>>8)&1);for(int s=0;s<k;s++)pitch=scale_neighbour(pitch,(r>>9)&1?1:-1);} // WANDER: moved by one or two scale steps
   if(c.pitch!=MD_PITCH_ECHO&&patch.gen[i].source)pitch+=orbit_gen(i); // the track's generator, as on a rhythm (GENERATOR page)
   if(c.pitch!=MD_PITCH_ECHO&&patch.macro[1]){const unsigned m=random_word(orbit_rng);static const int8_t leap[7]={0,2,3,5,7,10,12};if(m%1000<(unsigned)patch.macro[1])pitch+=leap[(m>>12)%7];}
   pitch=quantize_any(pitch+patch.transpose,patch.root,patch.scale,0);
@@ -189,6 +195,25 @@ static void orbit_moon_fire(unsigned i,int k){
  const float last=stats.last_pitch[i];const int32_t last_note=stats.last_note[i];
  fire(i,pitch,velocity);out_note(i,pitch,velocity,orbit_step_len*orbit_moon_steps(i)/(c.moons+1)*.6f);
  stats.last_pitch[i]=last;stats.last_note[i]=last_note;
+}
+// WANDER: a shock on body i, for a few of its notes: a note skipped, the body pushed on by a step, or notes moved.
+static void orbit_shock(unsigned i){
+ const unsigned r=random_word(orbit_rng);shock_kind[i]=(int8_t)(1+r%3);shock_left[i]=(uint8_t)(1+patch.comet_amount/25);
+ if(shock_kind[i]==2){orbits[i].M0+=ORBIT_TAU/orbit_steps(i);orbit_prepared=-1;} // pushed on: its next gate comes a step early
+ stats.shocks++;stats.shock_left[i]=shock_left[i];stats.shock_kind[i]=shock_kind[i];
+}
+// WANDER at the star: the next return drawn (4 to 32 bars), the body nearest its path shocked, and the shock passed on
+// to the nearest body, then the next, each link half as likely (AMOUNT 100: 60 %, 30 %...).
+static void orbit_wander_pass(float pos,float M,const float *phi,const bool *on){
+ comet_wander=16.0f*(4+random_word(orbit_rng)%29);comet_M0=M-ORBIT_TAU*pos/comet_wander;
+ if(!patch.comet_amount)return;
+ const float path=2.3561945f;bool hit[6]={};int at=-1;float best=9; // the comet's periapsis direction (as drawn)
+ for(int i=0;i<6;i++)if(on[i]){float d=phi[i]-path;d-=ORBIT_TAU*floorf((d+ORBIT_PI)/ORBIT_TAU);if(fabsf(d)<best){best=fabsf(d);at=i;}}
+ float p=patch.comet_amount*.006f;
+ while(at>=0){orbit_shock((unsigned)at);hit[at]=true;
+  if((random_word(orbit_rng)%1000)>=(unsigned)(p*1000))break;p*=.5f;
+  int next=-1;float near=9;for(int i=0;i<6;i++)if(on[i]&&!hit[i]){float d=phi[i]-phi[at];d-=ORBIT_TAU*floorf((d+ORBIT_PI)/ORBIT_TAU);if(fabsf(d)<near){near=fabsf(d);next=i;}}
+  at=next;}
 }
 // Once per rendered block, before the voices: gates crossed since the last block, then conjunctions.
 static void orbit_run(){
@@ -218,7 +243,7 @@ static void orbit_run(){
   conj_d[k]=d;conj_seen[k]=1;}
  // The comet: a passage each time its mean anomaly comes round to the star.
  if(patch.orbit_comet){const float M1=orbit_comet_M(orbit_prev),M2=orbit_comet_M(pos);
-  if(floorf(M2/ORBIT_TAU)>floorf(M1/ORBIT_TAU))stats.comet_passes++;
+  if(floorf(M2/ORBIT_TAU)>floorf(M1/ORBIT_TAU)){stats.comet_passes++;if(patch.orbit_comet==MD_COMET_WANDER)orbit_wander_pass(pos,M2,phi,on);}
   stats.comet_M=orbit_wrap(M2);comet_strength=orbit_comet_strength(M2);comet_target=comet_strength*patch.comet_amount*.01f;}
  else comet_target=comet_strength=0;
  stats.comet_now=comet_target;stats.orbit_pos=pos;orbit_prev=pos;

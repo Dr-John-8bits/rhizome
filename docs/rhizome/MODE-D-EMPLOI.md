@@ -265,10 +265,17 @@ La **comète** est un corps sans voix, sur une orbite très allongée. Elle pass
 
 | Potard | Réglage | Ce qu'il fait |
 |---|---|---|
-| K1 | COMET | Un tour en 4, 8, 16, 32 ou 64 mesures, ou OFF. La carte dit dans combien de mesures elle repassera. |
+| K1 | COMET | Un tour en 4, 8, 16, 32 ou 64 mesures, ou OFF. La carte dit dans combien de mesures elle repassera. Tout en haut, **WANDER** : la comète vagabonde (voir ci-dessous). |
 | K2 | EVENT | SWELL (la réverbe gonfle : envoi plus fort, queue plus longue, retour plus fort), FREEZE (la mémoire des grains se fige au cœur du passage), BOTH (les deux) ou **FILTER** : un filtre sur tout le son, fermé tant que la comète est loin, qui s'ouvre à mesure qu'elle approche et en grand quand elle frôle l'étoile, puis se referme. L'écran affiche sa fréquence. |
 | K3 | AMOUNT | La force du passage ; avec FILTER, jusqu’où le filtre se ferme quand la comète est loin (jusqu’à 280 Hz à 100). |
 | K4 | CONJUNCTION | Ce que fait l'alignement de deux corps avec l'étoile : OFF (rien), ACCENT (leur temps suivant est accentué) ou CHORD (les deux rejouent ensemble ; le second prend la note de l'accord du premier la plus proche de la sienne). |
+
+**La comète vagabonde (WANDER).** Elle revient au hasard, toutes les 4 à 32 mesures, et à chaque passage elle **choque** le corps le plus proche de sa trajectoire. Pendant quelques-unes de ses notes, ce corps :
+- **saute une note** (un trou là où on l'attendait) ;
+- ou **est poussé d'un pas** : sa porte suivante arrive en avance ;
+- ou **joue ses notes un ou deux degrés plus haut ou plus bas**, toujours dans la gamme.
+
+Le choc peut passer au corps voisin, puis au suivant, chaque fois deux fois moins probable : une petite réaction en chaîne. **K3 AMOUNT** règle la violence : combien de notes sont touchées (une à cinq) et la probabilité de la chaîne (60 % à 100). **K2 EVENT** agit toujours à son passage (la salle, les grains, le filtre). Tout est **temporaire** : rien n'est écrit dans le Monde, et les orbites retrouvent leurs réglages. Avec LOCK, le même Monde rejoue les mêmes chocs. À l'écran, un corps choqué est entouré d'un cercle en pointillé qui tourne, un trait par note encore touchée ; la carte de K1 compte les chocs.
 
 À l'écran :
 - **la queue de la comète pointe à l'opposé de l'étoile**, et sa longueur montre la force du passage ;
@@ -443,6 +450,7 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 | **Forme** | Une grande respiration : calme, montée, sommet, retombée, quelques mesures chacun ; des pistes se taisent et reviennent. Page FORM. |
 | **Gamaka** | Un ornement de la musique indienne autour d'une note : kan (une note frôlée avant), meend (un glissé depuis la note d'avant), andolan (une lente oscillation). Page RAGA / GAMAKA. |
 | **REWIND** | La bande qui repart en arrière : les échos reviennent à l'envers. |
+| **Comète vagabonde** | WANDER : une comète qui revient au hasard et, en passant, bouscule les corps : notes sautées, avancées ou déplacées dans la gamme, parfois en chaîne. Temporaire. |
 | **ORBIT, MOTIF, ECHO** | D'où viennent les notes d'un corps : de sa distance à l'étoile, d'une phrase jouée dans l'ordre, ou de l'accord au-dessus de la piste précédente. |
 | **Tintinnabuli** | Une voix qui répond à une mélodie par les notes de l'accord (la manière d'Arvo Pärt) : c'est ECHO. |
 | **Système réel** | Les périodes et les formes d'orbites de vraies planètes (Jupiter, Kepler-223, TRAPPIST-1, Pluton), chargées sur les pistes. |

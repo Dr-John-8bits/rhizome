@@ -640,7 +640,7 @@ int md_orbit_steps(int period){return (int)(orbit_steps_at(period,patch.tempo)+.
 int md_orbit_tenths(int period){period=bound(period,0,MD_ORBIT_PERIODS-1);return period<MD_ORBIT_TEMPO_PERIODS?0:orbit_free_tenths[period-MD_ORBIT_TEMPO_PERIODS];}
 const char *md_orbit_system_name(int s,int brief){const OrbitSystem &y=orbit_systems[bound(s,0,MD_ORBIT_SYSTEMS-1)];return brief?y.brief:y.name;}
 const char *md_orbit_system_about(int s){return orbit_systems[bound(s,0,MD_ORBIT_SYSTEMS-1)].about;}
-int md_orbit_comet_steps(int comet){return orbit_comet_steps_of[bound(comet,0,MD_COMETS-1)];}
+int md_orbit_comet_steps(int comet){return (int)orbit_comet_steps(bound(comet,0,MD_COMETS-1));} // WANDER: its turn now
 int md_orbit_moon_steps(int spin){return orbit_moon_steps_of[bound(spin,0,MD_MOON_SPINS-1)];}
 // The gates of a track: its turn's steps, the euclidean hits among them, each as a direction (top = -pi/2, clockwise).
 // DENSITY adds or takes gates as it adds or takes hits on a rhythm (up to a third of 16 each way); a body keeps its orbit.

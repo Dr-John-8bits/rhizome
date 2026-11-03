@@ -121,13 +121,14 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
   else{*label="LEVEL";md_num(o->moon_level,value);ov_append(info,"OF THE NOTE'S VELOCITY");}
  }else{
   if(k==0){*label="COMET";if(!p->orbit_comet){ov_append(value,"OFF");ov_append(info,"NO RARE EVENT");}
+   else if(p->orbit_comet==MD_COMET_WANDER){ov_append(value,"WANDER");char b[8];md_num((int)md_status()->shocks,b);ov_append(info,"AT RANDOM, IT SHOCKS: ");ov_append(info,b);}
    else{md_num(md_orbit_comet_steps(p->orbit_comet)/16,value);ov_append(value,brief?" BAR":" BARS");
     if(!md_playing())ov_append(info,"FIRST PASS HALF A TURN IN");
     else if(md_status()->comet_now>0)ov_append(info,"PASSING THE STAR NOW");
     else{const int bars=(ov_comet_wait(p)+15)/16;char b[8];md_num(bars,b);ov_append(info,"NEXT PASS IN ");ov_append(info,b);ov_append(info,bars>1?" BARS":" BAR");}}}
   else if(k==1){static const char *const names[MD_COMET_EVENTS]={"SWELL","FREEZE","BOTH","FILTER"},*const infos[MD_COMET_EVENTS]={"THE ROOM SWELLS AS IT PASSES","THE GRANULAR TAPE FREEZES","THE ROOM SWELLS, THE TAPE FREEZES","A FILTER OPENS AS IT PASSES"};
    *label="EVENT";ov_append(value,names[p->comet_event]);ov_append(info,infos[p->comet_event]);}
-  else if(k==2){*label="AMOUNT";md_num(p->comet_amount,value);ov_append(info,!p->comet_amount?"IT PASSES, NOTHING HAPPENS":p->comet_event==MD_COMET_FILTER?"HOW FAR THE FILTER CLOSES":"HOW MUCH ITS PASSAGE DOES");}
+  else if(k==2){*label="AMOUNT";md_num(p->comet_amount,value);ov_append(info,!p->comet_amount?"IT PASSES, NOTHING HAPPENS":p->orbit_comet==MD_COMET_WANDER?"ITS SHOCKS: HOW MANY, HOW FAR":p->comet_event==MD_COMET_FILTER?"HOW FAR THE FILTER CLOSES":"HOW MUCH ITS PASSAGE DOES");}
   else{static const char *const names[MD_CONJ_MODES]={"OFF","ACCENT","CHORD"},*const brief_names[MD_CONJ_MODES]={"OFF","ACC","CHORD"},
     *const infos[MD_CONJ_MODES]={"ALIGNED BODIES: NOTHING","ALIGNED: NEXT BEAT ACCENTED","ALIGNED: THEY STRIKE A CHORD"};
    *label="CONJUNCTION";ov_append(value,(brief?brief_names:names)[p->orbit_conj]);ov_append(info,infos[p->orbit_conj]);}
@@ -212,6 +213,7 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
   if(has&&p->orbit[i].moons&&ov_band(o->y-OV_MOON-3,o->y+OV_MOON+3))
    for(int k=0;k<p->orbit[i].moons;k++){const int lit=ov_moon_k[i]==k+1&&now-ov_moon_ms[i]<220;
     md_circle((int)(o->mx[k]+.5f),(int)(o->my[k]+.5f),lit?2:1,lit?MD_INK:md_tint(MD_BG,MD_INK,i==tr?28u:20u),1);}
+  {const int left=md_status()->shock_left[i];if(left>0&&ov_band(o->y-12,o->y+12))for(int d=0;d<left*3;d++){const float a=d*6.2831853f/(left*3)+plat_ms()*.004f;md_soft_point(o->x+10*fm_cosf(a),o->y+10*fm_sinf(a),MD_INK);}} // WANDER: shocked, one dash a note to come
   if(ov_band(o->y-8,o->y+8)){if(i==tr)md_circle((int)(o->x+.5f),(int)(o->y+.5f),6,md_tint(MD_BG,c,has?28u:12u),0);md_circle((int)(o->x+.5f),(int)(o->y+.5f),i==tr?4:3,has?c:md_tint(MD_BG,c,12),1);}}
  // The comet: its whole orbit while it is being set; inside the bar ring, itself and its tail (away from the star, as
  // long as its passage acts); beyond, a mark on the ring in its direction, brighter as it nears.

@@ -68,8 +68,12 @@ enum { MD_PITCH_ORBIT, MD_PITCH_MOTIF, MD_PITCH_ECHO, MD_PITCH_SOURCES };
  * tail, more return, more send), the granular tape freezes, or both, or FILTER: a low-pass on the whole mix, closed
  * while the comet is far and opening wide as it grazes the star (comet_amount: how far it closes, down to 280 Hz);
  * comet_amount 0..100 is how much.
+ * orbit_comet 6, WANDER: it comes back at random, every 4 to 32 bars (drawn from the seed), and at each passage shocks
+ * the body nearest its path: for a few of its notes (comet_amount: how many, how far), a note skipped, the body pushed
+ * on by a step, or the note moved by scale steps; the shock may pass to the next body, less likely at each link. It is
+ * all temporary: nothing is written into the patch.
  * orbit_conj: what a conjunction does: nothing, accent both bodies' next beat, or strike them together as a chord. */
-enum { MD_COMETS=6, MD_COMET_SWELL=0, MD_COMET_FREEZE, MD_COMET_BOTH, MD_COMET_FILTER, MD_COMET_EVENTS };
+enum { MD_COMETS=7, MD_COMET_WANDER=6, MD_COMET_SWELL=0, MD_COMET_FREEZE, MD_COMET_BOTH, MD_COMET_FILTER, MD_COMET_EVENTS };
 enum { MD_CONJ_OFF, MD_CONJ_ACCENT, MD_CONJ_CHORD, MD_CONJ_MODES };
 /* Real systems (orbit_system 1..4, 0 = your own): MD_ORBIT_SYSTEM loads one onto the tracks (unmuted melodic ones
  * first): measured period ratios and eccentricities, the same number of gates on each body so the ratios are heard as
@@ -150,7 +154,7 @@ typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; floa
  int32_t conj_a,conj_b;float conj_pos;uint32_t conj_count;
  float moon_t0[6],moon_note[6][3];int32_t moon_hit[6];uint32_t moon_hits[6];
  /* The comet: its mean anomaly (0 = at the star), how strongly its passage acts now (0..1), passages so far. */
- float comet_M,comet_now,comet_filter_hz;uint32_t comet_passes; /* comet_filter_hz: the FILTER event's cutoff now, 0 when off */
+ float comet_M,comet_now,comet_filter_hz;uint32_t comet_passes,shocks; int32_t shock_left[6],shock_kind[6]; /* WANDER: shocks so far; each body's notes still shocked and how (1 skip, 2 push, 3 pitch) */ /* comet_filter_hz: the FILTER event's cutoff now, 0 when off */
  int32_t motif_at[6]; /* MOTIF: the phrase step each body looks from for its next note */ } md_stats;
 /* Monades granular view: tape overview (256 columns, oldest wraps at the write head), grains as samples behind the head. */
 enum { MD_TAPE_GRAINS=8 }; /* Rhizome: Beads' grains (behind: samples behind the write head, which moves toward lower indices; len: samples left) */
