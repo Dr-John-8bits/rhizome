@@ -50,3 +50,6 @@ En route, trois corrections :
 3. **La flash dépassait de 9 724 octets.**
    - La table des 91 Mondes d'usine stockait chacun en patch complet de Rhizome, soit 296 octets de zéros par Monde (27 Ko en tout). Elle garde maintenant le format de Monades (1 680 octets par Monde) ; les champs de Rhizome sont posés au chargement, comme pour une sauvegarde de Monades.
    - Le média VINTAGE de Beads est retiré : 2,5 Ko. Sans son convertisseur à 32 kHz, ce n'était qu'un DIGITAL en 12 bits.
+
+## Deuxième compilation (3 novembre 2026)
+Avec l'accueil et les 12 Mondes de Rhizome. Les mêmes contrôles passent. L'image tombe à **434 232 octets** (−127 488) : il reste 168 Ko de flash. RAM 85 896 sur 98 304, pool 276 852 sur 344 064. Le paquet `rhizome-0.0.1.fwsc` garde sa taille (610 136 octets, complété à la taille fixe).
