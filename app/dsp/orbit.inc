@@ -15,7 +15,7 @@ static const int8_t orbit_moon_steps_of[MD_MOON_SPINS]={1,2,3,4,6,8,12,16};
 static const float ORBIT_TAU=6.28318531f,ORBIT_PI=3.14159265f;
 static const int16_t orbit_comet_steps_of[MD_COMETS]={0,64,128,256,512,1024,256}; // WANDER: the first turn; then drawn
 static float comet_wander=256; // WANDER: the current turn, in sixteenths (4 to 32 bars, drawn at each passage)
-static int8_t shock_kind[6];static uint8_t shock_left[6];
+static int8_t shock_kind[6];static uint8_t shock_left[6]; // WANDER (shock_burst: dreams.cpp, before the tape)
 static const float COMET_E=MD_COMET_ECC_MILLI*.001f;
 static float comet_M0=ORBIT_PI,comet_target,comet_swell,comet_strength,comet_open=1; // its mean anomaly at PLAY; what its passage asks for now, followed; FILTER: how open (0..1)
 static const float orbit_tilt[6]={-.6f,.5f,1.6f,2.7f,3.8f,4.9f}; // each periapsis in its own direction (radians)
@@ -71,7 +71,7 @@ static void orbit_reset(){ // PLAY: every body starts at the top, together
  for(unsigned i=0;i<6;i++){Orbit &o=orbits[i];o.w0=orbit_tilt[i];o.M0=orbit_mean_of(-1.57079633f-o.w0,orbit_e(i,0));o.accent_until=-1;o.motif=0;o.gate_n=0;o.moon_t0=-100;stats.motif_at[i]=0;
   stats.moon_t0[i]=-100;stats.moon_hit[i]=0;stats.orbit_hit_gate[i]=-1;stats.orbit_hit_pos[i]=-100;stats.orbit_hit_skip[i]=0;}
  comet_M0=ORBIT_PI;stats.comet_M=ORBIT_PI;comet_target=0; // the comet starts far away
- comet_wander=256;memset(shock_left,0,sizeof shock_left);memset(stats.shock_left,0,sizeof stats.shock_left);
+ comet_wander=256;shock_burst=0;memset(shock_left,0,sizeof shock_left);memset(stats.shock_left,0,sizeof stats.shock_left);
  memset(conj_cool,0,sizeof conj_cool);memset(conj_seen,0,sizeof conj_seen);stats.conj_a=stats.conj_b=-1;stats.conj_pos=-100;stats.orbit_pos=0;
 }
 // A new period or precession keeps each body where it is (no jump, no burst of gates).
@@ -90,7 +90,8 @@ static void orbit_rebase_comet(int comet){
 static float orbit_comet_strength(float M){const float r=1-COMET_E*cosf(orbit_E(M,COMET_E)),x=(1-r)/COMET_E;return x<=0?0:x>=1?1:x*x*(3-2*x);}
 // Once a block: the room swell follows the passage (about 70 ms), and stops gently with the sequence.
 static void orbit_comet_follow(){const int ev=patch.comet_event;
- comet_swell+=((playing&&patch.orbit_comet&&(ev==MD_COMET_SWELL||ev==MD_COMET_BOTH)?comet_target:0)-comet_swell)*.02f;
+ shock_burst*=.999f;if(!playing||patch.orbit_comet!=MD_COMET_WANDER)shock_burst=0;stats.shock_burst=shock_burst; // a block: 1.5 ms
+ comet_swell+=((playing&&patch.orbit_comet&&(ev==MD_COMET_SWELL||ev==MD_COMET_BOTH)?comet_target:0)+.6f*shock_burst-comet_swell)*.02f;
  comet_open+=((playing&&patch.orbit_comet?comet_strength:1)-comet_open)*.02f;} // FILTER: stopped, wide open; playing, its passage
 static bool orbit_comet_frozen(){return playing&&patch.orbit_comet&&(patch.comet_event==MD_COMET_FREEZE||patch.comet_event==MD_COMET_BOTH)&&comet_target>.35f;}
 static void orbit_rebase_prec(int prec){
@@ -201,6 +202,7 @@ static void orbit_shock(unsigned i){
  const unsigned r=random_word(orbit_rng);shock_kind[i]=(int8_t)(1+r%3);shock_left[i]=(uint8_t)(1+patch.comet_amount/25);
  if(shock_kind[i]==2){orbits[i].M0+=ORBIT_TAU/orbit_steps(i);orbit_prepared=-1;} // pushed on: its next gate comes a step early
  stats.shocks++;stats.shock_left[i]=shock_left[i];stats.shock_kind[i]=shock_kind[i];
+ shock_burst=fmaxf(shock_burst,.4f+.6f*patch.comet_amount*.01f); // the effects feel it: the HALL swells, the tape stumbles
 }
 // WANDER at the star: the next return drawn (4 to 32 bars), the body nearest its path shocked, and the shock passed on
 // to the nearest body, then the next, each link half as likely (AMOUNT 100: 60 %, 30 %...).

@@ -288,14 +288,15 @@ int main(){
   // chain), the shocks wear off, nothing is written into the patch, and the same seed replays the same shocks.
   {cmd(MD_SCENE,0,0);md_patch q=*md_state();q.orbit_comet=MD_COMET_WANDER;q.comet_amount=100;q.tempo=180;assert(md_validate(&q));
    auto run_wander=[&](uint32_t *shocks,uint32_t *passes,int *gaps_seen){md_init();assert(md_load(&q));cmd(MD_PLAY,0,1);uint32_t seen=0;float last=-1;int distinct=0;float gaps[8]={};
-    for(int b=0;b<345*240;b++){md_render(audio,128);const md_stats *st=md_status();if(st->comet_passes!=seen){seen=st->comet_passes;const float at=st->orbit_pos;
+    float burst=0;for(int b=0;b<345*240;b++){md_render(audio,128);const md_stats *st=md_status();burst=fmaxf(burst,st->shock_burst);if(st->comet_passes!=seen){seen=st->comet_passes;const float at=st->orbit_pos;
       if(last>=0&&distinct<8){gaps[distinct++]=at-last;}last=at;}}
+    assert(burst>.9f); // the shocks jolt the effects (AMOUNT 100)
     int differ=0;for(int k=1;k<distinct;k++)differ+=fabsf(gaps[k]-gaps[k-1])>8;*gaps_seen=differ;*shocks=md_status()->shocks;*passes=md_status()->comet_passes;
     for(int i=0;i<6;i++)assert(md_status()->shock_left[i]<=5);assert(!memcmp(&md_state()->orbit,&q.orbit,sizeof q.orbit));};
    uint32_t s1,p1,s2,p2;int d1,d2;run_wander(&s1,&p1,&d1);run_wander(&s2,&p2,&d2);
    printf("  wander: %u passages, %u shocks, %d changes of return time\n",p1,s1,d1);
    assert(p1>=4&&s1>p1&&d1>=2&&s1==s2&&p1==p2); // chains: more shocks than passages; random returns; the same seed, the same
-   puts("PASS WANDER: random returns, shocks and chains, temporary, reproducible from the seed");}
+   puts("PASS WANDER: random returns, shocks and chains jolting the effects, temporary, reproducible from the seed");}
   // Every voice builds in its arena with room to spare (the wavetable once wrote past it).
   {md_init();cmd(MD_SCENE,0,MD_BLANK_BIOME);for(int m=0;m<MD_MODELS;m++)for(int t=0;t<6;t++)cmd(MD_MODEL,t,m);
    printf("  voice arena: %u bytes to spare at least\n",md_voice_arena_spare());assert(md_voice_arena_spare()>0);puts("PASS every voice fits its arena");}

@@ -56,7 +56,7 @@ static void reel_block(unsigned n,float time_ms,float glide){
  reel_wow_phase+=n*(.55f/MD_RATE);if(reel_wow_phase>=1)reel_wow_phase-=1;reel_flutter_phase+=n*(7.3f/MD_RATE);if(reel_flutter_phase>=1)reel_flutter_phase-=1;
  reel_drift+=.02f*(reel_noise()-reel_drift);
  reel_wow_now=.6f*sinf(6.2831853f*reel_wow_phase)+.2f*sinf(6.2831853f*reel_flutter_phase)+.2f*reel_drift*5; // about -1..1
- reel_mod=1+wow*.01f*reel_wow_now;
+ reel_mod=(1+wow*.01f*reel_wow_now)*(1-.3f*shock_burst); // a WANDER shock: the tape stumbles (orbit.inc)
  // Slower tape holds fewer highs: the record head's filter follows the tape rate (and AGE takes more).
  reel_age=patch.tape_age*.001f;
  const float rate=22050*fmaxf(fabsf(reel_speed),.05f),fc=fminf(.45f,.42f*rate/MD_RATE)*(1-.55f*reel_age);const float w=6.2831853f*fc;reel_rec_coef=w/(1+w); // a one-pole at fc (close to 1-exp(-w), without exp)

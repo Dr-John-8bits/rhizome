@@ -82,6 +82,7 @@ static void extension_defaults(md_patch &p){v7_defaults(p);p.delay_ms=200;p.dela
 struct Repeat { float left,spacing,note,velocity; unsigned remaining; };
 static Repeat repeats[6];
 static md_patch patch,previous;
+static float shock_burst; // a WANDER shock's jolt on the effects (orbit.inc), fading in about 1.5 s
 #include "tape_echo.inc"
 static md_stats stats;
 // Display-only scope per voice: 128 points after the filter, stride chosen so about two periods fit 64 points.
