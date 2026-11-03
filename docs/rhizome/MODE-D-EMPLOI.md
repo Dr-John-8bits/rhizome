@@ -324,14 +324,16 @@ Une réverbe de la famille des grandes réverbes « hall » numériques, celle d
 Les réglages DECAY, TREBLE et DIFFUSION sont aussi sur les pages SHARED SPACE et SPACE TONE, héritées de Monades.
 
 ### Entendre la HALL
-Une réverbe s'entend surtout **dans ce qui reste après la note**, et la HALL arrive par un envoi et un retour. Elle reste donc muette tant que l'un des deux est bas. Dans les Mondes d'usine, elle est volontairement discrète, à 15 ou 20 dB sous le son direct : on la sent plus qu'on ne l'entend, d'autant que la bande et les grains jouent par-dessus.
+Une réverbe s'entend surtout **dans ce qui reste après la note**, et la HALL arrive par un envoi et un retour. Elle reste donc muette tant que l'un des deux est bas. Dans les Mondes d'usine, elle arrive 9 à 18 dB sous le reste du son : nette sur les nappes et les cloches, absente de la basse, qu'on garde sèche pour un grave net.
+
+**Où la doser** : piste par piste, sur **GLOBAL MIXER** (EDIT 5 fois), **K4**, pour la piste choisie avec SELECT. C'est le réglage de tous les jours. Le niveau d'ensemble de la salle, lui, est **K4 RETURN sur SHARED SPACE** (FX 8 fois), partagé avec la bande.
 
 **Pour l'entendre seule**, depuis n'importe quel Monde :
 1. **Couper les grains** : LIVE (HOME), K4 SPACE à 0.
-2. **Garder une seule piste** : choisir une piste mélodique. Couper les autres une à une : SELECT pour aller sur chacune, puis SEL.
+2. **Garder une seule piste** : choisir une piste aux notes courtes (une cloche, un pincé), pas une nappe qui tient. Couper les autres une à une : SELECT pour aller sur chacune, puis SEL.
 3. **L'envoyer à la HALL et pas à la bande** : EDIT 5 fois (GLOBAL MIXER), K4 vers la réverbe à 100, K3 vers la bande à 0.
 4. **Ouvrir le retour** : FX 8 fois (SHARED SPACE), K4 RETURN à 100. Ce retour sert aussi à la bande, coupée ici par son envoi.
-5. **PLAY, puis PLAY de nouveau pour arrêter** : la séquence s'arrête, et ce qu'on entend ensuite, c'est la salle seule qui s'éteint.
+5. **PLAY, puis PLAY de nouveau pour arrêter** : la séquence s'arrête. Une fois la dernière note éteinte, ce qu'on entend encore, c'est la salle seule.
 
 **Puis, sur la page HALL (FX 3 fois), un réglage à la fois** :
 - **K1 DECAY** : à 30, une pièce ; vers 60, une grande salle (4 à 6 s) ; tout en haut, INFINITE : la queue ne s'éteint plus.

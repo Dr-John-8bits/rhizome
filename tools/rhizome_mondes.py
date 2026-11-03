@@ -134,6 +134,10 @@ BLANK=dict(name='EMPTY SKY',family=3,tempo=64,root='C',scale='MINOR',macro=[500,
 GAIN={'LAST LIGHT':.77,'AMBER HOUR':.88,'LONG SHADOWS':1.5,'SLOW EMBERS':1.23,'NIGHT SWALLOWS':1.57,'BLACK ORCHARD':1.32,
  'SLEEPLESS TIDE':1.6,'NO STARS':3.0,'FIRST BIRD':1.78,'PALE COMET':1.23,'CHOKED DAWN':.88,'DAY BREAKS':1.33}
 
+# The HALL as a voice of its own: the melodic tracks' sends, raised from the values above (where it sat 15 to 20 dB under
+# the direct sound and went unheard) to about 10 dB under it; the bass keeps its small send, for a clear low end.
+HALL=2.2
+
 def rhizome(tones,fields):
  """Catalog entries: the FDDS writer's v10 part, plus 'v11', Rhizome's part."""
  out=fdds(tones,fields,0,mondes=MONDES+[BLANK],seed=0x52485A00)
@@ -141,6 +145,7 @@ def rhizome(tones,fields):
   for i,tr in enumerate(b['tracks']):
    tr['prob']=1000 # the seed is locked: a gate that misses would miss on every turn
    tr['level']=min(1000,round(tr['level']*GAIN.get(m['name'],1)))
+   if i and m is not BLANK:b['ext']['tracks'][i]['reverb_send']=min(1000,round(b['ext']['tracks'][i]['reverb_send']*HALL)) # the bass stays dry
    if i in m['orbits']:tr['hits']=0 # a body plays its gates, not a rhythm
   prec,pert,comet,event,amount,conj=m['sky']
   b['v11']=dict(orbit=[m['orbits'].get(i,body(0,16)) for i in range(6)],sky=[prec,pert,COMET[comet],EVENT[event],amount,CONJ[conj],0],
