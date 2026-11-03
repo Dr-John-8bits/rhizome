@@ -549,6 +549,12 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
 - **Le tempo libre, orbite par orbite** : après les 13 périodes en pas, PERIOD propose 8 périodes en secondes (5,1 à 31,8 s), qui ne suivent pas le tempo ; aucune ne divise une autre. Les cinq dernières sont les boucles de *Music for Airports*. Quand le tempo change, un corps libre reste où il était (testé : 17,8 s par tour à 140 puis à 60 BPM, changement compris, à 3 ms près). Le premier tour après PLAY part du premier pas (jusqu'à un pas de décalage).
 - **Les générateurs agissent sur les orbites** (ORBIT et MOTIF), avec leur mémoire déjà-vu, comme MOTION depuis le matin.
 - **Six Mondes DEEP** (13 à 18) : COLD IN THE DARK (la vitrine à peu de pas), KEPLER NIGHT, TRAPPIST DUST, RAGA OF ASH, SLOW TIDES, LOOPS OF ASH. EMPTY SKY devient le 19e, avec sa graine d'avant. Niveaux mesurés sur une minute (les formes longues commencent par leur calme). Écoute : `M-VAVE FM1/ecoutes/rhizome-6-mondes-deep.m4a`.
-- **Un effet de plus, à décider** : un *shimmer* dans la HALL (une octave au-dessus réinjectée dans la queue), le son des nappes d'Eno et Lanois. Petit tampon, peu de calcul ; la place du pool (24 Ko) est à surveiller.
+- **Le filtre de la comète, fait le 3 novembre 2026 (avant le premier flash).** Un filtre qui se balaie avec la comète : fermé quand elle est loin, il s'ouvre à mesure qu'elle approche et s'ouvre en grand quand elle frôle l'étoile, puis se referme. Pistes pour le faire :
+  - un nouvel ÉVÉNEMENT de la comète (ORBIT / COMET, K2), à côté de SWELL, FREEZE et BOTH, réglé par AMOUNT (K3) ;
+  - un passe-bas sur tout le mélange (ou un décalage du CUTOFF de chaque piste), mené par la force du passage que le moteur calcule déjà (`orbit_comet_strength`) ;
+  - à l'écran, la queue de la comète déjà dessinée, et le filtre qui s'ouvre visible (règle : chaque animation montre un vrai réglage) ;
+  - tests : l'énergie des aigus monte au passage et redescend ; mesure du calcul.
+  - **Résultat** : l'ÉVÉNEMENT FILTER (ORBIT / COMET, K2), un passe-bas 12 dB sur tout le mélange, de 18 kHz à 18 kHz / 2^(AMOUNT × 0,06) (280 Hz à 100). Mesuré : 281 Hz loin, 17,6 kHz au plus près, sept fois plus d'aigus au passage. À l'arrêt il est grand ouvert ; avec un autre événement il n'est pas calculé. La page COMET affiche la fréquence et sa jauge. KEPLER NIGHT l'utilise.
+- *Shimmer* dans la HALL : écarté pour Rhizome (le 3 novembre 2026), au profit du filtre de la comète.
 
 Chaque étape se développe d'abord sur le Mac (`tools/build_local.py host`), puis dans le navigateur, puis sur le FM-1.

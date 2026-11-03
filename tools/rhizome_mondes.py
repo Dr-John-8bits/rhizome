@@ -20,7 +20,7 @@ SPIN={1:0,2:1,3:2,4:3,6:4,8:5,12:6,16:7} # one spin of the moons, in sixteenths
 PITCH={'ORBIT':0,'MOTIF':1,'ECHO':2}
 MOON={'SAME':0,'UP':1,'DOWN':2,'3RD+':3,'3RD-':4,'HARM':5}
 COMET={0:0,4:1,8:2,16:3,32:4,64:5} # one turn, in bars
-EVENT={'SWELL':0,'FREEZE':1,'BOTH':2}
+EVENT={'SWELL':0,'FREEZE':1,'BOTH':2,'FILTER':3}
 CONJ={'OFF':0,'ACCENT':1,'CHORD':2}
 MEDIA={'DIRTY':0,'CLEAN':1,'DIGITAL':2}
 FAMILIES=['Dusk: resonances','Night: eccentric orbits','Dawn: moons and comets','Deep: long forms','Blank']
@@ -141,7 +141,8 @@ MONDES=[
   lfo={(1,0):('FREE SLOW','SINE','TONE',500),(3,0):('8 BARS','S&H','HARMONICS',300),(2,0):('4 BARS','TRIANGLE','CUTOFF',350)},
   gen={1:('MOTIF',700,8,7)},
   sky=(40,25,16,'BOTH',50,'CHORD'),tape=(3,200,150,250),hall=(800,40,600,450,0),beads=(650,820,300,'CLEAN')),
- # Kepler-223 as measured (3:4:6:8, its eccentricities), the wavetables' colour turning with a slow LFO.
+ # Kepler-223 as measured (3:4:6:8, its eccentricities), the wavetables' colour turning with a slow LFO; every 16 bars a
+ # comet whose FILTER opens the whole sky as it grazes the star.
  dict(name='KEPLER NIGHT',family=3,tempo=60,root='A',scale='DORIAN',macro=[500,60,460,320],
   echo='1/4',delay_fb=380,fx=480,room=720,diffusion=800,grain=(750,500,300),
   tracks=[('Night Table',57,4,16,dict(level=230,echo=300,room=450,send=250)),('DX Cirrus',64,4,16,dict(level=210,room=500,send=250)),
@@ -150,7 +151,7 @@ MONDES=[
   phrase={0:[0,-1,2,-1,3,-1,7,-1,5,-1,3,-1,2,-1,-1,-1]},
   orbits={0:body(4,48,ecc=78,pitch='MOTIF'),1:body(4,64,ecc=150),2:body(4,96,ecc=37),3:body(4,128,ecc=51),4:body(1,'31.8s')},
   lfo={(0,0):('FREE SLOW','SINE','TONE',450),(0,1):('8 BARS','TRIANGLE','SHAPE',350),(2,0):('4 BARS','SINE','CUTOFF',300)},
-  sky=(10,0,0,'SWELL',60,'ACCENT','KEPLER-223'),tape=(3,150,100,200),hall=(850,45,650,400,0),beads=(700,800,250,'DIGITAL')),
+  sky=(10,0,16,'FILTER',55,'ACCENT','KEPLER-223'),tape=(3,150,100,200),hall=(850,45,650,400,0),beads=(700,800,250,'DIGITAL')),
  # TRAPPIST-1's resonant chain (2:3:4:6), its notes drawn by generators that remember (deja-vu) and slowly let go.
  dict(name='TRAPPIST DUST',family=3,tempo=66,root='E',scale='HIRAJOSHI',macro=[500,40,480,360],
   echo='1/8 .',delay_fb=450,fx=500,room=680,grain=(650,450,400),

@@ -273,6 +273,17 @@ int main(){
    for(int b=0;b<345*100&&n<6;b++){if(b==345*30)cmd(MD_TEMPO,0,60);md_render(audio,128);t+=128.0/44100;if(md_status()->orbit_hits[0]!=seen){seen=md_status()->orbit_hits[0];times[n++]=t;}}
    assert(n>=4);for(int k=1;k<n;k++)printf("  free 17.8 s orbit: %.3f s\n",times[k]-times[k-1]);for(int k=2;k<n;k++)assert(fabs(times[k]-times[k-1]-17.8)<.01); // the first turn after PLAY starts on the first step (up to one step off)
    puts("PASS a free period: 17.8 s a turn at 140 and at 60 BPM, through the change");}
+  // The comet's FILTER: closed while it is far (AMOUNT 100: 280 Hz), wide open as it grazes the star, the mix's highs
+  // following; stopped, wide open; another event, no filter at all.
+  {md_patch q=*md_state();cmd(MD_SCENE,0,0);q=*md_state();q.orbit_comet=1;q.comet_event=MD_COMET_FILTER;q.comet_amount=100;assert(md_validate(&q));
+   md_init();assert(md_load(&q));run(10);assert(fabsf(md_status()->comet_filter_hz-18000)<200); // stopped: open
+   cmd(MD_PLAY,0,1);float lo=1e9f,hi=0;double hf[2]={},all[2]={};float prev=0;
+   for(int b=0;b<345*20;b++){md_render(audio,128);const float hz=md_status()->comet_filter_hz;lo=fminf(lo,hz);hi=fmaxf(hi,hz);
+    const int open=hz>4000;for(int k=0;k<256;k+=2){const float d=audio[k]-prev;prev=audio[k];hf[open]+=d*d;all[open]+=audio[k]*audio[k];}}
+   printf("  comet filter: %.0f Hz far, %.0f Hz at the star; highs %.4f closed, %.4f open\n",lo,hi,hf[0]/all[0],hf[1]/all[1]);
+   assert(lo<400&&hi>12000&&hf[1]/all[1]>4*hf[0]/all[0]);
+   q.comet_event=MD_COMET_SWELL;md_init();assert(md_load(&q));cmd(MD_PLAY,0,1);run(400);assert(md_status()->comet_filter_hz==0);
+   puts("PASS the comet's FILTER opens as it passes and closes far away; off for the other events");}
   // Every voice builds in its arena with room to spare (the wavetable once wrote past it).
   {md_init();cmd(MD_SCENE,0,MD_BLANK_BIOME);for(int m=0;m<MD_MODELS;m++)for(int t=0;t<6;t++)cmd(MD_MODEL,t,m);
    printf("  voice arena: %u bytes to spare at least\n",md_voice_arena_spare());assert(md_voice_arena_spare()>0);puts("PASS every voice fits its arena");}

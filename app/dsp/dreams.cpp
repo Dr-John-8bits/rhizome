@@ -58,6 +58,7 @@ static bool fx_active;
 static float fx_smooth,fx_highpass_in,fx_highpass_out;
 static void hall_reset(); // Rhizome's HALL (hall.inc)
 static void beads_reset(),beads_init(); // Rhizome's granular bus (beads_bus.inc)
+static stmlib::Svf comet_lp[2];static bool comet_filtering; // Rhizome: the comet's FILTER (orbit.inc's comet_open)
 static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob value the coefficients were computed for
 // Monades: Rings chorus on the dry mix (4 KiB line), and Dattorro / Griesinger input diffusion before the room
 // (four allpasses, 1210 samples). Both are skipped entirely at 0.
@@ -583,6 +584,12 @@ static void quantum(float *lr,unsigned n) {
   stats.env_now[i]=melodic?v.env:0;stats.env_attacking[i]=melodic&&v.attacking;
   if(melodic&&!v.attacking&&v.env<.000001f)v.active=0;
  }
+ // Rhizome: the comet's FILTER, a 12 dB low-pass on the mix: from 18 kHz (wide open) down to 18 kHz / 2^(AMOUNT x 0.06)
+ // (280 Hz at 100) while the comet is far, opening as it nears the star. Off: not computed, the mix untouched.
+ {const bool on=patch.orbit_comet&&patch.comet_event==MD_COMET_FILTER&&patch.comet_amount>0;
+  if(on&&!comet_filtering){comet_lp[0].Init();comet_lp[1].Init();}comet_filtering=on;stats.comet_filter_hz=0;
+  if(on){const float span=patch.comet_amount*.06f,hz=18000/exp2f(span*(1-comet_open));
+   for(int c=0;c<2;c++)comet_lp[c].set_f_q<stmlib::FREQUENCY_ACCURATE>(hz/MD_RATE,.9f);stats.comet_filter_hz=hz;}}
  const float echo_feedback=lfo_echo_fb?fminf(.8f,clamp01(unit(patch.delay_fb)+lfo_echo_fb*.5f)):unit(patch.delay_fb),effect_return=unit(patch.fx_level)+(1.4f-unit(patch.fx_level))*comet_swell;
  reel_block(n,echo_ms_now()*(1+lfo_echo_time*.5f),lfo_echo_time?.002f:.00005f); // Rhizome: the tape's speed, wow, dropouts
  const float echo_tone=tone_coef(patch.echo_tone,.04f,.25f,.9f);
@@ -614,6 +621,7 @@ static void quantum(float *lr,unsigned n) {
   fx_peak[0]=fmaxf(fx_peak[0],fmaxf(fabsf(wet[0]),fabsf(wet[1]))*smooth[3]*3.23f*duck[k]);
   for(unsigned c=0;c<2;c++) {
    float x=effect[c]+lr[2*k+c]+wet[c]*smooth[3]*1.7f*duck[k];
+   if(comet_filtering)x=comet_lp[c].Process<stmlib::FILTER_MODE_LOW_PASS>(x); // the comet's FILTER, on the whole mix
    float y=x-dcx[c]+.9997f*dcy[c];dcx[c]=x;dcy[c]=y;
    limit_peak=fmaxf(limit_peak,fabsf(y*1.9f));
    x=clip(y*1.9f);lr[2*k+c]=x;
@@ -652,7 +660,7 @@ void md_init() {
  memset(&stats,0,sizeof stats);memset(smooth,0,sizeof smooth);memset(dcx,0,sizeof dcx);memset(dcy,0,sizeof dcy);
  out_r=out_w=owed_n=0;memset(&routing,0,sizeof routing);clock_left=0;memset(chan_bend,0,sizeof chan_bend);for(int i=0;i<6;i++)in_chan[i]=out_chan[i]=i+1;
  for(int i=0;i<6;i++)last_generated[i]=60;
- memset(midi_bank,0,sizeof midi_bank);qread=qwrite=0;rng=0x88888;stmlib::Random::Seed(rng);comet_swell=0;scene(0);orbit_reset();playing=0;clock_source=midi_quantize=clock_pulse=0;clock_age=clock_last=0;clock_interval=0;
+ memset(midi_bank,0,sizeof midi_bank);qread=qwrite=0;rng=0x88888;stmlib::Random::Seed(rng);comet_swell=0;comet_open=1;comet_filtering=false;scene(0);orbit_reset();playing=0;clock_source=midi_quantize=clock_pulse=0;clock_age=clock_last=0;clock_interval=0;
 }
 void md_set_midi_routing(const md_midi_routing *r){
  // Turning output off (or changing the routing) first releases every note still owed on the old routing.

@@ -112,7 +112,7 @@ Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO ST
 | Monde | Gamme · tempo | Ce qu'on entend |
 |---|---|---|
 | 13 COLD IN THE DARK | D MINOR · 72 | La vitrine : des boucles de quelques pas, les trois sources de notes, une phrase que son générateur fait muter, des lunes, deux périodes libres qui ne tombent jamais en place, la précession, une comète, des accords, des LFO lents et la forme. |
-| 14 KEPLER NIGHT | A DORIAN · 60 | Le système Kepler-223 tel qu'il a été mesuré (3:4:6:8), la couleur des tables d'ondes qui tourne avec un LFO lent, un drone en période libre. |
+| 14 KEPLER NIGHT | A DORIAN · 60 | Le système Kepler-223 tel qu'il a été mesuré (3:4:6:8), la couleur des tables d'ondes qui tourne avec un LFO lent, un drone en période libre ; toutes les 16 mesures, une comète dont le FILTER ouvre tout le ciel à son passage. |
 | 15 TRAPPIST DUST | E HIRAJOSHI · 66 | La chaîne résonante de TRAPPIST-1 (2:3:4:6), ses notes tirées par des générateurs qui s'en souviennent (déjà-vu), puis les lâchent peu à peu. |
 | 16 RAGA OF ASH | D BHAIRAVI · 52 | Un raga de nuit : un bourdon, une voix soufflée qui chante sa phrase en meend, une anche qui ondule (andolan), des cloches avec kan, et les notes pivots. |
 | 17 SLOW TIDES | F MIXOLYDIAN · 58 | La forme : calme, montée, sommet, retombée, seize mesures chacun, des pistes qui se taisent et reviennent ; des LFO ouvrent les filtres et déplacent les voix. |
@@ -266,8 +266,8 @@ La **comète** est un corps sans voix, sur une orbite très allongée. Elle pass
 | Potard | Réglage | Ce qu'il fait |
 |---|---|---|
 | K1 | COMET | Un tour en 4, 8, 16, 32 ou 64 mesures, ou OFF. La carte dit dans combien de mesures elle repassera. |
-| K2 | EVENT | SWELL (la réverbe gonfle : envoi plus fort, queue plus longue, retour plus fort), FREEZE (la mémoire des grains se fige au cœur du passage) ou BOTH. |
-| K3 | AMOUNT | La force du passage. |
+| K2 | EVENT | SWELL (la réverbe gonfle : envoi plus fort, queue plus longue, retour plus fort), FREEZE (la mémoire des grains se fige au cœur du passage), BOTH (les deux) ou **FILTER** : un filtre sur tout le son, fermé tant que la comète est loin, qui s'ouvre à mesure qu'elle approche et en grand quand elle frôle l'étoile, puis se referme. L'écran affiche sa fréquence. |
+| K3 | AMOUNT | La force du passage ; avec FILTER, jusqu’où le filtre se ferme quand la comète est loin (jusqu’à 280 Hz à 100). |
 | K4 | CONJUNCTION | Ce que fait l'alignement de deux corps avec l'étoile : OFF (rien), ACCENT (leur temps suivant est accentué) ou CHORD (les deux rejouent ensemble ; le second prend la note de l'accord du premier la plus proche de la sienne). |
 
 À l'écran :

@@ -125,9 +125,9 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
     if(!md_playing())ov_append(info,"FIRST PASS HALF A TURN IN");
     else if(md_status()->comet_now>0)ov_append(info,"PASSING THE STAR NOW");
     else{const int bars=(ov_comet_wait(p)+15)/16;char b[8];md_num(bars,b);ov_append(info,"NEXT PASS IN ");ov_append(info,b);ov_append(info,bars>1?" BARS":" BAR");}}}
-  else if(k==1){static const char *const names[MD_COMET_EVENTS]={"SWELL","FREEZE","BOTH"},*const infos[MD_COMET_EVENTS]={"THE ROOM SWELLS AS IT PASSES","THE GRANULAR TAPE FREEZES","THE ROOM SWELLS, THE TAPE FREEZES"};
+  else if(k==1){static const char *const names[MD_COMET_EVENTS]={"SWELL","FREEZE","BOTH","FILTER"},*const infos[MD_COMET_EVENTS]={"THE ROOM SWELLS AS IT PASSES","THE GRANULAR TAPE FREEZES","THE ROOM SWELLS, THE TAPE FREEZES","A FILTER OPENS AS IT PASSES"};
    *label="EVENT";ov_append(value,names[p->comet_event]);ov_append(info,infos[p->comet_event]);}
-  else if(k==2){*label="AMOUNT";md_num(p->comet_amount,value);ov_append(info,p->comet_amount?"HOW MUCH ITS PASSAGE DOES":"IT PASSES, NOTHING HAPPENS");}
+  else if(k==2){*label="AMOUNT";md_num(p->comet_amount,value);ov_append(info,!p->comet_amount?"IT PASSES, NOTHING HAPPENS":p->comet_event==MD_COMET_FILTER?"HOW FAR THE FILTER CLOSES":"HOW MUCH ITS PASSAGE DOES");}
   else{static const char *const names[MD_CONJ_MODES]={"OFF","ACCENT","CHORD"},*const brief_names[MD_CONJ_MODES]={"OFF","ACC","CHORD"},
     *const infos[MD_CONJ_MODES]={"ALIGNED BODIES: NOTHING","ALIGNED: NEXT BEAT ACCENTED","ALIGNED: THEY STRIKE A CHORD"};
    *label="CONJUNCTION";ov_append(value,(brief?brief_names:names)[p->orbit_conj]);ov_append(info,infos[p->orbit_conj]);}
@@ -229,7 +229,11 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
   md_circle(ov_cx,ov_cy,2,MD_INK,1);}
  }
  // Words only where they help.
- if(page==ORBIT_COMET){if(!p->orbit_comet)md_text(10,44,"K1 COMET: A RARE PASSAGE",MD_DIM);else if(!md_playing())md_text(10,44,"PLAY: IT STARTS FAR AWAY",MD_DIM);}
+ if(page==ORBIT_COMET){if(!p->orbit_comet)md_text(10,44,"K1 COMET: A RARE PASSAGE",MD_DIM);else if(!md_playing())md_text(10,44,"PLAY: IT STARTS FAR AWAY",MD_DIM);
+  else if(md_status()->comet_filter_hz>0){ // FILTER: the cutoff now, and where it stands between 60 Hz and 18 kHz (log)
+   const float hz=md_status()->comet_filter_hz;char t[24]="FILTER ",b[12];if(hz>=1000){md_num((int)(hz/1000),b);ov_append(t,b);ov_append(t,".");b[0]=(char)('0'+(int)(hz/100)%10);b[1]=0;ov_append(t,b);ov_append(t," KHZ");}
+   else{md_num((int)hz,b);ov_append(t,b);ov_append(t," HZ");}md_text(10,44,t,MD_DIM);
+   if(ov_band(48,53)){const int w=(int)(150*fm_logf(hz/60)/fm_logf(300));cv_rect(90,50,150,1,MD_EDGE);cv_rect(90,49,w<0?0:w>150?150:w,3,col);}}}
  else if(!p->orbit[tr].gates)md_text(10,44,page==ORBIT?"K3 GATES STARTS THIS ORBIT":"NO ORBIT: ORBIT PAGE, K3 GATES",MD_DIM);
  else if(page!=ORBIT_MOONS&&p->orbit[tr].pitch==MD_PITCH_MOTIF&&ov_motif_empty(p,tr))md_text(10,44,"MOTIF EMPTY: KEYS ON GENERATOR",MD_DIM);
  else if(page==ORBIT_MOONS&&!p->orbit[tr].moons)md_text(10,44,"K1 MOONS: ORNAMENTS AFTER NOTES",MD_DIM);

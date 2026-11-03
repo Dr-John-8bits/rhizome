@@ -15,7 +15,7 @@ static const int8_t orbit_moon_steps_of[MD_MOON_SPINS]={1,2,3,4,6,8,12,16};
 static const float ORBIT_TAU=6.28318531f,ORBIT_PI=3.14159265f;
 static const int16_t orbit_comet_steps_of[MD_COMETS]={0,64,128,256,512,1024};
 static const float COMET_E=MD_COMET_ECC_MILLI*.001f;
-static float comet_M0=ORBIT_PI,comet_target,comet_swell; // its mean anomaly at PLAY; what its passage asks for now, followed
+static float comet_M0=ORBIT_PI,comet_target,comet_swell,comet_strength,comet_open=1; // its mean anomaly at PLAY; what its passage asks for now, followed; FILTER: how open (0..1)
 static const float orbit_tilt[6]={-.6f,.5f,1.6f,2.7f,3.8f,4.9f}; // each periapsis in its own direction (radians)
 struct Orbit { float M0,w0,gate_M[MD_ORBIT_GATES_MAX];int gate_n,motif;float accent_until,moon_t0,moon_vel; };
 static Orbit orbits[6];
@@ -85,8 +85,10 @@ static void orbit_rebase_comet(int comet){
 // fifth of its turn.
 static float orbit_comet_strength(float M){const float r=1-COMET_E*cosf(orbit_E(M,COMET_E)),x=(1-r)/COMET_E;return x<=0?0:x>=1?1:x*x*(3-2*x);}
 // Once a block: the room swell follows the passage (about 70 ms), and stops gently with the sequence.
-static void orbit_comet_follow(){comet_swell+=((playing&&patch.orbit_comet&&patch.comet_event!=MD_COMET_FREEZE?comet_target:0)-comet_swell)*.02f;}
-static bool orbit_comet_frozen(){return playing&&patch.orbit_comet&&patch.comet_event!=MD_COMET_SWELL&&comet_target>.35f;}
+static void orbit_comet_follow(){const int ev=patch.comet_event;
+ comet_swell+=((playing&&patch.orbit_comet&&(ev==MD_COMET_SWELL||ev==MD_COMET_BOTH)?comet_target:0)-comet_swell)*.02f;
+ comet_open+=((playing&&patch.orbit_comet?comet_strength:1)-comet_open)*.02f;} // FILTER: stopped, wide open; playing, its passage
+static bool orbit_comet_frozen(){return playing&&patch.orbit_comet&&(patch.comet_event==MD_COMET_FREEZE||patch.comet_event==MD_COMET_BOTH)&&comet_target>.35f;}
 static void orbit_rebase_prec(int prec){
  const float pos=orbit_pos_now()<0?0:orbit_pos_now();float w[6];
  for(unsigned i=0;i<6;i++)w[i]=orbit_w(i,pos);
@@ -217,7 +219,7 @@ static void orbit_run(){
  // The comet: a passage each time its mean anomaly comes round to the star.
  if(patch.orbit_comet){const float M1=orbit_comet_M(orbit_prev),M2=orbit_comet_M(pos);
   if(floorf(M2/ORBIT_TAU)>floorf(M1/ORBIT_TAU))stats.comet_passes++;
-  stats.comet_M=orbit_wrap(M2);comet_target=orbit_comet_strength(M2)*patch.comet_amount*.01f;}
- else comet_target=0;
+  stats.comet_M=orbit_wrap(M2);comet_strength=orbit_comet_strength(M2);comet_target=comet_strength*patch.comet_amount*.01f;}
+ else comet_target=comet_strength=0;
  stats.comet_now=comet_target;stats.orbit_pos=pos;orbit_prev=pos;
 }
