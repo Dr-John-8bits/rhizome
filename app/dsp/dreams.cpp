@@ -476,10 +476,10 @@ static void quantum(float *lr,unsigned n) {
  // Conservative admission guard from 0.4.1 FM-1 costs with full-rate tape, LP24 and maximum repeats.
  // Count unmuted slots before playback so the tape cannot prefill four FULL grains
  // immediately before a dense six-voice attack. Existing audible tails also count.
- if(patch.quality){static const unsigned weight[MD_MODELS]={10,10,10,14,12,10,10,12};unsigned cost=12;
-  // Provisional additional weights, pending physical-device measurement. Rhizome: its voices from the Mac bench, and its
-  // effects counted apart (tape, HALL, Beads while SPACE is open).
-  if(fx_active||patch.fx_level)cost+=10;if(patch.macro[3])cost+=10;
+ if(patch.quality){static const unsigned weight[MD_MODELS]={13,6,6,7,6,9,7,8};unsigned cost=7;
+  // Rhizome: percent of the FM-1's processor, measured on the device on 4 November 2026 (a sounding voice; the tape and
+  // HALL together; Beads with its 3 grains, estimated from 6 grains at 28 %).
+  if(fx_active||patch.fx_level)cost+=14;if(patch.macro[3])cost+=14;
   if(patch.chorus)cost+=3;if(patch.send_hp||patch.room_diffusion)cost+=2; // Monades estimates, pending FM-1 measurement
   for(unsigned j=0;j<6;j++)if(!patch.track[j].mute&&patch.ext[j].warps)cost+=2;
   for(unsigned i=0;i<6;i++)if(voices[i].active||!patch.track[i].mute)cost+=weight[patch.track[i].model];
@@ -553,6 +553,9 @@ static void quantum(float *lr,unsigned n) {
    if(melodic){if(v.midi_gate<0){v.env*=.9975f;v.attacking=0;}else if(v.attacking){v.env+=attackstep;if(v.env>=1){v.env=1;v.attacking=0;}}else if(v.midi_gate==0)v.env*=dec;x*=v.env;}
    out[k]=x;
   }
+  // Rhizome: a voice whose envelope has died away (-70 dB, nothing held) goes to sleep: its engine is no longer computed
+  // until its next note (on the FM-1 a sounding voice costs 6 to 13 % of the processor, measured 4 November 2026).
+  if(!v.attacking&&v.midi_gate<=0&&v.env<.0003f){v.env=0;v.active=0;}
   if(t.filter==4||t.filter==7){v.filter1.Process<stmlib::FILTER_MODE_HIGH_PASS>(out,out,n);if(t.filter==7)v.filter2.Process<stmlib::FILTER_MODE_HIGH_PASS>(out,out,n);}
   else if(t.filter==5)v.filter1.Process<stmlib::FILTER_MODE_BAND_PASS_NORMALIZED>(out,out,n);
   else if(t.filter==6){v.filter1.Process<stmlib::FILTER_MODE_BAND_PASS_NORMALIZED>(out,tmp,n);for(unsigned k=0;k<n;k++)out[k]-=tmp[k];} // notch = input - band

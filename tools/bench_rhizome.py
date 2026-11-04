@@ -20,7 +20,10 @@ OUT = A / 'build' / 'bench'
 # FM-1 % per Mac ns/s. Calibrated on 2 November 2026 with two Monades Mondes whose load was read on an FM-1 (87 CLOUDEE
 # 69 %, 89 ALCHIMISTE 76 %, ECO): 3.514e-6 and 3.362e-6, their mean below. Rhizome no longer carries Monades' voices, so
 # the yardstick cannot be re-run here: a measurement on the FM-1 will replace this figure.
-SCALE = 3.438e-6
+SCALE = 3.438e-6 * 2.4
+# x 2.4: on 4 November 2026 the first Mondes measured 121 to 130 % on the FM-1 where this bench said 47 to 53 %. Plaits'
+# voices slow down about 1.5 times more than Monades' did on the device, and Beads about 4 times: a single factor is
+# only a rough guide. The device's own reading (tools/measure_fm1.py) is the one that counts.
 
 PLAITS = ['plaits/resources.cc', 'plaits/dsp/chords/chord_bank.cc', 'plaits/dsp/fm/algorithms.cc', 'plaits/dsp/fm/dx_units.cc',
           *[f'plaits/dsp/physical_modelling/{n}.cc' for n in ('modal_voice', 'resonator', 'string', 'string_voice')],

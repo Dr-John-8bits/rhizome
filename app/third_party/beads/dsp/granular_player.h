@@ -148,8 +148,9 @@ class GranularPlayer {
         grain_priority_list_[i]->FadeOut(instant_crossfade_time_);
       }
     } else {
-      const int num_safety_grains = 4;
-      int fade_time[num_safety_grains];
+      // Rhizome: with fewer grains, fewer kept safe (4 of 32 on the module; at least one grain is never faded).
+      const int num_safety_grains = num_grains > 5 ? 4 : num_grains - 1;
+      int fade_time[4];
     
       if (grain_interval_ < simple_scheduler_threshold_) {
         // When the grains are arriving very fast, we simply assume that the

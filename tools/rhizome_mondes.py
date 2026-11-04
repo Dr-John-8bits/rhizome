@@ -202,11 +202,15 @@ BLANK=dict(name='EMPTY SKY',family=4,tempo=64,root='C',scale='MINOR',macro=[500,
 
 # Levels: every Monde near -30 dB RMS over a minute (NO STARS and LOOPS OF ASH, sparse by design, near -36), measured with Rhizome's
 # voices by tests/next_features.cpp; the tracks' levels above are the balance inside a Monde, these the Monde's own.
-GAIN={'LAST LIGHT':1.98,'AMBER HOUR':1.62,'LONG SHADOWS':2.79,'SLOW EMBERS':1.4,'NIGHT SWALLOWS':1.43,'BLACK ORCHARD':1.48,'SLEEPLESS TIDE':2.01,'NO STARS':0.95,'FIRST BIRD':2.75,'PALE COMET':2.95,'CHOKED DAWN':1.0,'DAY BREAKS':1.12,'COLD IN THE DARK':1.48,'KEPLER NIGHT':1.41,'TRAPPIST DUST':0.93,'RAGA OF ASH':2.0,'SLOW TIDES':2.69,'LOOPS OF ASH':1.4}
+GAIN={'LAST LIGHT':2.12,'AMBER HOUR':1.6,'LONG SHADOWS':2.79,'SLOW EMBERS':1.4,'NIGHT SWALLOWS':1.45,'BLACK ORCHARD':1.48,'SLEEPLESS TIDE':2.03,'NO STARS':0.95,'FIRST BIRD':2.85,'PALE COMET':2.92,'CHOKED DAWN':1.0,'DAY BREAKS':1.13,'COLD IN THE DARK':1.48,'KEPLER NIGHT':1.82,'TRAPPIST DUST':0.99,'RAGA OF ASH':2.12,'SLOW TIDES':5.49,'LOOPS OF ASH':1.47}
 
 # The HALL as a voice of its own: the melodic tracks' sends, raised from the values above (where it sat 15 to 20 dB under
 # the direct sound and went unheard) to about 10 dB under it; the bass keeps its small send, for a clear low end.
 HALL=2.2
+
+# On the FM-1 a sounding voice costs 6 to 13 % of the processor and a pad's tail keeps it awake for long (measured
+# 4 November 2026): a Monde plays four voices at most. Those written with five lose their fifth (track 5).
+VOICES_MAX=4
 
 def rhizome(tones,fields):
  """Catalog entries: the FDDS writer's v10 part, plus 'v11', Rhizome's part."""
@@ -217,8 +221,11 @@ def rhizome(tones,fields):
    tr['level']=min(1000,round(tr['level']*GAIN.get(m['name'],1)))
    if i and m is not BLANK:b['ext']['tracks'][i]['reverb_send']=min(1000,round(b['ext']['tracks'][i]['reverb_send']*HALL)) # the bass stays dry
    if i in m['orbits']:tr['hits']=0 # a body plays its gates, not a rhythm
+  playing=[i for i in range(6) if i in m['orbits'] and m['orbits'][i][0]>0]
+  for i in playing[VOICES_MAX:]:b['tracks'][i]['mute']=1;b['tracks'][i]['level']=0 # beyond four voices: silent
+  orbits={i:o for i,o in m['orbits'].items() if i not in playing[VOICES_MAX:]}
   prec,pert,comet,event,amount,conj=m['sky'][:6];system=SYSTEM[m['sky'][6]] if len(m['sky'])>6 else 0
-  b['v11']=dict(orbit=[m['orbits'].get(i,body(0,16)) for i in range(6)],sky=[prec,pert,COMET[comet],EVENT[event],amount,CONJ[conj],system],
+  b['v11']=dict(orbit=[orbits.get(i,body(0,16)) for i in range(6)],sky=[prec,pert,COMET[comet],EVENT[event],amount,CONJ[conj],system],
    tape=list(m['tape']),hall=list(m['hall']),beads=list(m['beads'][:3])+[MEDIA[m['beads'][3]]])
   b['v10']=False;b['v11ok']=True
   if m is BLANK:b['seed']=0x52485A00+12*7919 # EMPTY SKY keeps the seed it had as the 13th, before the DEEP Mondes

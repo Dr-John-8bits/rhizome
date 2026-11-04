@@ -36,7 +36,7 @@
 
 namespace beads {
 
-class DelayGranularPlayer : public GranularPlayer<DelayGrain, 6> {
+class DelayGranularPlayer : public GranularPlayer<DelayGrain, 3> {  // Rhizome: 3 grains (6 measured at +28 % on the FM-1)
  public:
   DelayGranularPlayer() { }
   ~DelayGranularPlayer() { }

@@ -156,18 +156,14 @@ int main(){
   assert(abs(crossings[0]-crossings[1])<=3);assert(crossings[0]>=435&&crossings[0]<=445);
  }
  puts("PASS ECO pitch compensation / odd fragment continuity");
- // Rhizome's FULL admission (its voices, its effects): five SIX-OP stay FULL, six use ECO before render; six of any
- // other voice stay FULL; open the grains (SPACE) and six SWARM use ECO.
- for(int count=5;count<=6;count++){
-  md_init();p=*md_state();no_orbits(p);p.quality=1;p.macro[3]=0;for(int i=0;i<6;i++){p.track[i].model=MD_SIXOP;p.track[i].mute=i>=count;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
-  assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==(count==5));assert(md_status()->quality_reductions==(unsigned)(count==6));
- }
- for(int m=0;m<MD_MODELS;m++){if(m==MD_SIXOP)continue;
+ // Rhizome's FULL admission, in percent of the FM-1 measured on the device: six of any voice stay FULL without effects;
+ // six STRING MACHINE with the grains open (SPACE) use ECO before render.
+ for(int m=0;m<MD_MODELS;m++){
   md_init();p=*md_state();no_orbits(p);p.quality=1;p.macro[3]=0;for(int i=0;i<6;i++){p.track[i].model=m;p.track[i].hits=p.track[i].length;p.track[i].prob=1000;p.track[i].speed=1;}
   assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==1);
-  if(m==MD_SWARM){md_init();p.macro[3]=500;assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==0);}
+  if(m==MD_STRINGS){md_init();p.macro[3]=500;assert(md_load(&p));md_command(MD_PLAY,0,1);render(1);assert(md_state()->quality==0&&md_status()->quality_reductions==1);}
  }
- puts("PASS FULL admission: five SIX-OP stay FULL, six use ECO; six of another voice stay FULL; SPACE counts");
+ puts("PASS FULL admission (device-measured weights): six of a voice stay FULL; six STRING MACHINE with SPACE use ECO");
  md_init();unsigned seed=5678;
  for(int i=0;i<10000;i++){seed=seed*1664525+1013904223;md_command(seed%MD_COMMAND_COUNT,(seed>>8)%6,(int)((seed>>16)%1800)-300);render(1);if(!md_validate(md_state())){const md_patch *p=md_state();fprintf(stderr,"INVALID after %d cmd %u t%u v%d\n",i,seed%MD_COMMAND_COUNT,(seed>>8)%6,(int)((seed>>16)%1800)-300);for(int t=0;t<6;t++){const md_track &a=p->track[t];fprintf(stderr,"t%d model%d len%d hits%d rot%d note%d speed%d mute%d\n",t,a.model,a.length,a.hits,a.rotate,a.note,a.speed,a.mute);}return 1;}}
  puts("PASS 10,000 boundary / all-command / reassignment commands");

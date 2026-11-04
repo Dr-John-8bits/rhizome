@@ -78,13 +78,13 @@ Deux différences :
 
 Rhizome a **18 Mondes**, écrits pour When Day Chokes The Night. Les trois premières familles vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. La quatrième, DEEP, fait évoluer la musique sur plusieurs minutes. Le 19e, **EMPTY SKY**, est une page blanche : aucune porte, aucun coup, les effets à zéro.
 
-Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas). Sur le Mac, les douze premiers sont estimés entre 36 et 53 % du processeur du FM-1, Beads grand ouvert compris : loin de la limite de 85 %. Ce n'est qu'une estimation, que l'appareil devra confirmer.
+**Chaque Monde joue quatre voix au plus** : sur le FM-1, une voix qui sonne coûte 6 à 13 % du processeur (mesuré le 4 novembre 2026). Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas). Sur le Mac, les douze premiers sont estimés entre 36 et 53 % du processeur du FM-1, Beads grand ouvert compris : loin de la limite de 85 %. Ce n'est qu'une estimation, que l'appareil devra confirmer.
 
 **DUSK, les résonances.** Des orbites rondes ou presque, dont les périodes sont des rapports simples. On entend des polyrythmes lents et réguliers.
 
 | Monde | Gamme · tempo | Ce qu'on entend |
 |---|---|---|
-| 1 LAST LIGHT | D DORIAN · 64 | Cinq corps en 8:3:4:6:12 : un terrain grave fait le 8, une nappe Solina le 12, des sons DX7 entre les deux. |
+| 1 LAST LIGHT | D DORIAN · 64 | Quatre corps en 8:3:4:6 : un terrain grave fait le 8, des sons DX7 et une table d'ondes au-dessus. |
 | 2 AMBER HOUR | A MINOR PENT · 72 | Une résonance de Laplace : 1:2:4, comme Io, Europe et Ganymède. Des cloches et un piano électrique DX7. |
 | 3 LONG SHADOWS | F LYDIAN · 60 | Trois corps de cinq portes en 6:7:8 : ils se décalent lentement, puis se retrouvent. |
 | 4 SLOW EMBERS | E MINOR · 54 | Tintinnabuli : une voix soufflée (FORMANT) joue sa phrase (MOTIF), un son doux lui répond sur l'accord (ECHO). |
@@ -111,12 +111,12 @@ Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO ST
 
 | Monde | Gamme · tempo | Ce qu'on entend |
 |---|---|---|
-| 13 COLD IN THE DARK | D MINOR · 72 | La vitrine : des boucles de quelques pas, les trois sources de notes, une phrase que son générateur fait muter, des lunes, deux périodes libres qui ne tombent jamais en place, la précession, une comète, des accords, des LFO lents et la forme. |
-| 14 KEPLER NIGHT | A DORIAN · 60 | Le système Kepler-223 tel qu'il a été mesuré (3:4:6:8), la couleur des tables d'ondes qui tourne avec un LFO lent, un drone en période libre ; toutes les 16 mesures, une comète dont le FILTER ouvre tout le ciel à son passage. |
+| 13 COLD IN THE DARK | D MINOR · 72 | La vitrine : des boucles de quelques pas, les trois sources de notes, une phrase que son générateur fait muter, des lunes, une nappe en période libre qui ne tombe jamais en place, la précession, une comète, des accords, des LFO lents et la forme. |
+| 14 KEPLER NIGHT | A DORIAN · 60 | Le système Kepler-223 tel qu'il a été mesuré (3:4:6:8), la couleur des tables d'ondes qui tourne avec un LFO lent ; toutes les 16 mesures, une comète dont le FILTER ouvre tout le ciel à son passage. |
 | 15 TRAPPIST DUST | E HIRAJOSHI · 66 | La chaîne résonante de TRAPPIST-1 (2:3:4:6), ses notes tirées par des générateurs qui s'en souviennent (déjà-vu), puis les lâchent peu à peu. |
 | 16 RAGA OF ASH | D BHAIRAVI · 52 | Un raga de nuit : un bourdon, une voix soufflée qui chante sa phrase en meend, une anche qui ondule (andolan), des cloches avec kan, et les notes pivots. |
 | 17 SLOW TIDES | F MIXOLYDIAN · 58 | La forme : calme, montée, sommet, retombée, seize mesures chacun, des pistes qui se taisent et reviennent ; des LFO ouvrent les filtres et déplacent les voix. |
-| 18 LOOPS OF ASH | F MINOR · 60 | Cinq périodes libres, une porte chacune : les longueurs des boucles de bande de *Music for Airports* (Brian Eno). Cinq voix qui ne retombent jamais ensemble : la musique ne se répète jamais. |
+| 18 LOOPS OF ASH | F MINOR · 60 | Quatre périodes libres, une porte chacune : des longueurs des boucles de bande de *Music for Airports* (Brian Eno). Quatre voix qui ne retombent jamais ensemble : la musique ne se répète jamais. |
 
 ## Les voix : les 8 moteurs
 
@@ -137,7 +137,7 @@ Sur la page **SOUND** (EDIT 1 fois), K1 à K3 règlent le moteur de la piste cho
 
 - **Tous les moteurs ont l'enveloppe** de la page **ENVELOPE** (attaque jusqu'à 8 s, déclin jusqu'à 16 s). SIX-OP FM garde en plus les enveloppes de son DX7.
 - **Les huit sont réglés au même niveau** : passer d'un moteur à l'autre ne fait pas sauter le volume.
-- **Le calcul** : tous sont légers, de 3 à 6 % du FM-1 par voix (estimation sur le Mac). Les Mondes de Rhizome, effets compris, sont estimés entre 36 et 53 %.
+- **Le calcul**, mesuré sur le FM-1 : de 6 à 9 % par voix qui sonne, **13 % pour STRING MACHINE**. Une voix dont le son s'est éteint se met en veille et ne coûte plus rien jusqu'à sa note suivante. Les nappes aux longues queues restent éveillées longtemps : quatre voix ensemble, c'est la bonne mesure.
 - **En ECO** (page SYSTEM), les moteurs sans temps propre sont calculés à mi-cadence pour soulager le processeur. SIX-OP FM (ses enveloppes) et STRING MACHINE (son ensemble) restent à pleine cadence. Les Mondes de Rhizome se chargent en ECO.
 - **Un Monde ou une sauvegarde de Monades** se charge avec, pour chaque piste, le moteur de Rhizome le plus proche (la FM devient SIX-OP FM, l'additif WAVETABLE, le chœur CHORDS…), et sans son de bibliothèque.
 
@@ -363,7 +363,7 @@ Une réverbe s'entend surtout **dans ce qui reste après la note**, et la HALL a
 
 ## Les grains : Beads
 
-Le granulaire est celui du module Beads de Mutable Instruments, réduit pour le FM-1 : 6 grains au plus et 128 Ko de mémoire, en mono. Les pistes y envoient du son (GLOBAL MIXER, K2), et SPACE règle le niveau des grains (LIVE K4, ou GRANULAR BUS K1). **Quand SPACE est à 0, Beads se repose et ne calcule rien.**
+Le granulaire est celui du module Beads de Mutable Instruments, réduit pour le FM-1 : 3 grains au plus et 128 Ko de mémoire, en mono. Les pistes y envoient du son (GLOBAL MIXER, K2), et SPACE règle le niveau des grains (LIVE K4, ou GRANULAR BUS K1). **Quand SPACE est à 0, Beads se repose et ne calcule rien.**
 
 ### GRANULAR BUS
 | Potard | Réglage | Ce qu'il fait |
