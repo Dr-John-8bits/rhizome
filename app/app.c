@@ -120,30 +120,7 @@ static void md_soft_point(float x,float y,uint16_t ink){
  }
 }
 static uint16_t md_tint(uint16_t a,uint16_t b,unsigned mix);
-// The fleet: six windowless ships. Live page: orbit radius jitters with Motion, hull size = real level (dB),
-// flame = hits after Density, outline brightness = Colour, the dust ring around them = Space.
-static void md_ship(float cx,float cy,float a,float len,uint16_t c,int solid,float flame,uint16_t flame_ink){
- float ux=fm_cosf(a),uy=fm_sinf(a),nx=-uy,ny=ux;
- float tx=cx+ux*len,ty=cy+uy*len,lx=cx-ux*len*.6f+nx*len*.55f,ly=cy-uy*len*.6f+ny*len*.55f,rx=cx-ux*len*.6f-nx*len*.55f,ry=cy-uy*len*.6f-ny*len*.55f;
- for(int k=0;k<=24;k++){float u=k/24.0f;md_soft_point(tx+(lx-tx)*u,ty+(ly-ty)*u,c);md_soft_point(tx+(rx-tx)*u,ty+(ry-ty)*u,c);md_soft_point(lx+(rx-lx)*u,ly+(ry-ly)*u,c);}
- if(solid)for(int k=1;k<12;k++){float u=k/12.0f;float ax=tx+(lx-tx)*u,ay=ty+(ly-ty)*u,bx=tx+(rx-tx)*u,by=ty+(ry-ty)*u;for(int m=0;m<=8;m++){float v=m/8.0f;md_soft_point(ax+(bx-ax)*v,ay+(by-ay)*v,c);}}
- float bx=cx-ux*len*.6f,by=cy-uy*len*.6f;for(int k=1;k<=(int)flame;k++)md_soft_point(bx-ux*k,by-uy*k,md_tint(MD_BG,flame_ink,(unsigned)(30-k*20/(flame+1))));
-}
 static int md_segments(float peak);
-static unsigned fleet_mix=32; // a still fleet's brightness, 0..32 (the morph page fades A and lights B)
-static void md_fleet(float cx,float cy,float radius,float spin,const md_patch *bp,int live){
- for(int j=0;j<6;j++){
-  float a=j*1.04719755f-.52f+spin,r=radius+(live?bp->macro[1]*.004f*fm_sinf(spin*7+j*2.1f):0);
-  float x=cx+fm_cosf(a)*r,y=cy+fm_sinf(a)*r;
-  float size=live?4.5f+md_segments(md_status()->track_peak[j]*1.9f)*.25f:7;
-  int len=bp->track[j].length>0?bp->track[j].length:1,hits=bp->track[j].hits+(bp->macro[0]-500)*len/1500;hits=hits<0?0:hits>len?len:hits;
-  int pulse=dream_prefs.motion&&plat_ms()<pulse_until[j];
-  float flame=live?2+hits*10.0f/len+(pulse?4:0):3;
-  uint16_t ink=live?md_tint(MD_BG,dream_colors[j],(unsigned)(14+bp->macro[2]*18/1000)):md_tint(MD_BG,dream_colors[j],fleet_mix);
-  md_ship(x,y,a+1.5707963f,size,bp->track[j].mute&&live?MD_EDGE:ink,!(bp->track[j].mute&&live),bp->track[j].mute&&live?0:flame,pulse?MD_INK:dream_colors[j]);
-  if(live&&j==dream_ui.track)md_circle((int)x,(int)y,(int)size+4,dream_colors[j],0);
- }
-}
 // RGB565 translucency over the current 40-line tile: no second framebuffer.
 static uint16_t md_tint(uint16_t a,uint16_t b,unsigned mix){
  unsigned rb=(((a&0xf81fu)*(32-mix)+(b&0xf81fu)*mix)>>5)&0xf81fu;
@@ -533,16 +510,18 @@ static void md_draw_all(void) {
     md_named(8,158,"K1 VADI",vadi<0?"OFF":md_pitch_names[(root+vadi)%12],col);md_named(124,158,"K2 SAMVADI",samvadi<0?"OFF":md_pitch_names[(root+samvadi)%12],col);}
    md_named(8,194,"K3 GAMAKA",md_gamaka_name(p->gamaka[tr]),col);md_value(124,194,"K4 AMOUNT",p->gamaka_amount[tr]/10,col);
   }else if(dream_ui.page==MORPH){
-   // Two Mondes and the patch between them: A fades on the left, B lights up on the right, the live fleet travels
-   // from one to the other. Under it, what glides (tempo) and what switches half way (scale, engines).
+   // Rhizome: two Mondes as systems, still: A fades on the left, B lights up on the right; between them the system
+   // playing now, live, travels from one to the other with the position. Under it, what glides (tempo) and what
+   // switches (each track's choices at its own point, the scale half way).
    md_morph_state ms;const md_patch *ma,*mb;md_morph_view(&ms,&ma,&mb);cv_rect(4,44,232,108,MD_BG);
    md_drift_state dv;md_drift_view(&dv,0);
-   if(dv.on){md_fleet(120,90,20,plat_ms()*.0004f,p,1);md_text(12,48,"DERIVE DRIVES THE MORPH",col);md_text(12,128,"HOME: SEE THE DERIVE PAGE",MD_DIM);}
-   else if(!ms.on){md_fleet(120,90,20,plat_ms()*.0004f,p,1);md_text(12,48,monde_label(p->biome_id),MD_INK);md_text(12,128,"K1 OR PRESET: MONDE TO MORPH TO",col);}
+   if(dv.on){md_orbit_mini(p,1,0);md_text(12,48,"DERIVE DRIVES THE MORPH",col);md_text(12,128,"HOME: SEE THE DERIVE PAGE",MD_DIM);}
+   else if(!ms.on){md_orbit_mini(p,1,0);md_text(12,48,monde_label(p->biome_id),MD_INK);md_text(12,128,"K1 OR PRESET: MONDE TO MORPH TO",col);}
    else{const float tt=ms.pos*.001f;const int past=ms.pos>=500;
     md_text(10,48,monde_label(ma->biome_id)+6,past?MD_DIM:MD_INK);{const char *bn=monde_label(ms.target)+6;md_text(230-text_w(&FONT_XS,bn),48,bn,past?MD_INK:MD_DIM);}
-    fleet_mix=32-(unsigned)(tt*24);md_fleet(30,86,12,0,ma,0);fleet_mix=8+(unsigned)(tt*24);md_fleet(210,86,12,0,mb,0);fleet_mix=32;
-    md_fleet(30+180*tt,86,18,plat_ms()*.0004f,p,1);
+    md_system_still(ma,48,83,25,32-(unsigned)(tt*24));md_system_still(mb,192,83,25,8+(unsigned)(tt*24));
+    for(int k=0;k<=44;k++)if(k%3==0)cv_rect(76+k*2,83,1,1,MD_EDGE); // the way from A to B
+    md_orbit_mini(p,1,0); // the system playing, on its way (app_frame placed it)
     const unsigned changes=md_morph_changes();cv_rect(20,110,200,1,MD_EDGE);cv_rect(120,107,1,7,MD_DIM); // half way: scale and seed switch
     for(i=0;i<6;i++)if((changes>>i)&1)cv_rect(20+md_morph_point(i)/5,107,1,7,dream_colors[i]); // where each track switches, inside its fade
     cv_rect(20+(int)(200*tt)-1,106,3,9,col);
@@ -557,17 +536,19 @@ static void md_draw_all(void) {
     md_named(8,158,"K1 MONDE B",ms.on?monde_label(ms.target)+6:"-",col);md_value(124,158,"K2 POSITION",ms.on?ms.pos/10:0,col);
     md_named(8,194,"K3 AUTO",n?bars:"BY HAND",col);md_named(124,194,"K4 MORPH",scope[ms.scope],col);}
   }else if(dream_ui.page==DRIFT){
-   // Home, pale, in the centre; the live fleet orbits it on its leash, as far out as the sound has drifted. Under it:
+   // Rhizome: home, a pale still system in the centre; the system playing now circles it on its leash, as far out as
+   // the sound has drifted (app_frame places it). Under it:
    // how far the current glide has got, when the next one starts, and the last three things that moved.
    md_drift_state ds;const md_patch *home;md_drift_view(&ds,&home);cv_rect(4,44,232,108,MD_BG);
-   if(!ds.on){md_fleet(120,88,20,plat_ms()*.0004f,p,1);md_text(12,48,monde_label(p->biome_id),MD_INK);md_text(12,128,"K2: HOW SLOW, THEN PLAY",col);}
+   if(!ds.on){md_orbit_mini(p,1,0);md_text(12,48,monde_label(p->biome_id),MD_INK);md_text(12,128,"K2: HOW SLOW, THEN PLAY",col);}
    else{char tm[24];unsigned sec=(unsigned)ds.seconds;
     if(sec<3600){md_num((int)(sec/60),tm);char *q=tm;while(*q)q++;*q++=':';*q++='0'+sec%60/10;*q++='0'+sec%10;*q=0;}
     else{md_num((int)(sec/3600),tm);char *q=tm;while(*q)q++;const char *z=" H ";while(*z)*q++=*z++;*q++='0'+sec%3600/600;*q++='0'+sec%600/60;*q=0;}
     md_text(10,48,"HOME",MD_DIM);md_text(44,48,monde_label(home->biome_id)+6,MD_INK);md_text(230-text_w(&FONT_XS,tm),48,tm,MD_DIM);
-    const float a=ds.seconds*.05f,fx=120+fm_cosf(a)*(30+ds.distance*.07f),fy=84+fm_sinf(a)*(12+ds.distance*.012f); // farther out = farther from home
-    for(int k=1;k<6;k++)cv_rect(120+(int)((fx-120)*k/6),84+(int)((fy-84)*k/6),1,1,MD_DIM); // the leash
-    fleet_mix=9;md_fleet(120,84,11,0,home,0);fleet_mix=32;md_fleet(fx,fy,13,plat_ms()*.0004f,p,1);
+    const float fx=ov_cx,fy=ov_cy; // farther out = farther from home
+    md_system_still(home,120,78,22,10);
+    for(int k=2;k<9;k++)cv_rect(120+(int)((fx-120)*k/10),78+(int)((fy-78)*k/10),1,1,MD_DIM); // the leash
+    md_orbit_mini(p,1,0);
     cv_rect(20,112,200,1,MD_EDGE);cv_rect(20+ds.pos/5-1,109,3,7,col);
     {unsigned nx=(unsigned)ds.next;char n[20]="NEXT ";md_num((int)(nx/60),n+5);char *q=n;while(*q)q++;*q++=':';*q++='0'+nx%60/10;*q++='0'+nx%10;*q=0;md_text(230-text_w(&FONT_XS,n),116,n,MD_DIM);}
     static const char *const what[5]={"CUTOFF","TONE","HARMONICS","SHAPE","DECAY"};
@@ -1079,8 +1060,14 @@ void app_frame(void) {
   if(intro||dream_ui.page==APPEARANCE){demo+=(now-demo_at)*md_state()->tempo*(1.0f/15000);while(demo>=2688)demo-=2688;}else demo=0; /* sixteenths; 2688 steps bring every period round */
   if(intro&&now-intro_start<60)demo=0;demo_at=now;
   if(intro)orbit_frame(120,98,52,42,152,demo);else if(dream_ui.page==LIVE)orbit_frame(47,92,40,42,140,0);
-  else if(dream_ui.page==APPEARANCE)orbit_frame(120,96,44,42,136,dream_prefs.motion?demo:0);else orbit_frame(OV_CX,OV_CY,72,42,196,0);
-  if(intro||dream_ui.page==LIVE||dream_ui.page==APPEARANCE)orbit_view_update();}
+  else if(dream_ui.page==APPEARANCE)orbit_frame(120,96,44,42,136,dream_prefs.motion?demo:0);
+  else if(dream_ui.page==MORPH||dream_ui.page==DRIFT){ /* the system playing now: travelling from A to B, or circling home */
+   md_morph_state ms;md_morph_view(&ms,0,0);md_drift_state ds;md_drift_view(&ds,0);float x=120,y=91,f=36,bottom=124;
+   if(dream_ui.page==MORPH&&ms.on&&!ds.on){x=52+136*ms.pos*.001f;y=83;f=17;bottom=106;}
+   else if(dream_ui.page==DRIFT&&ds.on){const float a=ds.seconds*.05f,r=fm_minf(90,44+ds.distance*.05f);x=120+fm_cosf(a)*r;y=78+fm_sinf(a)*9;f=13;bottom=104;}
+   orbit_frame(x,y,f,58,bottom,0);}
+  else orbit_frame(OV_CX,OV_CY,72,42,196,0);
+  if(intro||dream_ui.page==LIVE||dream_ui.page==APPEARANCE||dream_ui.page==MORPH||dream_ui.page==DRIFT)orbit_view_update();}
  if(orbit_page(dream_ui.page))orbit_view_update();else if(tape_echo_page(dream_ui.page))tape_view_update();else if(hall_page(dream_ui.page))hall_view_update(); /* once a frame, before the bands */
  for(y=0;y<240;y+=40){cv_begin(240,40,MD_BG);cv_oy=-(int)y;md_draw_all();cv_blit(0,y);}
  {uint32_t dim;const uint32_t lit=dream_lights(&dim);plat_lights(lit,dream_key_lights(),dim,0,1);}
@@ -1123,5 +1110,7 @@ int app_expect(const char *what,int *got) {
 
 void app_splash(void){for(unsigned y=0;y<240;y+=40){cv_begin(240,40,MD_BG);cv_oy=-(int)y;
  unsigned r=0x2545f491u;for(int k=0;k<70;k++){r^=r<<13;r^=r>>17;r^=r<<5;cv_pset((int)(r%240),(int)((r>>8)%240),k%3?MD_EDGE:MD_DIM);}
- md_circle(120,96,4,MD_INK,1);for(int j=0;j<6;j++){float a=j*1.04719755f-.52f;md_ship(120+fm_cosf(a)*30,96+fm_sinf(a)*30,a+1.5707963f,7,dream_colors[j],1,3,dream_colors[j]);}
+ /* Rhizome: a star and six bodies on their orbits, each at its own place */
+ for(int j=0;j<6;j++){const float r=16+j*8,a=-1.5707963f+j*1.9f;ov_ring(120,96,r,md_tint(MD_BG,dream_colors[j],9),1.5f);md_circle(120+(int)(fm_cosf(a)*r),96+(int)(fm_sinf(a)*r),2,dream_colors[j],1);}
+ md_circle(120,96,3,MD_INK,1);
  cv_text(120-text_w(&FONT_B,"RHIZOME")/2,160,&FONT_B,"RHIZOME",MD_INK);md_text(120-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT")/2,186,"WHEN DAY CHOKES THE NIGHT",MD_DIM);cv_blit(0,y);}}

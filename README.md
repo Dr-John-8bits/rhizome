@@ -23,7 +23,7 @@ Le nom vient de Deleuze et Guattari (*Rhizome*, 1976) : un réseau sans centre, 
 
 ## Construire et installer
 - Tests sur le Mac : `python3 tools/build_local.py dsp` puis `app/build/native/dsp-tests` (depuis `tests/`), de même avec `next` ; les scripts d'écran de `tests/*.txt` se jouent avec `app/build/native/mutable-dreams-host` (`python3 tools/build_local.py host`).
-- Firmware : `sh tools/build_device.sh` (chaîne JieLi), qui produit `app/build/rhizome-0.0.1.fwsc`, identité FM-1_968000001.
+- Firmware : `sh tools/build_device.sh` (chaîne JieLi), qui produit `app/build/rhizome-0.1.0.fwsc`, identité FM-1_968000100.
 - Installation par USB : `python3 base/tools/fm1_install.py <paquet> --yes`.
 - Charge du processeur, Monde par Monde, sur l'appareil : `python3 tools/measure_fm1.py`.
 

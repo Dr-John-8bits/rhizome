@@ -207,7 +207,7 @@ Le Monde en cours (A) glisse vers un autre (B). Les nombres glissent (tempo, fil
 
 REC garde le mélange en cours, ENV revient à A.
 
-**À l'écran** : le Monde A s'éteint à gauche, le Monde B s'allume à droite. La barre de position porte un trait par piste, le moment où ses choix basculent ; dessous, le tempo de A, le tempo en cours et celui de B, puis les deux gammes (la claire est celle qui joue), et six carrés, un par piste : creux avant sa bascule, sombre pendant son fondu, plein après, un tiret si rien ne bascule.
+**À l'écran** : les deux Mondes sous forme de systèmes, immobiles, tels qu'ils partent au PLAY : A s'éteint à gauche, B s'allume à droite. Entre eux, **le système qui joue**, vivant (ses corps tournent, ses notes font des ondes), voyage de A vers B avec la position. Quand aucun passage n'est en cours, le système qui joue est au centre. La barre de position porte un trait par piste, le moment où ses choix basculent ; dessous, le tempo de A, le tempo en cours et celui de B, puis les deux gammes (la claire est celle qui joue), et six carrés, un par piste : creux avant sa bascule, sombre pendant son fondu, plein après, un tiret si rien ne bascule.
 
 **Ce qui ne glisse pas.** MORPH fait glisser les sons, les rythmes, les notes, les envois, le temps et la réinjection de la bande, la longueur de la HALL et le retour. Les réglages propres à Rhizome restent ceux de A pendant tout le passage : **les orbites** (périodes, portes, excentricités, sources des notes, lunes), **la comète**, les têtes, l'usure et le transport de la bande, la taille et la couleur de la HALL, et les réglages de GRAIN CLOUD. Pour passer aussi aux orbites de B, il faut charger B (PRESET sur LIVE). Les mutes, le verrou de graine et la qualité ne bougent pas non plus.
 
@@ -223,7 +223,7 @@ Le Monde change tout seul pendant la lecture, pendant des minutes ou des heures.
 
 REC : l'état actuel devient la maison. ENV : retour à la maison. Avec ARP, la même dérive refait le même chemin. Pour une installation, K2 sur 128 ou 256 mesures.
 
-**À l'écran** : la maison au centre, et le son en cours autour d'elle, d'autant plus loin qu'il s'en est éloigné. Le temps écoulé, l'avancée du glissement en cours, le temps avant le suivant (« NEXT »), et les trois derniers changements (« T3 DECAY UP », « T5 RESTS », « T5 COMES BACK », « NEW NOTES », « HOME AGAIN »…).
+**À l'écran** : la maison au centre, en système pâle et immobile, et le système qui joue, vivant, qui tourne autour d'elle au bout d'une laisse en pointillé, d'autant plus loin que le son s'en est éloigné. Le temps écoulé, l'avancée du glissement en cours, le temps avant le suivant (« NEXT »), et les trois derniers changements (« T3 DECAY UP », « T5 RESTS », « T5 COMES BACK », « NEW NOTES », « HOME AGAIN »…).
 
 Comme MORPH, la dérive ne touche pas aux orbites, à la comète ni aux réglages propres à la bande, à la HALL et aux grains : le ciel du Monde reste le même, ce sont les sons, les notes et les envois qui dérivent. Un réglage tourné pendant la dérive reste, et la maison le prend aussi. Charger un Monde arrête la dérive.
 
@@ -975,7 +975,7 @@ Avec la gamme **CUSTOM**, les touches du clavier ajoutent ou retirent leur note.
 À l'écran : à gauche, la gamme avec la vadi (anneau épais) et la samvadi (anneau fin) ; à droite, le gamaka de la piste choisie dessiné sur 600 ms, et un point quand une de ses notes sonne. Les gamakas ne partent pas en MIDI.
 
 ### QUALITY / SYSTEM (GLO 3 fois)
-La version (« RHIZOME 0.0.1 »), le mode ECO ou FULL, la **charge et le pic du processeur**, les décrochages, la mémoire.
+La version (« RHIZOME 0.1.0 » ; « RHIZOME DEV » dans le simulateur), le mode ECO ou FULL, la **charge et le pic du processeur**, les décrochages, la mémoire.
 
 | Potard | Réglage |
 |---|---|

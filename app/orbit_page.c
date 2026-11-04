@@ -286,3 +286,24 @@ static void md_orbit_mini(const md_patch *p,float arrive,int live){
  {const float g=3+fm_minf(7,ov_level*24);ov_ring(ov_cx,ov_cy,g,md_tint(MD_BG,MD_INK,8),1.2f);ov_ring(ov_cx,ov_cy,g*.6f,md_tint(MD_BG,MD_INK,14),1.2f);
   if(ov_band(ov_cy-3,ov_cy+3))md_circle((int)ov_cx,(int)ov_cy,arrive<1?(int)(1+arrive):2,MD_INK,1);}
 }
+// Rhizome: a Monde's system as a still portrait (MORPH's A and B, DERIVE's home), from its patch alone: each ellipse
+// as at PLAY (tilted its own way, orbit.inc's orbit_tilt), sized by Kepler's third law as on the ORBIT page, its gates,
+// each body at the top where PLAY starts it, and the star. mix (0..32): how bright it is drawn.
+static const float ov_tilt[6]={-.6f,.5f,1.6f,2.7f,3.8f,4.9f};
+static void md_system_still(const md_patch *p,float cx,float cy,float fit,unsigned mix){
+ float p23[6],lo=1e9f,hi=0,ext=1;OrbitView o[6];
+ for(int i=0;i<6;i++){p23[i]=fm_powf((float)md_orbit_steps(p->orbit[i].period),.6666667f);if(p->orbit[i].gates){lo=fm_minf(lo,p23[i]);hi=fm_maxf(hi,p23[i]);}}
+ for(int i=0;i<6;i++){o[i].on=p->orbit[i].gates>0;if(!o[i].on)continue;
+  o[i].a=hi-lo<1e-3f?46:24+38*(p23[i]-lo)/(hi-lo);o[i].e=p->orbit[i].ecc*.001f;o[i].w=ov_tilt[i];
+  if(o[i].a*(1+o[i].e)>ext)ext=o[i].a*(1+o[i].e);}
+ const float sx=ov_cx,sy=ov_cy;ov_cx=cx;ov_cy=cy;const float k=fit/ext;
+ for(int i=0;i<6;i++){if(!o[i].on)continue;o[i].a*=k;const uint16_t c=p->track[i].mute?MD_EDGE:dream_colors[i];
+  ov_ellipse(&o[i],md_tint(MD_BG,c,12*mix/32),1.5f);
+  float phi[MD_ORBIT_GATES_MAX];const int n=md_orbit_gate_angles(p,i,phi);
+  for(int g=0;g<n;g++){const float r=o[i].a*(1-o[i].e*o[i].e)/(1+o[i].e*fm_cosf(phi[g]-o[i].w)),x=cx+r*fm_cosf(phi[g]),y=cy+r*fm_sinf(phi[g]);
+   if(ov_band(y-2,y+2))md_soft_point(x,y,md_tint(MD_BG,c,20*mix/32));}
+  ov_point(&o[i],ov_mean_at(-1.5707963f,o[i].w,o[i].e),&o[i].x,&o[i].y);
+  if(ov_band(o[i].y-3,o[i].y+3))md_circle((int)(o[i].x+.5f),(int)(o[i].y+.5f),2,md_tint(MD_BG,c,mix),1);}
+ if(ov_band(cy-3,cy+3))md_circle((int)cx,(int)cy,2,md_tint(MD_BG,MD_INK,mix),1);
+ ov_cx=sx;ov_cy=sy;
+}
