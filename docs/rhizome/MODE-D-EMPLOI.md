@@ -239,6 +239,23 @@ Chaque Monde joue **quatre voix au plus**, et ceux des familles ECHO, VOICE, RAG
 
 ## Le séquenceur orbital
 
+C'est la grande nouveauté de Rhizome : au lieu d'une grille de pas, des corps qui tournent autour d'une étoile. Le bouton **SEQ** ouvre ses dix pages, dans cet ordre :
+
+| SEQ | Page | À quoi elle sert |
+|---|---|---|
+| 1 fois | **ORBIT** | L'orbite de la piste choisie : la durée du tour, sa forme, ses portes. |
+| 2 fois | **ORBIT / SYSTEM** | Tout le système : les ellipses qui tournent, le désordre, la source des notes, les vrais systèmes planétaires. |
+| 3 fois | **ORBIT / MOONS** | Les lunes de la piste choisie : les ornements après chaque note. |
+| 4 fois | **ORBIT / COMET** | La comète (rare, ou vagabonde) et les alignements des corps. |
+| 5 fois | **RHYTHM** | Le rythme d'une piste qui n'est pas en orbite. |
+| 6 fois | **GROOVE / REPEATS** | Le swing, les répétitions, l'accent, la vitesse de la piste. |
+| 7 fois | **BASS / MOTIFS** | Activer une phrase de notes écrites. |
+| 8 fois | **PHRASE / NOTES** | Écrire cette phrase, pas à pas. |
+| 9 fois | **GENERATOR / DEJA VU** | Des notes qui s'inventent, et leur mémoire ; le motif joué au clavier. |
+| 10 fois | **FORM** | Une grande forme : calme, montée, sommet, détente. |
+
+Les quatre premières sont celles du séquenceur orbital ; les six suivantes servent aux pistes qui ne sont pas en orbite, mais les phrases, les générateurs et la forme agissent aussi sur les corps.
+
 ### L'idée, en partant d'un séquenceur pas à pas
 Un séquenceur pas à pas fait tourner une boucle de pas, et certains pas jouent. Le séquenceur orbital fait la même chose, mais la boucle est **une orbite**, et la piste est **un corps** qui en fait le tour.
 
@@ -323,6 +340,10 @@ Quand on tourne un potard, une carte apparaît sur la moitié de l'écran où le
 | K3 | GATES | Le nombre de portes par tour, de 0 (orbite coupée) à 16. |
 | K4 | PHASE | Fait tourner les portes par pas de 15°. |
 
+**À l'écran** : tout le système, l'ellipse de la piste choisie plus vive. Avec la source MOTIF, chaque porte que le corps va franchir porte la note qu'elle jouera, la prochaine en blanc. En haut, ce qui manque pour entendre la piste (« K3 GATES STARTS THIS ORBIT » quand elle n'a pas de porte).
+
+**Pour l'entendre** : EMPTY SKY, piste 1, K3 GATES sur 5, PLAY ; puis K2 ECCENTRICITY vers 60 : les cinq notes se pressent d'un côté du tour et s'étirent de l'autre. Enfin K1 PERIOD sur une autre valeur que celle d'une deuxième piste en orbite, pour une polyrythmie.
+
 ### ORBIT / SYSTEM (SEQ 2 fois)
 | Potard | Réglage | Ce qu'il fait |
 |---|---|---|
@@ -330,6 +351,8 @@ Quand on tourne un potard, une carte apparaît sur la moitié de l'écran où le
 | K2 | PERTURBATION | Le système vit : les orbites respirent, des portes sont refusées, des notes voisines s'invitent. 0 = une horloge parfaite. |
 | K3 | PITCH | D'où viennent les notes de la piste choisie (voir ci-dessous). |
 | K4 | SYSTEM | Charge un système planétaire réel, ou affiche OWN pour vos propres orbites. |
+
+**À l'écran** : le système entier ; tourner PRECESSION fait tourner les ellipses, et la perturbation se voit comme un halo autour de l'étoile pendant qu'on la règle. Les portes refusées par la perturbation deviennent grises.
 
 **Les trois sources de notes (K3 PITCH)** :
 - **ORBIT** : plus le corps est près de l'étoile, plus la note est aiguë. L'ellipse dessine donc une mélodie qui monte et descend, dans la gamme choisie sur HARMONY.
@@ -353,6 +376,8 @@ Comment ça se charge :
 - dès qu'on touche une orbite, le système redevient OWN ;
 - **ENV** revient aux orbites d'avant le premier système chargé.
 
+**Pour l'entendre** : un Monde de la famille DUSK (des orbites rondes), puis K1 PRECESSION vers 40 : la phrase se transforme lentement sans aucun hasard. Ensuite K2 PERTURBATION vers 30 : des notes manquent, d'autres s'invitent, comme un ciel moins parfait.
+
 ### ORBIT / MOONS (SEQ 3 fois, piste choisie) : les lunes
 Chaque note du corps fait faire un tour à ses lunes autour de lui. Une lune joue un ornement quand elle passe du côté du corps opposé à l'étoile. Au repos, les lunes attendent régulièrement espacées, donc les ornements partagent le tour en parts égales après la note.
 
@@ -365,6 +390,8 @@ Chaque note du corps fait faire un tour à ses lunes autour de lui. Une lune jou
 
 Sur cette page, le corps choisi est **en gros plan** : l'étoile est en bas, le point où les lunes jouent est marqué en haut, et chaque lune porte le nom de la note qu'elle jouera. Sur les autres pages, les lunes sont de petits points autour des corps. Les ornements partent aussi en MIDI ; l'ECHO reprend la note du corps, pas ses ornements.
 
+**Pour l'entendre** : une piste en orbite avec peu de portes et des notes courtes (une cloche), K1 MOONS sur 2, K2 SPIN sur 1/8, K3 INTERVAL sur STEPS UP : chaque note est suivie de deux notes qui montent la gamme, comme un petit appel d'oiseau.
+
 ### ORBIT / COMET (SEQ 4 fois, tout le système) : la comète et les conjonctions
 La **comète** est un corps sans voix, sur une orbite très allongée. Elle passe presque tout son tour loin de l'étoile, puis la frôle. PLAY la fait partir de loin, donc son premier passage arrive à la moitié du tour. Son passage agit pendant à peu près un cinquième du tour, le plus fort au plus près de l'étoile.
 
@@ -375,16 +402,30 @@ La **comète** est un corps sans voix, sur une orbite très allongée. Elle pass
 | K3 | AMOUNT | La force du passage ; avec FILTER, jusqu'où le filtre se ferme quand la comète est loin (jusqu'à 280 Hz à 100). |
 | K4 | CONJUNCTION | Ce que fait l'alignement de deux corps avec l'étoile : OFF (rien), ACCENT (leur temps suivant est accentué) ou CHORD (les deux rejouent ensemble ; le second prend la note de l'accord du premier la plus proche de la sienne). |
 
-**La comète vagabonde (WANDER).** Elle revient au hasard, toutes les 4 à 32 mesures, et à chaque passage elle **choque** le corps le plus proche de sa trajectoire. Pendant quelques-unes de ses notes, ce corps :
+#### Le filtre de la comète : la gravité qui ouvre le son
+Avec **EVENT sur FILTER**, la comète tient un filtre passe-bas sur **tout le son** de Rhizome, et c'est **sa distance à l'étoile qui le règle**, comme une gravité :
+- **loin de l'étoile**, presque tout le tour, le filtre est **fermé** : le son est sourd, comme entendu de loin, ou à travers un mur ;
+- **à mesure qu'elle approche**, attirée par l'étoile et de plus en plus vite, le filtre **s'ouvre**, sans à-coup, en suivant sa distance ;
+- **quand elle frôle l'étoile**, il est **grand ouvert** (18 000 Hz) : tout le son s'éclaire d'un coup ;
+- **puis elle repart**, et le filtre se referme peu à peu.
+
+**K3 AMOUNT** règle jusqu'où il se ferme quand la comète est loin : à 100, jusqu'à 280 Hz (très sourd) ; plus bas, il reste plus ouvert. **K1 COMET** règle le rythme du phénomène : une ouverture toutes les 4, 8, 16, 32 ou 64 mesures. À l'arrêt, ou avec un autre EVENT, le filtre est grand ouvert. L'écran affiche sa fréquence en direct. Le Monde MARWA AT SUNSET l'utilise : un ciel qui s'ouvre toutes les 16 mesures.
+
+**Pour l'entendre** : n'importe quel Monde, SEQ 4 fois, K1 COMET sur 4 mesures (pour ne pas attendre), K2 EVENT sur FILTER, K3 AMOUNT sur 80, PLAY.
+
+#### La comète vagabonde (WANDER)
+Avec **K1 COMET tout en haut, sur WANDER**, la comète ne suit plus d'orbite régulière. Elle revient au hasard, toutes les 4 à 32 mesures, et à chaque passage elle **choque** le corps le plus proche de sa trajectoire. Pendant quelques-unes de ses notes, ce corps :
 - **saute une note** (un trou là où on l'attendait) ;
 - ou **est poussé d'un pas** : sa porte suivante arrive en avance ;
 - ou **joue ses notes un ou deux degrés plus haut ou plus bas**, toujours dans la gamme.
 
 Le choc peut passer au corps voisin, puis au suivant, chaque fois deux fois moins probable : une petite réaction en chaîne. **K3 AMOUNT** règle la violence : combien de notes sont touchées (une à cinq) et la probabilité de la chaîne. **Chaque choc secoue aussi les effets** : la HALL gonfle et la bande trébuche (elle ralentit puis repart, les échos plongent), pendant environ une seconde et demie. **K2 EVENT** agit en plus à son passage. Tout est **temporaire** : rien n'est écrit dans le Monde, et les orbites retrouvent leurs réglages. Avec ARP (graine verrouillée), le même Monde rejoue les mêmes chocs. À l'écran, un corps choqué est entouré d'un cercle en pointillé qui tourne, un trait par note encore touchée.
 
-À l'écran :
+À l'écran, pour toutes les comètes :
 - **la queue de la comète pointe à l'opposé de l'étoile**, et sa longueur montre la force du passage ;
 - quand la comète est hors de l'écran, une marque sur l'anneau suit sa direction et s'éclaire à son approche.
+
+**Pour entendre la comète vagabonde** : un Monde avec plusieurs corps (FIRST BIRD, par exemple), SEQ 4 fois, K1 COMET tout en haut (WANDER), K3 AMOUNT vers 80, PLAY, et écouter quelques minutes : de temps en temps, une note manque, une autre arrive en avance ou un peu plus haut, la salle gonfle et la bande trébuche, puis tout revient en place. Avec ARP (graine verrouillée), les mêmes chocs reviennent au même moment à chaque lecture.
 
 ## Les pistes sans orbite : rythmes, phrases, générateurs, forme
 
@@ -400,6 +441,10 @@ L'anneau euclidien que le séquenceur utilise vraiment. Plein : joué au dernier
 | K3 | ROTATION | Fait tourner le motif sur son anneau. |
 | K4 | CHANCE | La probabilité de chaque coup. Graine verrouillée, les décisions se répètent à chaque tour. |
 
+**À l'écran** : l'anneau euclidien tel que le séquenceur l'utilise (avec DENSITY) : un point plein a joué au dernier passage, un anneau rouge est un coup refusé par CHANCE, un point pâle n'est pas encore atteint ; au centre, le nombre de coups sur la longueur (« 5/16 ») ; les petits points à l'extérieur sont les répétitions (GROOVE). Quand la piste est en orbite, l'écran écrit en rouge « ORBIT PLAYS THIS TRACK: SET GATES TO 0 ».
+
+**Pour l'entendre** : EMPTY SKY, piste 1, K1 HITS sur 5 et K2 LENGTH sur 16, PLAY : le rythme euclidien 5 sur 16. Une deuxième piste en 3 sur 12 se décale contre la première, et le motif change sans cesse.
+
 ### GROOVE / REPEATS (SEQ 6 fois)
 | Potard | Réglage | Ce qu'il fait |
 |---|---|---|
@@ -407,6 +452,8 @@ L'anneau euclidien que le séquenceur utilise vraiment. Plein : joué au dernier
 | K2 | REPEATS | 1 à 4 répétitions par coup (le pas est divisé). |
 | K3 | ACCENT | L'accent du premier pas du cycle. |
 | K4 | CLOCK DIV | La piste avance un pas tous les 1 à 8 pas. |
+
+**À l'écran** : les pas décalés par le swing, les répétitions en petites barres sous chaque coup, l'accent en hauteur. Le swing vaut pour tout le Monde ; il décale aussi le mouvement des corps.
 
 ### BASS / MOTIFS (SEQ 7 fois) : activer une phrase
 Malgré son nom, la page marche sur toutes les pistes. À l'écran, les 16 pas de la phrase : un point plein est une note (plus il est haut, plus elle est aiguë), un point creux un silence.
@@ -418,6 +465,8 @@ Malgré son nom, la page marche sur toutes les pistes. À l'écran, les 16 pas d
 | K3 | GLIDE | Le glissé d'une note à la suivante, jusqu'à un tiers de seconde. |
 | K4 | BASE NOTE | La note de base de la piste, de 24 à 96 (C1 à C7). |
 
+Quand une phrase est active, le générateur et la macro MOTION ne changent plus les notes de la piste. **MARBLES** (FX 11 fois) peut encore faire varier les notes hors temps. Un corps en source MOTIF joue cette même phrase, porte après porte.
+
 ### PHRASE / NOTES (SEQ 8 fois) : écrire les notes pas à pas
 | Potard | Réglage | Ce qu'il fait |
 |---|---|---|
@@ -425,6 +474,10 @@ Malgré son nom, la page marche sur toutes les pistes. À l'écran, les 16 pas d
 | K2 | NOTE / REST | Demi-tons au-dessus de la note de base (0 à 24), ramenés dans la gamme, ou silence (−1). |
 | K3 | ACCENT | L'accent de la piste. |
 | K4 | CHANCE | La probabilité de la piste. |
+
+**À l'écran** : un petit piano-roll de 16 pas, avec la tête de lecture. Les notes sont des demi-tons au-dessus de la note de base, puis ramenées dans la gamme : deux valeurs voisines peuvent donc donner la même note. En STEP, la phrase boucle sur la longueur de la piste (RHYTHM K2) ; en EUCLID, sur 16 pas.
+
+**Pour l'entendre** : BASS / MOTIFS, K1 sur STEP ; RHYTHM, K2 LENGTH sur 8 ; puis ici, K1 le pas et K2 sa note, pas après pas. REC tire une phrase au hasard, ENV l'annule. Pour écrire au clavier, c'est la page suivante, GENERATOR.
 
 ### GENERATOR / DEJA VU (SEQ 9 fois) : des notes qui s'inventent
 Les touches du clavier écrivent le motif de la piste, une note par pas ; REC l'efface. C'est aussi ce motif que joue un corps en MOTIF.
@@ -438,6 +491,12 @@ Les touches du clavier écrivent le motif de la piste, une note par pas ; REC l'
 
 Quand une phrase est active (BASS / MOTIFS en EUCLID ou STEP), c'est elle qui donne les notes, et le générateur ne les change pas.
 
+**À l'écran** : la boucle du générateur, une colonne par note (plus haute = plus aiguë, creuse = silence), et le motif en petit au-dessus.
+
+**Écrire au clavier** : sur cette page, chaque touche jouée s'écrit au pas suivant du motif ; REC efface tout et revient au pas 1. C'est le moyen le plus rapide de donner une phrase à un corps en source MOTIF, ou au générateur MARKOV.
+
+**Pour l'entendre** : une piste en orbite, ORBIT / SYSTEM K3 PITCH sur MOTIF ; ici, REC, puis jouer quatre ou cinq notes au clavier ; K1 SOURCE sur MOTIF, K2 DEJA VU vers 70 : le corps joue la phrase porte après porte, et elle se transforme lentement.
+
 ### FORM (SEQ 10 fois) : une forme qui monte et redescend
 Le Monde enchaîne quatre sections en boucle, **CALM → BUILD → PEAK → RELEASE** (calme, montée, sommet, détente). Dans le calme, les pistes jouent moins de notes et certaines se taisent ; au sommet, tout le monde joue.
 
@@ -447,6 +506,10 @@ Le Monde enchaîne quatre sections en boucle, **CALM → BUILD → PEAK → RELE
 | K2 | SECTION | La durée de chaque section : 2, 4, 8 ou 16 mesures. Un cycle dure quatre fois plus. |
 | K3 | RESTING | Combien de pistes peuvent se taire, de 0 à 3. |
 | K4 | MOTION | Tous les combien de pas la macro MOTION tire une nouvelle variation de notes. |
+
+**À l'écran** : les quatre sections en blocs (leur hauteur est la tension), la section en cours en clair avec un trait qui avance ; sous chaque section, les six pistes : en couleur elles jouent, en gris elles se reposent dans ce cycle.
+
+**Pour l'entendre** : K1 DEPTH vers 80, K2 SECTION sur 4 mesures, K3 RESTING sur 2, PLAY : le morceau commence dépouillé, se remplit, culmine, puis redescend, toutes les 16 mesures. Le Monde SLOW TIDES est construit dessus.
 
 ## Les voix : les 14 moteurs
 
@@ -826,6 +889,7 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 | **Résonance orbitale** | Des périodes en rapports simples (1:2:4, 3:4:6:8), comme les lunes de Jupiter : la polyrythmie des vraies planètes. |
 | **Lune** | Un petit satellite d'un corps : après chaque note, elle tourne autour de lui et joue un ornement en passant. |
 | **Comète** | Un objet très ovale, qui passe rarement près de l'étoile ; à son passage, la salle gonfle, les grains se figent ou le filtre s'ouvre. |
+| **Filtre de la comète** | EVENT sur FILTER : un filtre sur tout le son, fermé quand la comète est loin de l'étoile, qui s'ouvre à mesure qu'elle s'en approche et en grand quand elle la frôle. |
 | **Comète vagabonde** | WANDER : une comète qui revient au hasard et, en passant, bouscule les corps : notes sautées, avancées ou déplacées dans la gamme, parfois en chaîne. Temporaire. |
 | **ORBIT, MOTIF, ECHO** | D'où viennent les notes d'un corps : de sa distance à l'étoile, d'une phrase jouée dans l'ordre, ou de l'accord au-dessus de la piste précédente. |
 | **Tintinnabuli** | La manière d'Arvo Pärt : une voix chante une mélodie, une autre lui répond par les notes de l'accord. C'est ECHO. |
