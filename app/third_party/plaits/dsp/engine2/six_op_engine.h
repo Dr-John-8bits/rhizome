@@ -39,7 +39,7 @@
 
 namespace plaits {
 
-const int kNumSixOpVoices = 2;
+const int kNumSixOpVoices = 1;  // Rhizome: one voice, not two (a track is monophonic; two cost 12 to 15 % of the FM-1 at half rate)
 
 class FMVoice {
  public:

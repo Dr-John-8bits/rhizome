@@ -6,7 +6,8 @@ SIX-OP FM and STRING MACHINE. The other engines are in the folder but not built.
 in Mutable Dreams).
 
 Changes for Rhizome, each marked `Rhizome:` in the code:
-- `engine2/six_op_engine`: the six voices share one decoded bank of 96 DX7 patches (`set_patches`) instead of 5 KB of
+- `engine2/six_op_engine`: one voice instead of two (`kNumSixOpVoices`: a Rhizome track is monophonic, and the second
+  voice doubled its cost on the FM-1); the six voices share one decoded bank of 96 DX7 patches (`set_patches`) instead of 5 KB of
   patches each; without a bank the engine renders silence;
 - `engine/wavetable_engine.cc` (not built today): the wave map holds the four banks' 256 waves, not 64 (`LoadUserData` writes 256 pointers:
   the original allocation was overrun), and the smoothed coordinates are kept below 7 (they overshot to 7.0000019 and read

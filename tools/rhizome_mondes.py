@@ -133,7 +133,7 @@ MONDES=[
  dict(name='COLD IN THE DARK',family=3,tempo=72,root='D',scale='MINOR',macro=[500,60,460,320],
   echo='1/8 .',delay_fb=420,fx=480,room=700,diffusion=800,grain=(700,450,350),form=(600,2,2),
   tracks=[('Deep Root',38,1,16,dict(level=380,send=100,room=150)),('Glass Drop',62,1,16,dict(level=230,echo=350,room=400,send=280)),
-   ('DX Vibe',69,2,16,dict(level=210,echo=300,room=450,send=250)),('Ensemble Haze',57,1,16,dict(level=200,attack=650,decay=950,room=500,send=220)),
+   ('Hollow Chime',69,2,16,dict(level=210,echo=300,room=450,send=250)),('Ensemble Haze',57,1,16,dict(level=200,attack=650,decay=950,room=500,send=220)),
    ('Wool Pad',45,1,16,dict(level=180,attack=700,decay=950,room=500,send=250)),REST],
   phrase={1:[0,-1,3,-1,7,-1,10,-1,12,-1,10,-1,7,-1,5,-1]},
   orbits={0:body(1,12),1:body(1,4,ecc=300,pitch='MOTIF',moons=2,spin=3,interval='UP',moon_level=45),2:body(2,6,ecc=450,phase=6,pitch='ECHO'),
@@ -146,7 +146,7 @@ MONDES=[
  dict(name='KEPLER NIGHT',family=3,tempo=60,root='A',scale='DORIAN',macro=[500,60,460,320],
   echo='1/4',delay_fb=380,fx=480,room=720,diffusion=800,grain=(750,500,300),
   tracks=[('Moon Tone',57,4,16,dict(level=230,echo=300,room=450,send=250)),('DX Cirrus',64,4,16,dict(level=210,room=500,send=250)),
-   ('Pale Orchestra',52,4,16,dict(level=200,attack=500,decay=930,room=500,send=220)),('Copper Bell',69,4,16,dict(level=210,echo=350,room=450,send=250)),
+   ('Slow Halo',52,4,16,dict(level=200,attack=500,decay=930,room=500,send=220)),('Copper Bell',69,4,16,dict(level=210,echo=350,room=450,send=250)),
    ('Low Current',33,1,16,dict(level=360,attack=800,decay=960,room=250,send=100)),REST],
   phrase={0:[0,-1,2,-1,3,-1,7,-1,5,-1,3,-1,2,-1,-1,-1]},
   orbits={0:body(4,48,ecc=78,pitch='MOTIF'),1:body(4,64,ecc=150),2:body(4,96,ecc=37),3:body(4,128,ecc=51),4:body(1,'31.8s')},
@@ -166,7 +166,7 @@ MONDES=[
  # with kan; the pivot notes draw the generated ones.
  dict(name='RAGA OF ASH',family=3,tempo=52,root='D',scale='BHAIRAVI',macro=[500,40,440,340],vadi=5,samvadi=0,
   echo='1/4',delay_fb=350,fx=500,room=760,diffusion=850,grain=(800,500,350),
-  tracks=[('Warm Organ',38,1,16,dict(level=360,send=100,room=250)),('Hollow Flute',62,6,16,dict(level=250,attack=150,echo=300,room=450,send=250)),
+  tracks=[('Deep Root',38,1,16,dict(level=360,send=100,room=250)),('Hollow Flute',62,6,16,dict(level=250,attack=150,echo=300,room=450,send=250)),
    ('Warm Reed',57,3,16,dict(level=220,attack=100,echo=300,room=450,send=250)),('DX Tub Bells',74,2,16,dict(level=190,echo=400,room=500,send=300)),
    ('Open Fifth',50,1,16,dict(level=200,attack=800,decay=960,room=450,send=200)),REST],
   phrase={1:[0,-1,1,-1,5,-1,-1,-1,7,-1,5,-1,3,-1,1,-1]},
@@ -179,7 +179,7 @@ MONDES=[
  dict(name='SLOW TIDES',family=3,tempo=58,root='F',scale='MIXOLYDIAN',macro=[500,60,460,340],form=(900,3,3),
   echo='1/8 .',delay_fb=400,fx=500,room=740,diffusion=800,grain=(750,450,350),
   tracks=[('Low Strings',41,2,16,dict(level=380,send=100,room=200)),('Warm Strings',65,3,16,dict(level=210,attack=500,room=450,send=250)),
-   ('Slow Glass',60,3,16,dict(level=210,echo=300,room=450,send=280)),('DX Soundtrack',72,2,16,dict(level=200,echo=350,room=500,send=280)),
+   ('Moon Tone',60,3,16,dict(level=210,echo=300,room=450,send=280)),('DX Soundtrack',72,2,16,dict(level=200,echo=350,room=500,send=280)),
    ('Cloud Reed',53,2,16,dict(level=200,attack=400,room=450,send=250)),REST],
   orbits={0:body(2,128,ecc=200),1:body(3,64,ecc=350,phase=4),2:body(3,96,ecc=500,phase=10),3:body(2,48,ecc=600,phase=18),4:body(2,112,ecc=250,phase=14)},
   lfo={(1,0):('8 BARS','SINE','CUTOFF',500),(2,0):('4 BARS','TRIANGLE','PAN',600),(3,0):('FREE SLOW','SINE','ROOM SEND',500),(4,0):('8 BARS','SMOOTH','TONE',400)},
@@ -202,7 +202,7 @@ BLANK=dict(name='EMPTY SKY',family=4,tempo=64,root='C',scale='MINOR',macro=[500,
 
 # Levels: every Monde near -30 dB RMS over a minute (NO STARS and LOOPS OF ASH, sparse by design, near -36), measured with Rhizome's
 # voices by tests/next_features.cpp; the tracks' levels above are the balance inside a Monde, these the Monde's own.
-GAIN={'LAST LIGHT': 0.83,'AMBER HOUR': 0.9,'LONG SHADOWS': 1.23,'SLOW EMBERS': 1.15,'NIGHT SWALLOWS': 1.23,'BLACK ORCHARD': 1.32,'SLEEPLESS TIDE': 1.21,'NO STARS': 3.67,'FIRST BIRD': 1.86,'PALE COMET': 1.16,'CHOKED DAWN': 0.78,'DAY BREAKS': 1.3,'COLD IN THE DARK': 1.55,'KEPLER NIGHT': 1.17,'TRAPPIST DUST': 1.14,'RAGA OF ASH': 1.47,'SLOW TIDES': 14.77,'LOOPS OF ASH': 1.12}
+GAIN={'LAST LIGHT':0.83,'AMBER HOUR':0.89,'LONG SHADOWS':1.22,'SLOW EMBERS':1.16,'NIGHT SWALLOWS':1.23,'BLACK ORCHARD':1.32,'SLEEPLESS TIDE':1.21,'NO STARS':4.73,'FIRST BIRD':1.86,'PALE COMET':1.11,'CHOKED DAWN':0.78,'DAY BREAKS':1.3,'COLD IN THE DARK':1.13,'KEPLER NIGHT':1.16,'TRAPPIST DUST':1.14,'RAGA OF ASH':1.85,'SLOW TIDES':1.58,'LOOPS OF ASH':1.12}
 
 # The HALL as a voice of its own: the melodic tracks' sends, raised from the values above (where it sat 15 to 20 dB under
 # the direct sound and went unheard) to about 10 dB under it; the bass keeps its small send, for a clear low end.
