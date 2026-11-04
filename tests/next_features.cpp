@@ -310,6 +310,13 @@ int main(){
    printf("  wander: %u passages, %u shocks, %d changes of return time\n",p1,s1,d1);
    assert(p1>=4&&s1>p1&&d1>=2&&s1==s2&&p1==p2); // chains: more shocks than passages; random returns; the same seed, the same
    puts("PASS WANDER: random returns, shocks and chains jolting the effects, temporary, reproducible from the seed");}
+  // SIX-OP plays every note, not only the first: a bell (sustain 0) struck on every step stays audible (its single DX7
+  // voice must see its gate fall between notes).
+  {md_patch q=blank(MD_SIXOP);q.track[0].harm=557;q.track[0].decay=600;for(int i=0;i<6;i++)q.orbit[i].gates=0;assert(md_validate(&q)); // TUB BELLS
+   md_init();assert(md_load(&q));cmd(MD_PLAY,0,1);double e[5]={};
+   for(int b=0;b<345*5;b++){md_render(audio,128);for(int k=0;k<256;k++)e[b/345]+=audio[k]*audio[k];}
+   printf("  SIX-OP repeated notes: energy %.3g first second, %.3g fifth\n",e[0],e[4]);assert(e[0]>0&&e[4]>.2*e[0]);
+   puts("PASS SIX-OP strikes every note");}
   // Every voice builds in its arena with room to spare (the wavetable once wrote past it).
   {md_init();cmd(MD_SCENE,0,MD_BLANK_BIOME);for(int m=0;m<MD_MODELS;m++)for(int t=0;t<6;t++)cmd(MD_MODEL,t,m);
    printf("  voice arena: %u bytes to spare at least\n",md_voice_arena_spare());assert(md_voice_arena_spare()>0);puts("PASS every voice fits its arena");}

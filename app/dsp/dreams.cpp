@@ -535,7 +535,10 @@ static void quantum(float *lr,unsigned n) {
   float f=440.0f*stmlib::SemitonesToRatio(played_note-69.0f)/MD_RATE;
   // Rhizome: SIX-OP and STRING MACHINE get Plaits' gate, high from the note for as long as its envelope still sounds
   // (SIX-OP's DX7 envelopes hold on it), and an accent below 1 (SIX-OP reads one table entry past it at 1).
-  const bool gate=t.model>=MD_SIXOP&&(trig||v.attacking||v.env>.3f||v.midi_gate>0);
+  // SIX-OP has a single DX7 voice: its envelopes start again only after a block with the gate low, so the gate drops
+  // for the note's first block (1.5 ms) and rises on the next; with the gate held, every note after the first was silent.
+  const bool held=v.attacking||v.env>.3f||v.midi_gate>0;
+  const bool gate=t.model==MD_SIXOP?!trig&&held:t.model==MD_STRINGS&&(trig||held);
   plaits::EngineParameters p={(int)((trig?plaits::TRIGGER_RISING_EDGE:0)|(gate?plaits::TRIGGER_HIGH:0)),played_note,tone,shp,harm*.999f,t.model>=MD_SIXOP?fminf(v.velocity,.999f):v.velocity};bool done=false;
   memset(out,0,sizeof out);memset(aux,0,sizeof aux);
   // ECO: FM, VA and HARMONIC at half rate as in Monades, and Rhizome's two (SIX-OP's envelopes rebuilt for the half rate).

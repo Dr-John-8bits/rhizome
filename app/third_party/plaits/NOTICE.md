@@ -14,5 +14,8 @@ Changes for Rhizome, each marked `Rhizome:` in the code:
   wave 8, past the map);
 - `fm/dx_units.h`: the exponent is shifted as an unsigned value (shifting a negative int is undefined in C++).
 
+With one voice, the DX7 envelopes start again only after a block with the gate low: Rhizome drops SIX-OP's gate for
+the first block of each note (app/dsp/dreams.cpp).
+
 Rhizome also keeps the accent below 1 when it calls an engine: at exactly 1, the six-op's velocity curve reads one entry
 past `lut_cube_root`.

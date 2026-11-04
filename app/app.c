@@ -788,7 +788,8 @@ static void md_draw_all(void) {
      for(int k=1;k<t->ratchet;k++)md_circle(cx+(int)(fm_cosf(a)*(rr+5+k*4)),cy+(int)(fm_sinf(a)*(rr+5+k*4)),1,col,1);}
     if(md_playing()){int pos=(int)((ms->step/(unsigned)(t->speed>0?t->speed:1))%(unsigned)len);float a=pos*6.2831853f/len-1.5707963f;md_circle(cx+(int)(fm_cosf(a)*(rr-9)),cy+(int)(fm_sinf(a)*(rr-9)),2,MD_INK,1);}
     char hl[12];md_num(hits,hl);char *q=hl;while(*q)q++;*q++='/';md_num(len,q);md_text(cx-text_w(&FONT_XS,hl)/2,cy-6,hl,MD_INK);
-    md_text(8,139,"SOLID PLAYED  RED: CHANCE SAID NO",MD_DIM);}
+    if(p->orbit[tr].gates)md_text(8,139,"ORBIT PLAYS THIS TRACK: SET GATES TO 0",MD_HOT); /* Rhizome: a body plays its gates, not this rhythm */
+    else md_text(8,139,"SOLID PLAYED  RED: CHANCE SAID NO",MD_DIM);}
    md_value_span(8,158,"K1 HITS",t->hits,0,t->length,col);md_value_span(124,158,"K2 LENGTH",t->length,1,32,col);md_value_span(8,194,"K3 ROTATION",t->rotate,0,t->length-1,col);md_value(124,194,"K4 CHANCE",t->prob/10,col);
   } else if(dream_ui.page==GRAIN) {
    // Rhizome: Beads' memory (beads_page.c): now at the right edge, its whole length to the left.
