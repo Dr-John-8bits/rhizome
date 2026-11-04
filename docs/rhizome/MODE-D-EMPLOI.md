@@ -138,7 +138,7 @@ Sur la page **SOUND** (EDIT 1 fois), K1 à K3 règlent le moteur de la piste cho
 - **Tous les moteurs ont l'enveloppe** de la page **ENVELOPE** (attaque jusqu'à 8 s, déclin jusqu'à 16 s). SIX-OP FM garde en plus les enveloppes de son DX7.
 - **Les huit sont réglés au même niveau** : passer d'un moteur à l'autre ne fait pas sauter le volume.
 - **Le calcul**, mesuré sur le FM-1 : de 6 à 9 % par voix qui sonne, **13 % pour STRING MACHINE**. Une voix dont le son s'est éteint se met en veille et ne coûte plus rien jusqu'à sa note suivante. Les nappes aux longues queues restent éveillées longtemps : quatre voix ensemble, c'est la bonne mesure.
-- **En ECO** (page SYSTEM), les moteurs sans temps propre sont calculés à mi-cadence pour soulager le processeur. SIX-OP FM (ses enveloppes) et STRING MACHINE (son ensemble) restent à pleine cadence. Les Mondes de Rhizome se chargent en ECO.
+- **En ECO** (page SYSTEM), tous les moteurs sont calculés à demi-fréquence pour soulager le processeur : les aigus s'adoucissent un peu. SIX-OP FM garde la durée de ses enveloppes ; l'ensemble de STRING MACHINE tourne un peu plus lentement. Les Mondes de Rhizome se chargent en ECO.
 - **Un Monde ou une sauvegarde de Monades** se charge avec, pour chaque piste, le moteur de Rhizome le plus proche (la FM devient SIX-OP FM, l'additif WAVETABLE, le chœur CHORDS…), et sans son de bibliothèque.
 
 Le détail des pages héritées (filtres, enveloppes, LFO, gammes) est dans le [mode d'emploi de Monades](https://dr-john-8bits.github.io/rhizome/monades/manuel/). Dans Rhizome, les cibles de LFO **ECHO** visent la bande, **ROOM** la HALL et **GRAIN** Beads.
@@ -361,9 +361,9 @@ Une réverbe s'entend surtout **dans ce qui reste après la note**, et la HALL a
 
 **Dans un morceau**, la HALL se règle surtout par piste : une nappe ou une cloche bien envoyées (K4 à 60–100), une basse peu ou pas envoyée, pour garder le grave net.
 
-## Les grains : Beads
+## Les grains
 
-Le granulaire est celui du module Beads de Mutable Instruments, réduit pour le FM-1 : 3 grains au plus et 128 Ko de mémoire, en mono. Les pistes y envoient du son (GLOBAL MIXER, K2), et SPACE règle le niveau des grains (LIVE K4, ou GRANULAR BUS K1). **Quand SPACE est à 0, Beads se repose et ne calcule rien.**
+Le granulaire est celui de Monades : jusqu'à quatre grains qui relisent une bande de 128 Ko, chacun dans une fenêtre. Il remplace Beads de Mutable Instruments, qui prenait à lui seul plus de la moitié du processeur du FM-1 dès que du son le traversait (mesuré le 4 novembre 2026). La page garde le nom BEADS et les mêmes réglages. Les pistes y envoient du son (GLOBAL MIXER, K2), et SPACE règle le niveau des grains (LIVE K4, ou GRANULAR BUS K1). **Quand SPACE est à 0, Beads se repose et ne calcule rien.**
 
 ### GRANULAR BUS
 | Potard | Réglage | Ce qu'il fait |
@@ -379,7 +379,7 @@ Le granulaire est celui du module Beads de Mutable Instruments, réduit pour le 
 | K1 | DENSITY | **Au milieu, aucun grain.** À gauche, des grains réguliers, de plus en plus fréquents. À droite, des grains au hasard, de plus en plus nombreux. La carte donne le nombre de grains par seconde. |
 | K2 | SHAPE | L'enveloppe de chaque grain : carrée, puis décroissante, puis en cloche, puis inversée. Elle est dessinée à l'écran. |
 | K3 | RANDOM | Fait varier la position, la taille, la forme et la hauteur d'un grain à l'autre. |
-| K4 | MEDIA | Le grain de la mémoire et sa durée : DIGITAL (16 bits, 1,4 s), CLEAN TAPE (12 bits à demi-fréquence, 3,8 s), DIRTY TAPE (μ-law à demi-fréquence, avec du wow, 5,8 s). **Changer de média vide la mémoire**, comme sur le module. |
+| K4 | MEDIA | Le grain de la mémoire et sa durée : DIGITAL (16 bits, 1,5 s), CLEAN TAPE (à demi-fréquence, plus doux, 3 s), DIRTY TAPE (à demi-fréquence, en marches grossières et avec une lente ondulation, 3 s). **Changer de média vide la mémoire.** |
 
 ### TAPE / MOTION
 - **K1 PITCH** : la hauteur des grains, de −24 à +24 demi-tons.

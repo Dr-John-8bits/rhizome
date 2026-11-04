@@ -18,7 +18,6 @@
 #include "plaits/resources.h"
 #include "stmlib/dsp/filter.h"
 #include "stmlib/utils/random.h"
-#include "beads/dsp/processor.h" // Rhizome: the granular bus
 // The Rings chorus lives in chorus.cpp: its resources.h redefines Plaits' LUT_* macros.
 extern "C" { void md_chorus_reset(uint16_t *line); void md_chorus_process(float *left,float *right,unsigned n,float amount,float depth); }
 #ifndef PLAT_HOST
@@ -39,7 +38,7 @@ enum : unsigned { ARENA=cmax(cmax(cmax(EngineSize<plaits::StringMachineEngine,10
  cmax(EngineSize<plaits::ChordEngine,0>::bytes,EngineSize<plaits::GrainEngine,0>::bytes)))+64 };
 static size_t arena_spare=ARENA; // the least room an engine left in its arena (tests: never 0)
 struct Voice {
- alignas(16) unsigned char arena[ARENA]; plaits::Engine *engine;
+ alignas(16) unsigned char arena[ARENA]; plaits::Engine *engine; int half; // half: SIX-OP built for half rate (ECO)
  stmlib::Svf filter1,filter2;
  float expression_smooth,pan_smooth,midi_gate;
  float target_note,tide_phase,warp_phase,warp_smooth,delay_send_smooth,reverb_send_smooth;
@@ -144,7 +143,7 @@ static void build_engine(Voice &v,int model){
   case MD_STRINGS:v.engine=build<plaits::StringMachineEngine>(v);break;
   case MD_WAVETABLE:v.engine=build<plaits::WavetableEngine>(v);v.engine->LoadUserData(nullptr);break; // Plaits' own waves
   case MD_TERRAIN:v.engine=build<plaits::WaveTerrainEngine>(v);break;
-  case MD_SIXOP:{plaits::SixOpEngine *e=static_cast<plaits::SixOpEngine*>(build<plaits::SixOpEngine>(v));e->set_patches(sixop_bank,96);v.engine=e;break;}
+  case MD_SIXOP:{plaits::SixOpEngine *e=static_cast<plaits::SixOpEngine*>(build<plaits::SixOpEngine>(v));v.half=patch.quality==0;e->set_half_rate(v.half);e->set_patches(sixop_bank,96);v.engine=e;break;}
   case MD_SWARM:v.engine=build<plaits::SwarmEngine>(v);break;
   case MD_PD:v.engine=build<plaits::PhaseDistortionEngine>(v);break;
   case MD_CHORDS:v.engine=build<plaits::ChordEngine>(v);break;
@@ -522,9 +521,11 @@ static void quantum(float *lr,unsigned n) {
   const bool gate=trig||v.attacking||v.env>.3f||v.midi_gate>0;
   plaits::EngineParameters p={(int)((trig?plaits::TRIGGER_RISING_EDGE:0)|(gate?plaits::TRIGGER_HIGH:0)),played_note,tone,shp,harm*.999f,fminf(v.velocity,.999f)};bool done=false; // accent below 1: SIX-OP reads one table entry past it at 1
   memset(out,0,sizeof out);memset(aux,0,sizeof aux);
-  // ECO: the engines without time of their own run at half rate (an octave up, interpolated below). SIX-OP's envelopes
-  // and STRING MACHINE's ensemble keep the full rate.
-  bool eco=patch.quality==0&&t.model!=MD_SIXOP&&t.model!=MD_STRINGS;
+  // ECO: every engine runs at half rate (an octave up, interpolated below): on the FM-1 a voice costs 6 to 13 % at full
+  // rate (measured 4 November 2026). SIX-OP's envelopes are rebuilt for the half rate; STRING MACHINE's ensemble turns
+  // a little slower.
+  bool eco=patch.quality==0;
+  if(t.model==MD_SIXOP&&v.engine&&v.half!=(int)eco){static_cast<plaits::SixOpEngine*>(v.engine)->set_half_rate(eco);v.half=eco;}
   unsigned engine_n=eco?(n+(v.eco_phase?0:1))/2:n;
   if(eco)p.note+=12.0f; // same concert pitch at 22.05 kHz; linear reconstruction below.
   if(engine_n&&v.engine)v.engine->Render(p,out,aux,engine_n,&done);
@@ -657,7 +658,7 @@ int md_orbit_gate_angles(const md_patch *p,int track,float *phi){
 float md_orbit_eccentric(float mean,float e){return orbit_E(mean,e);}
 float md_atan2(float y,float x){return orbit_atan2(y,x);}
 void md_init() {
- beads_init(); // Rhizome: Beads is built once, here
+ beads_init(); // Rhizome: the granular bus
  {static const uint8_t *const banks[3]={plaits::syx_bank_0,plaits::syx_bank_1,plaits::syx_bank_2}; // SIX-OP's 96 DX7 sounds
   for(int b=0;b<3;b++)for(int k=0;k<32;k++)sixop_bank[b*32+k].Unpack(banks[b]+k*plaits::fm::Patch::SYX_SIZE);}
  voices=reinterpret_cast<Voice*>(voices_raw);memset(voices_raw,0,sizeof voices_raw);
@@ -699,14 +700,15 @@ float md_beads_envelope(float shape,float t){ // as Beads' GrainEnvelope::Start 
  float x;if(t<a)x=t/a;else if(t<a+sustain)return 1;else x=release>0?1-(t-a-sustain)/release:0;
  x=x<0?0:x>1?1:x;const float base=t<a?x:(x*x)*(x*x),ss=x*x*(3-2*x);return base+(ss-base)*smooth;
 }
-float md_beads_seconds(void){return (float)beads_line_length()*beads_proc->ratio()/MD_RATE;}
+float md_beads_seconds(void){return (float)GR_N*gr_step()/MD_RATE;}
 void md_tape_view(md_tape *v){
- // Rhizome: Beads' memory: the level written along it, the write head, where the next grains start (TIME), the live
- // grains (how far behind the head they read, how long they have left).
- const int len=beads_line_length();memcpy(v->peak,tape_peak,sizeof v->peak);v->head=(uint32_t)*beads_proc->mutable_delay_write_ptr();v->valid=v->length=(uint32_t)len;
- v->freeze=patch.freeze||orbit_comet_frozen();v->zone=unit(patch.grain_pos)*(float)len;v->zone_len=(float)len*.04f;
- int32_t delay[MD_TAPE_GRAINS];int left[MD_TAPE_GRAINS];const int n=beads_proc->grains(delay,left,MD_TAPE_GRAINS);
- for(int j=0;j<MD_TAPE_GRAINS;j++){v->grain[j].active=j<n;if(j>=n)continue;v->grain[j].behind=(float)delay[j];v->grain[j].len=(float)left[j];v->grain[j].env=fminf(1,left[j]/2000.0f);}
+ // Rhizome: the grain tape: the level written along it, the write head, where the next grains start (POSITION), the
+ // live grains (how far behind the head they read, how long they have left).
+ memcpy(v->peak,tape_peak,sizeof v->peak);v->head=gr_head;v->valid=gr_valid;v->length=GR_N;
+ v->freeze=patch.freeze||orbit_comet_frozen();v->zone=unit(patch.grain_pos)*(float)GR_N;v->zone_len=(float)GR_N*.04f;
+ int n=0;for(int j=0;j<GR_MAX&&n<MD_TAPE_GRAINS;j++){const GrainVoice &g=gr[j];if(g.age>=g.life)continue;float d=(float)gr_head-g.pos;while(d<0)d+=GR_N;
+  v->grain[n].active=1;v->grain[n].behind=d;v->grain[n].len=(float)(g.life-g.age);v->grain[n].env=md_beads_envelope(patch.beads_shape*.001f,g.age*g.inc);n++;}
+ for(int j=n;j<MD_TAPE_GRAINS;j++)v->grain[j].active=0;
 }
 int md_clock_source(void){return clock_source;}
 int md_midi_quantize(void){return midi_quantize;}
@@ -797,7 +799,7 @@ int md_validate(const md_patch *p) {
  return 1;
 }
 int md_load(const md_patch *p){if(playing||!md_validate(p))return 0;patch=*p;orbit_prepared=-1;previous=patch;returnable=0;morph_on=0;drift_on=0;drift_slow=0;morph_span=0;fx_shed=0;seqrng=patch.seed;clear_audio();for(int j=0;j<4;j++)smooth[j]=unit(patch.macro[j]);for(int i=0;i<6;i++)reset_voice(i);mark_saved();return 1;}
-unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof hall_buf+sizeof sixop_bank+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof voices_raw+sizeof beads_mem+sizeof beads_raw+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
+unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof hall_buf+sizeof sixop_bank+sizeof gr_tape+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof voices_raw+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
 int md_decode(md_patch *out,const void *data,unsigned bytes){
  if(!out||!data)return 0;
  if(bytes==sizeof(md_patch)){md_patch p;memcpy(&p,data,sizeof p);if(p.version==11){rhizome_voices(p);p.biome_id=-1;}if(!md_validate(&p))return 0;*out=p;return 1;} // v11: Monades' voices

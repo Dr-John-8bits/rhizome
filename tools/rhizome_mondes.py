@@ -202,7 +202,7 @@ BLANK=dict(name='EMPTY SKY',family=4,tempo=64,root='C',scale='MINOR',macro=[500,
 
 # Levels: every Monde near -30 dB RMS over a minute (NO STARS and LOOPS OF ASH, sparse by design, near -36), measured with Rhizome's
 # voices by tests/next_features.cpp; the tracks' levels above are the balance inside a Monde, these the Monde's own.
-GAIN={'LAST LIGHT':2.12,'AMBER HOUR':1.6,'LONG SHADOWS':2.79,'SLOW EMBERS':1.4,'NIGHT SWALLOWS':1.45,'BLACK ORCHARD':1.48,'SLEEPLESS TIDE':2.03,'NO STARS':0.95,'FIRST BIRD':2.85,'PALE COMET':2.92,'CHOKED DAWN':1.0,'DAY BREAKS':1.13,'COLD IN THE DARK':1.48,'KEPLER NIGHT':1.82,'TRAPPIST DUST':0.99,'RAGA OF ASH':2.12,'SLOW TIDES':5.49,'LOOPS OF ASH':1.47}
+GAIN={'LAST LIGHT':2.22,'AMBER HOUR':1.77,'LONG SHADOWS':2.85,'SLOW EMBERS':1.42,'NIGHT SWALLOWS':1.57,'BLACK ORCHARD':1.51,'SLEEPLESS TIDE':2.05,'NO STARS':0.88,'FIRST BIRD':2.98,'PALE COMET':2.99,'CHOKED DAWN':1.01,'DAY BREAKS':1.13,'COLD IN THE DARK':1.51,'KEPLER NIGHT':1.84,'TRAPPIST DUST':0.99,'RAGA OF ASH':2.12,'SLOW TIDES':7.84,'LOOPS OF ASH':1.49}
 
 # The HALL as a voice of its own: the melodic tracks' sends, raised from the values above (where it sat 15 to 20 dB under
 # the direct sound and went unheard) to about 10 dB under it; the bass keeps its small send, for a clear low end.

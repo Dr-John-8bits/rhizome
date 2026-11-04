@@ -101,6 +101,8 @@ class SixOpEngine : public Engine {
   void LoadBank(int bank);
   // Rhizome: the six voices share one decoded bank (count patches) instead of 5 KB each.
   void set_patches(const fm::Patch* patches, int count);
+  // Rhizome: rendered at half rate (ECO), the voices' envelopes and LFO count at half rate too, so they keep their time.
+  void set_half_rate(bool half);
   
  private:
   stmlib::HysteresisQuantizer2 patch_index_quantizer_;

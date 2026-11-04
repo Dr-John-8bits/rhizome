@@ -87,6 +87,12 @@ void SixOpEngine::Init(BufferAllocator* allocator) {
   rendered_voice_ = 0;
 }
 
+void SixOpEngine::set_half_rate(bool half) {
+  for (int i = 0; i < kNumSixOpVoices; ++i) {
+    voice_[i].Init(&algorithms_, half ? kCorrectedSampleRate * 0.5f : kCorrectedSampleRate);
+  }
+}
+
 void SixOpEngine::set_patches(const fm::Patch* patches, int count) {
   patches_ = const_cast<fm::Patch*>(patches);
   patch_index_quantizer_.Init(count, 0.005f, false);

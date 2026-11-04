@@ -495,6 +495,11 @@ Rhizome est installé sur le second FM-1 (identité `FM-1_968000001`, depuis la 
 3. **moins de voix jouées ensemble** dans les Mondes (3 ou 4, comme prévu au départ), et STRING MACHINE avec parcimonie ;
 4. recaler la garde automatique et le banc du Mac sur ces chiffres, puis remesurer.
 
+**Deuxième et troisième essais (4 novembre 2026).** Voix en veille, Beads à 3 grains, Mondes à 4 voix : toujours 101 à 147 %. Un souffle anti-dénormaux sur Beads : aucun effet. Les relevés montrent que **Beads coûte 50 à 70 % dès qu'il reçoit du son** (17 % silencieux), et que sans lui les Mondes vont de 42 à 105 % : les voix de Plaits coûtent 10 à 20 % chacune en jeu. D'où :
+- **Beads est remplacé par le granulaire de Monades** (4 grains sur une bande de 128 Ko, la page BEADS et ses réglages gardés, les médias redéfinis) ;
+- **en ECO, toutes les voix tournent à demi-fréquence**, SIX-OP compris (ses enveloppes recalculées pour garder leur durée).
+À remesurer sur l'appareil.
+
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
 - Même plateforme fm1-base, même chaîne de compilation, mêmes outils.
