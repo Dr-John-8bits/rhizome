@@ -2,7 +2,7 @@
 
 Rhizome est un firmware pour le M-VAVE FM-1, écrit pour le projet ambient **When Day Chokes The Night**. Il fait l'espace et le temps :
 - un **séquenceur orbital** : des corps tournent autour d'une étoile et jouent quand ils passent leurs portes. C'est la vraie mécanique de Kepler : une orbite ronde joue un rythme régulier, une orbite ovale le même rythme avec du rubato ;
-- **quatorze voix**, dont deux propres à Rhizome : **SIX-OP FM** (les sons des DX7) et **STRING MACHINE** (les cordes d'ensemble des années 70) ;
+- **quatorze voix de synthèse**, des cloches FM aux chœurs et aux résonateurs, dont deux faites pour les nappes : **SIX-OP FM**, qui rejoue les sons des synthés DX7 de Yamaha, et **STRING MACHINE**, les cordes électroniques des années 70 ;
 - une **bande** à trois têtes, avec ses bobines à l'écran ;
 - une **réverbe HALL**, dans l'esprit des grandes réverbes numériques des années 80 ;
 - un **nuage de grains**, qui relit en petits morceaux ce que les pistes lui envoient.
@@ -27,7 +27,7 @@ Maintenir n'importe quel bouton affiche son aide à l'écran, sans faire son act
 4. Appuyer sur **PLAY**. Tous les corps partent du haut, ensemble.
 5. Ovaliser une orbite avec **K2 ECCENTRICITY** : le corps accélère près de l'étoile et ralentit loin d'elle. On entend un rubato qui revient à chaque tour.
 
-Plus rapide encore : **SEQ 2 fois**, puis **K4 SYSTEM**, pour charger un vrai système planétaire. Et pour construire une séquence entière, étape par étape : [Programmer une séquence complète](#programmer-une-séquence-complète).
+Plus rapide encore : **SEQ 2 fois**, puis **K4 SYSTEM**, pour charger un vrai système planétaire. Il se charge sur tout le Monde d'un coup : ses corps prennent les pistes qui jouent (voir [les systèmes réels](#orbit-system-seq-2-fois)). Et pour construire une séquence entière, étape par étape : [Programmer une séquence complète](#programmer-une-séquence-complète).
 
 ## Où trouver quoi
 
@@ -124,7 +124,7 @@ L'aide-mémoire de toutes les pages : ce que règlent les quatre potards. Le dé
 | **ALGO** (encodeur) | Change le moteur de la piste choisie (14 moteurs) et ouvre SOUND. |
 | **PRESET** (encodeur) | Sur les pages d'une piste : un des 256 sons. Ailleurs : un des 30 Mondes, ou EMPTY SKY. Sur MORPH : le Monde d'arrivée. Sur USER BANKS : la lettre du nom. Le bas de l'écran dit ce que fait PRESET. |
 | **PLAY** | Lance ou arrête. L'arrêt laisse le son s'éteindre ; un nouveau départ fait repartir tous les corps du haut. |
-| **REC** | N'enregistre rien. Sur LIVE, les pages GLO (sauf RAGA / GAMAKA) et les pages propres à Rhizome (les quatre pages ORBIT, TAPE ECHO, HALL et GRAIN CLOUD) : une nouvelle variation (nouvelle graine). Sur les autres pages EDIT, SEQ et FX, et sur RAGA / GAMAKA : **DICE**, les réglages K1 à K4 de la page tirés au sort. Sur GENERATOR : efface le motif. Sur QUALITY / SYSTEM et MIDI : panique (tout se tait). Sur MORPH : garde le mélange. Sur DERIVE : l'état actuel devient la maison. |
+| **REC** | N'enregistre rien. Sur LIVE, les pages GLO (sauf RAGA / GAMAKA) et les pages du séquenceur orbital et des effets (les quatre pages ORBIT, TAPE ECHO, HALL et GRAIN CLOUD) : une nouvelle variation (nouvelle graine). Sur les autres pages EDIT, SEQ et FX, et sur RAGA / GAMAKA : **DICE**, les réglages K1 à K4 de la page tirés au sort. Sur GENERATOR : efface le motif. Sur QUALITY / SYSTEM et MIDI : panique (tout se tait). Sur MORPH : garde le mélange. Sur DERIVE : l'état actuel devient la maison. |
 | **ENV** | Annule : revient à l'état d'avant la dernière variation ou le dernier DICE. Une seule étape. Luit faiblement quand il y a quelque chose à annuler. Il ne règle pas les enveloppes. |
 | **ARP** | Verrouille la graine (LOCK) : la même variation se répète, et les mêmes chocs de comète aussi. Allumé quand elle est verrouillée. |
 | **LFO** | Fige la mémoire des grains (FREEZE) : les grains rejouent ce qui est enregistré, les pistes continuent. Il n'ouvre pas les LFO (FX 12 et 13 fois). |
@@ -209,7 +209,7 @@ REC garde le mélange en cours, ENV revient à A.
 
 **À l'écran** : les deux Mondes sous forme de systèmes, immobiles, tels qu'ils partent au PLAY : A s'éteint à gauche, B s'allume à droite. Entre eux, **le système qui joue**, vivant (ses corps tournent, ses notes font des ondes), voyage de A vers B avec la position. Quand aucun passage n'est en cours, le système qui joue est au centre. La barre de position porte un trait par piste, le moment où ses choix basculent ; dessous, le tempo de A, le tempo en cours et celui de B, puis les deux gammes (la claire est celle qui joue), et six carrés, un par piste : creux avant sa bascule, sombre pendant son fondu, plein après, un tiret si rien ne bascule.
 
-**Ce qui ne glisse pas.** MORPH fait glisser les sons, les rythmes, les notes, les envois, le temps et la réinjection de la bande, la longueur de la HALL et le retour. Les réglages propres à Rhizome restent ceux de A pendant tout le passage : **les orbites** (périodes, portes, excentricités, sources des notes, lunes), **la comète**, les têtes, l'usure et le transport de la bande, la taille et la couleur de la HALL, et les réglages de GRAIN CLOUD. Pour passer aussi aux orbites de B, il faut charger B (PRESET sur LIVE). Les mutes, le verrou de graine et la qualité ne bougent pas non plus.
+**Ce qui ne glisse pas.** MORPH fait glisser les sons, les rythmes, les notes, les envois, le temps et la réinjection de la bande, la longueur de la HALL et le retour. Ces réglages-ci restent ceux de A pendant tout le passage : **les orbites** (périodes, portes, excentricités, sources des notes, lunes), **la comète**, les têtes, l'usure et le transport de la bande, la taille et la couleur de la HALL, et les réglages de GRAIN CLOUD. Pour passer aussi aux orbites de B, il faut charger B (PRESET sur LIVE). Les mutes, le verrou de graine et la qualité ne bougent pas non plus.
 
 ### DERIVE (HOME 3 fois) : laisser le Monde vivre seul
 Le Monde change tout seul pendant la lecture, pendant des minutes ou des heures. Dès que K2 quitte OFF, le Monde en cours devient **la maison** : il glisse vers une variante tirée autour d'elle, puis vers la suivante. Glissent : timbres, filtres, enveloppes, panoramique, envois, accents, nombre de coups, LFO déjà actifs, grains, bande, HALL, chorus, et le tempo (±10 %). De temps en temps une piste se tait le temps d'un glissement, puis revient. Ne bougent jamais : la gamme, la note de base, la transposition, les mutes.
@@ -231,7 +231,7 @@ Comme MORPH, la dérive ne touche pas aux orbites, à la comète ni aux réglage
 
 Un **Monde** est une scène complète : les six pistes avec leur moteur et leur son, leurs orbites et leurs notes, les quatre macros, les effets, la gamme et le tempo. Charger un Monde remplace tout, y compris la mémoire des grains.
 
-Rhizome a **30 Mondes**, écrits pour When Day Chokes The Night, en neuf familles. Les trois premières vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. DEEP fait évoluer la musique sur plusieurs minutes. ECHO met la bande et la HALL au premier plan, VOICE les deux voix propres à Rhizome. RAGA, MAQAM et EAST parcourent les gammes du monde : les ragas de l'Inde, les modes arabes et persans avec leurs quarts de ton, le gamelan de Java, la Thaïlande et le Japon. Le 31e, **EMPTY SKY**, est une page blanche : six pistes jouables au clavier, aucune porte, aucun coup, les effets à zéro (C MINOR, 64 BPM).
+Rhizome a **30 Mondes**, écrits pour When Day Chokes The Night, en neuf familles. Les trois premières vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. DEEP fait évoluer la musique sur plusieurs minutes. ECHO met la bande et la HALL au premier plan, VOICE les deux voix faites pour les nappes, SIX-OP FM et STRING MACHINE. RAGA, MAQAM et EAST parcourent les gammes du monde : les ragas de l'Inde, les modes arabes et persans avec leurs quarts de ton, le gamelan de Java, la Thaïlande et le Japon. Le 31e, **EMPTY SKY**, est une page blanche : six pistes jouables au clavier, aucune porte, aucun coup, les effets à zéro (C MINOR, 64 BPM).
 
 Chaque Monde joue **quatre voix au plus**, et ceux des familles ECHO, VOICE, RAGA, MAQAM et EAST trois : c'est ce qui les garde loin de la limite du processeur, la bande, la HALL et les grains en prenant déjà une bonne part. Tous sont réglés au même niveau d'écoute (NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas).
 
@@ -278,7 +278,7 @@ Chaque Monde joue **quatre voix au plus**, et ceux des familles ECHO, VOICE, RAG
 | 17 CATHEDRAL OF SMOKE | E HARMONIC MIN · 48 | La HALL en avant : la plus grande salle, une longue pré-attente, peu de notes ; toutes les 8 mesures, une comète fait gonfler la salle. |
 | 18 DRIFTING SIGNAL | D HIJAZ · 62 | Les deux, comme une vieille radio : une HALL VINTAGE, une bande qui ondule, une anche qui glisse vers ses notes (meend). |
 
-**VOICE, les voix de Rhizome.** SIX-OP FM ou STRING MACHINE au premier plan.
+**VOICE, les nappes.** SIX-OP FM ou STRING MACHINE au premier plan, avec deux autres voix.
 
 | Monde | Gamme · tempo | Ce qu'on entend |
 |---|---|---|
@@ -445,11 +445,14 @@ Les **générateurs** (page GENERATOR) agissent aussi sur un corps : avec ORBIT 
 | TRAPPIST-1 | les planètes e, f, g, h | 2:3:4:6 |
 | PLUTO | Neptune, Pluton (et Charon, sa lune) | 3 tours contre 2 |
 
-Comment ça se charge :
-- les corps vont d'abord sur les pistes mélodiques non coupées ;
-- le son, la gamme, la comète et les conjonctions ne changent pas ;
-- dès qu'on touche une orbite, le système redevient OWN ;
-- **ENV** revient aux orbites d'avant le premier système chargé.
+**Un système se charge sur tout le Monde, pas sur une seule piste.** K4 SYSTEM est un réglage du ciel entier : la piste choisie avec SELECT n'y change rien.
+- **Ses corps prennent des pistes** : quatre pour JUPITER, KEPLER-223 et TRAPPIST-1, deux pour PLUTO. Ils vont d'abord sur les pistes mélodiques qui jouent, dans l'ordre (piste 1, puis 2…), puis sur les batteries, puis sur les pistes coupées.
+- **Les autres pistes perdent leurs portes** : elles reviennent à leur rythme (page RHYTHM), souvent muet dans un Monde d'usine, où les pistes jouent par leurs orbites.
+- **Chaque corps reçoit** la durée de tour et l'excentricité du vrai corps, 4 portes, la phase à 0 ; la précession est réglée (un peu pour PLUTO, aucune pour les autres) et la perturbation remise à 0.
+- **Rien d'autre ne change** : les sons, les notes de base, la source des notes (ORBIT, MOTIF, ECHO), la gamme, la comète et les conjonctions restent ceux du Monde. Les corps repartent de là où ils sont, sans saut.
+- **Dès qu'on touche une orbite**, le système redevient OWN : ce sont désormais vos orbites. **ENV** revient aux orbites d'avant le premier système chargé.
+
+**Pourquoi ces quatre.** Chacun est une résonance orbitale célèbre, dont les rapports tombent exactement sur les durées de tour du séquenceur : la résonance de Laplace des lunes de Jupiter (Io, Europe et Ganymède tournent en 1:2:4), la chaîne parfaite de Kepler-223 (3:4:6:8, mesurée en 2016), le système de TRAPPIST-1 et ses sept planètes (les quatre extérieures en 2:3:4:6), et Pluton, qui fait deux tours quand Neptune en fait trois, sur une orbite très allongée qui croise celle de Neptune. Quatre façons différentes d'entendre une polyrythmie réelle.
 
 **Pour l'entendre** : un Monde de la famille DUSK (des orbites rondes), puis K1 PRECESSION vers 40 : la phrase se transforme lentement sans aucun hasard. Ensuite K2 PERTURBATION vers 30 : des notes manquent, d'autres s'invitent, comme un ciel moins parfait.
 
@@ -640,7 +643,7 @@ On construit un petit morceau à cinq pistes : une basse, une mélodie, sa répo
 
 Chaque piste fabrique son son avec un **moteur**, une méthode de synthèse calculée en direct. Chaque moteur va sur chaque piste : **ALGO** le change, et **PRESET** (sur la page SOUND) choisit l'un des **256 sons** tout faits : 224 pour les douze premiers moteurs, puis 16 pour SIX-OP FM et 16 pour STRING MACHINE.
 
-Dix moteurs viennent du code publié par Mutable Instruments (huit de Plaits, un de Rings, un d'Elements) ; quatre ont été écrits pour Mutable Dreams. **SIX-OP FM** et **STRING MACHINE**, tirés de Plaits, sont les deux voix propres à Rhizome, faites pour les nappes.
+Dix moteurs viennent du code publié par Mutable Instruments (huit de Plaits, un de Rings, un d'Elements) ; quatre ont été écrits pour Mutable Dreams. **SIX-OP FM** et **STRING MACHINE**, tirés eux aussi de Plaits, sont les deux voix que Rhizome ajoute, faites pour les nappes.
 
 | Moteur | Ce qu'il fait | K1 | K2 | K3 | Calcul |
 |---|---|---|---|---|---|
