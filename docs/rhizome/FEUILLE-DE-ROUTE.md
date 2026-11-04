@@ -498,7 +498,7 @@ Rhizome est installé sur le second FM-1 (identité `FM-1_968000001`, depuis la 
 **Deuxième et troisième essais (4 novembre 2026).** Voix en veille, Beads à 3 grains, Mondes à 4 voix : toujours 101 à 147 %. Un souffle anti-dénormaux sur Beads : aucun effet. Les relevés montrent que **Beads coûte 50 à 70 % dès qu'il reçoit du son** (17 % silencieux), et que sans lui les Mondes vont de 42 à 105 % : les voix de Plaits coûtent 10 à 20 % chacune en jeu. D'où :
 - **Beads est remplacé par le granulaire de Monades** (4 grains sur une bande de 128 Ko, la page BEADS et ses réglages gardés, les médias redéfinis) ;
 - **en ECO, toutes les voix tournent à demi-fréquence**, SIX-OP compris (ses enveloppes recalculées pour garder leur durée).
-À remesurer sur l'appareil.
+**Mesuré le 4 novembre au soir** : les 18 Mondes vont de 62 à 108 % (contre 101 à 147). Sous le plafond : SLOW EMBERS 77, NO STARS 67, COLD IN THE DARK 70, SLOW TIDES 65. Le budget réel sur le FM-1 : base 7 %, bande et HALL 14 %, grains de Monades 5 à 12 %, **chaque voix qui joue 11 à 15 %** même à demi-fréquence (tous les moteurs se valent). Les nappes gardent leurs voix éveillées : un Monde de 4 voix fait donc 7 + 14 + 12 + 4 × 13, soit 85 % environ. **Il faut 3 voix par Monde**, ou 4 sans les grains, ou trouver pourquoi une voix coûte autant (le traitement par voix autour du moteur est à mesurer).
 
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
