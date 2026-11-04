@@ -890,7 +890,14 @@ void app_render(int32_t *lr,uint32_t n,uint32_t master) {
  lr[2*k]=(int32_t)((md_audio[2*k]+chime)*md_gain*8380000.0f);lr[2*k+1]=(int32_t)((md_audio[2*k+1]+chime)*md_gain*8380000.0f);}lr+=z*2;n-=z;}
 }
 void app_panic(void) {dream_cmd(MD_PANIC,0,0);}
-void app_overload(void) {if((int32_t)(plat_ms()-load_quiet_until)<0)return;overloads++;dream_cmd(MD_OVERLOAD,0,0);}
+// A block that took over 90 % of its time (device/main_fm1.c). Each one is counted (the diagnostics read them), but the
+// engine sheds only when they repeat, three within two seconds: an isolated long block (measured on the FM-1: a few
+// in 40 s in the densest Mondes, never a dropout) no longer turns the chorus and the HALL's diffusion off for the
+// rest of the Monde; a real overload, a long block every few milliseconds, is still caught at once.
+static uint32_t overload_at[3];static unsigned overload_n;
+void app_overload(void) {if((int32_t)(plat_ms()-load_quiet_until)<0)return;overloads++;
+ const uint32_t now=plat_ms();overload_at[overload_n++%3]=now;
+ if(overload_n>=3&&now-overload_at[overload_n%3]<=2000){overload_n=0;dream_cmd(MD_OVERLOAD,0,0);}}
 // Lights say what is in use: the button of the page shown, SEL when the selected track is muted, ARP locked,
 // LFO frozen, PLAY playing (green); ENV glows when there is something to undo.
 // The five page buttons and their pages, in the order each press goes through them.

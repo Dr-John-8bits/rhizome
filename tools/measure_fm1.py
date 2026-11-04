@@ -5,7 +5,8 @@
   measure_fm1.py [--seconds 40] [--worst] [--mondes 0-29] [--port NAME]
 
 For each Monde: load it, PLAY, reset the measured peak, let it play, then read the load now and its peak (the SYSTEM
-page's figures), the audio dropouts (xruns), the overload fallbacks to ECO, and the longest audio block against its
+page's figures), the audio dropouts (xruns), the blocks over 90 % of their time, how often the firmware shed
+(ECO, then the chorus and the HALL's diffusion: only when long blocks repeat), and the longest audio block against its
 budget. --worst also opens SPACE fully with Beads on CLEAN TAPE (its heaviest). The rule: the peak never reaches 85 %.
 Writes a JSON next to the printout if --json is given. Needs mido with python-rtmidi.
 """
@@ -82,11 +83,12 @@ def main():
         dev.command(PLAY, 0, 1); time.sleep(2)
         dev.call(3); before = dev.status(); time.sleep(a.seconds); s = dev.status()
         s.update(monde=k + 1, name=NAMES[k] if k < len(NAMES) else str(k), xruns_during=s['xruns'] - before['xruns'],
-                 overloads_during=s['overloads'] - before['overloads'])
+                 overloads_during=s['overloads'] - before['overloads'],
+                 shed_during=s['quality_reductions'] - before['quality_reductions'])
         results.append(s)
         flag = '  <-- ABOVE 85 %' if s['peak'] >= 85 else ''
         print(f"{s['monde']:2} {s['name']:16} load {s['cpu']:3} %  peak {s['peak']:3} %  block max {s['block_us_max']:5} us"
-              f" / {s['block_us_budget']} us  xruns +{s['xruns_during']}  ECO fallbacks +{s['overloads_during']}{flag}", flush=True)
+              f" / {s['block_us_budget']} us  xruns +{s['xruns_during']}  long blocks +{s['overloads_during']}  shed +{s['shed_during']}{flag}", flush=True)
     dev.command(PLAY, 0, 0)
     worst = max(results, key=lambda r: r['peak'])
     print(f"highest peak: {worst['peak']} % ({worst['name']}); ceiling 85 %")
