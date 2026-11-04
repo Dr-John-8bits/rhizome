@@ -38,7 +38,10 @@ static void beads_block(const float *send,unsigned n,float *wl,float *wr,bool fr
  const int len=beads_line_length();
  for(unsigned o=0;o<n;o+=BEADS_CHUNK){const unsigned c=n-o<BEADS_CHUNK?n-o:BEADS_CHUNK;
   static beads::FloatFrame in[BEADS_CHUNK],out[BEADS_CHUNK];static bool fr[BEADS_CHUNK]; // off the audio stack (7.9 KB on the FM-1)
-  for(unsigned i=0;i<c;i++){const float x=clip(send[o+i]);in[i].l=in[i].r=x;fr[i]=frozen;}
+  // A whisper of 1e-12 alternating (-240 dB, never heard) under the input: Beads was written for a processor that
+  // flushes denormal numbers to zero, and on the FM-1 its fading filter and feedback states sank into them (with sound
+  // coming in, Beads measured 50 % and more of the processor; silent, 17 %).
+  for(unsigned i=0;i<c;i++){const float x=clip(send[o+i])+(i&1?1e-12f:-1e-12f);in[i].l=in[i].r=x;fr[i]=frozen;}
   beads_proc->Process(beads::SEED_BUTTON_STATE_LOCKED,nullptr,fr,d,p,m,in,out,c); // SEED latched, as on the module: grains all along
   for(unsigned i=0;i<c;i++){wl[o+i]=out[i].l;wr[o+i]=out[i].r;}
   // The overview of what is in memory: the input's level where the write head is.
