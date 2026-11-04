@@ -500,6 +500,12 @@ Rhizome est installé sur le second FM-1 (identité `FM-1_968000001`, depuis la 
 - **en ECO, toutes les voix tournent à demi-fréquence**, SIX-OP compris (ses enveloppes recalculées pour garder leur durée).
 **Mesuré le 4 novembre au soir** : les 18 Mondes vont de 62 à 108 % (contre 101 à 147). Sous le plafond : SLOW EMBERS 77, NO STARS 67, COLD IN THE DARK 70, SLOW TIDES 65. Le budget réel sur le FM-1 : base 7 %, bande et HALL 14 %, grains de Monades 5 à 12 %, **chaque voix qui joue 11 à 15 %** même à demi-fréquence (tous les moteurs se valent). Les nappes gardent leurs voix éveillées : un Monde de 4 voix fait donc 7 + 14 + 12 + 4 × 13, soit 85 % environ. **Il faut 3 voix par Monde**, ou 4 sans les grains, ou trouver pourquoi une voix coûte autant (le traitement par voix autour du moteur est à mesurer).
 
+**Décision du 4 novembre 2026 : le plan LEAD si le profilage ne donne rien de net.** Une seule passe de profilage sur l'appareil (le temps de chaque partie du rendu). Si elle ne désigne pas clairement une cause qu'on peut corriger, ou ne donne que des pistes vagues, on arrête l'enquête (trop coûteuse) et on passe à la voie du milieu :
+- **les moteurs de Monades** pour les voix (ils tiennent à 64–74 % avec 6 voix et les effets, mesuré) ;
+- **deux voix de Rhizome gardées** : **SIX-OP FM** et **STRING MACHINE** ;
+- **le séquenceur orbital**, **le tape echo** et **la HALL** gardés ; les grains de Monades.
+Que les autres voix sonnent comme celles de Monades n'est pas un problème : ça sonne déjà très bien.
+
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
 - Même plateforme fm1-base, même chaîne de compilation, mêmes outils.
