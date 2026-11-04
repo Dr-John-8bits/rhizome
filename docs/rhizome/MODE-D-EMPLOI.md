@@ -7,7 +7,7 @@ Rhizome est un firmware pour le M-VAVE FM-1, écrit pour le projet ambient **Whe
 - une **réverbe HALL**, dans l'esprit des grandes réverbes numériques des années 80 ;
 - un **nuage de grains**, qui relit en petits morceaux ce que les pistes lui envoient.
 
-Il joue très bien seul, et il est le compagnon de Monades, l'autre FM-1 du projet, qui fait les notes et le rythme. Sur le FM-1, ses 30 Mondes restent entre 61 et 79 % du processeur au plus fort, sans aucun décrochage.
+Il joue très bien seul, et il est le compagnon de Monades, l'autre FM-1 du projet, qui fait les notes et le rythme. Sur le FM-1, ses 30 Mondes restent entre 61 et 78 % du processeur au plus fort, sans aucun décrochage.
 
 ## Premiers pas
 
@@ -989,7 +989,7 @@ La version (« RHIZOME 0.1.0 » ; « RHIZOME DEV » dans le simulateur), le mode
 
 REC sur cette page : **panique**, tout se tait, la bande et les traînes d'effets sont effacées.
 
-**La garde du processeur.** La limite est **85 %** du processeur, et les Mondes de Rhizome restent entre 61 et 79 % au plus fort. Si un Monde fait à la main est trop lourd (six voix lourdes, avec la bande, la HALL et les grains grands ouverts), Rhizome passe de lui-même en ECO avant de jouer. S'il déborde encore, de façon répétée (trois blocs audio trop longs en deux secondes), il coupe le chorus et la diffusion, et la HALL passe en VINTAGE, jusqu'au Monde suivant. Un bloc isolé un peu long, sans conséquence audible, ne déclenche rien.
+**La garde du processeur.** La limite est **85 %** du processeur, et les Mondes de Rhizome restent entre 61 et 78 % au plus fort. Si un Monde fait à la main est trop lourd (six voix lourdes, avec la bande, la HALL et les grains grands ouverts), Rhizome passe de lui-même en ECO avant de jouer. S'il déborde encore, de façon répétée (trois blocs audio trop longs en deux secondes), il coupe le chorus et la diffusion, et la HALL passe en VINTAGE, jusqu'au Monde suivant. Un bloc isolé un peu long, sans conséquence audible, ne déclenche rien.
 
 ### LOOK / STARTUP (GLO 4 fois)
 | Potard | Réglage |
