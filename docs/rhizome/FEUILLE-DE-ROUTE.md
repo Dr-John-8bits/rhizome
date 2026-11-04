@@ -561,7 +561,7 @@ Que les autres voix sonnent comme celles de Monades n'est pas un problème : ça
 
 **Site et mode d'emploi** (2 novembre 2026, le dépôt étant devenu public) :
 - le mode d'emploi est dans `docs/rhizome/MODE-D-EMPLOI.md`, et sur le site (`site/manuel/`, régénéré par `tools/site_manual.py`) ;
-- le mode d'emploi de Monades reste sur le site (`site/monades/manuel/`) pour les pages héritées ;
+- le mode d'emploi de Rhizome est autonome (4 novembre 2026) : il décrit toutes les pages, héritées comprises ;
 - le simulateur est compilé par GitHub Actions (`.github/workflows/pages.yml`, avec le WASI SDK 34) et publié avec le site sur GitHub Pages.
 
 **Première compilation pour le FM-1** (2 novembre 2026) : `rhizome-0.0.1.fwsc`, 610 136 octets, identité `FM-1_968000001`. Flash 561 720 octets sur 602 112, RAM 85 848 sur 98 304, pool 276 852 sur 344 064. Revue avant flash et chiffres détaillés : `docs/rhizome/REVUE-AVANT-FLASH.md`. **Pas encore installé ni mesuré sur l'appareil.**

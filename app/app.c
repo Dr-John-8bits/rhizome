@@ -53,7 +53,7 @@ static const uint16_t dream_colors[6]={RGB(255,140,118),RGB(255,198,104),RGB(124
 #define MD_INK RGB(244,242,255)
 #define MD_DIM RGB(172,180,208)
 #define MD_EDGE RGB(60,66,100)
-static const char *dream_pages[]={"LIVE MONDE","SOUND","RHYTHM","GRANULAR BUS","MIX / NOTES","QUALITY / SYSTEM","ENVELOPE / BLOOM","GROOVE / REPEATS","TAPE / MOTION","HARMONY / GLOBAL","VELVET FILTER","LOOK / STARTUP","GLOBAL MIXER","BASS / MOTIFS","SHARED SPACE","MARBLES / TIDES / WARPS","PHRASE / NOTES","MIDI / PERFORMANCE","USER BANKS","MIDI OUT ZONES","LFO A","LFO B","SPACE TONE","ECHO SYNC / CHORUS","GENERATOR / DEJA VU","FORM","RAGA / GAMAKA","MORPH","DERIVE","MIDI CHANNELS","ORBIT","ORBIT / SYSTEM","ORBIT / MOONS","ORBIT / COMET","TAPE ECHO","TAPE ECHO / AGE","HALL","HALL / COLOR","BEADS"};
+static const char *dream_pages[]={"LIVE MONDE","SOUND","RHYTHM","GRANULAR BUS","MIX / NOTES","QUALITY / SYSTEM","ENVELOPE / BLOOM","GROOVE / REPEATS","TAPE / MOTION","HARMONY / GLOBAL","VELVET FILTER","LOOK / STARTUP","GLOBAL MIXER","BASS / MOTIFS","SHARED SPACE","MARBLES / TIDES / WARPS","PHRASE / NOTES","MIDI / PERFORMANCE","USER BANKS","MIDI OUT ZONES","LFO A","LFO B","SPACE TONE","ECHO SYNC / CHORUS","GENERATOR / DEJA VU","FORM","RAGA / GAMAKA","MORPH","DERIVE","MIDI CHANNELS","ORBIT","ORBIT / SYSTEM","ORBIT / MOONS","ORBIT / COMET","TAPE ECHO","TAPE ECHO / AGE","HALL","HALL / COLOR","GRAIN CLOUD"};
 static const char *help_title[NB]={"GRANULAR BUS","MUTE A TRACK","RETURN","FREEZE","CHOOSE A VOICE","GLOBAL","LIVE MACROS","SAVE","LOCK THE SEED","GENERATE RHYTHMS","PLAY / STOP","VARY / DICE","LOWER OCTAVE","HIGHER OCTAVE"};
 static const char *help_lines[NB][5]={
  {"FX: Tape Echo > Age > Hall >","Color > Grain > Beads > Tape >","Space > Tone > Echo > Marbles..","Grain: K1 mix / K2 length","REC: dice this page"},
@@ -684,7 +684,7 @@ static void md_draw_all(void) {
   md_text(12,145,md_tone_name(p->tone_preset[dream_ui.track]),col);md_text(140,145,md_biome_family(p->biome_id),MD_DIM);
   const char *labels[]={"K1 DENSITY","K2 MOTION","K3 COLOUR","K4 SPACE"};for(i=0;i<4;i++)md_value(8+(i%2)*116,158+(i/2)*36,labels[i],p->macro[i]/10,dream_colors[i]);
  } else if(dream_ui.page==SYSTEM) {
-  md_text(10,48,"RHIZOME " APP_VERSION,MD_INK);md_text(238-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT"),48,"WHEN DAY CHOKES THE NIGHT",col);md_text(10,69,p->quality?"FULL  24 MODES / 4 GRAINS":"ECO / ADAPTIVE MODES / 2 GRAINS",col);
+  md_text(10,48,"RHIZOME " APP_VERSION,MD_INK);md_text(238-text_w(&FONT_XS,"WHEN DAY CHOKES THE NIGHT"),48,"WHEN DAY CHOKES THE NIGHT",col);md_text(10,69,p->quality?"FULL / VOICES AT FULL RATE":"ECO / VOICES AT HALF RATE",col);
   md_text(10,93,"LOAD / MAX %",MD_DIM);
 #ifdef PLAT_HOST
   md_text(139,93,"HOST ONLY",MD_INK);

@@ -4,8 +4,8 @@
 from pathlib import Path
 import re
 R=Path(__file__).resolve().parents[1]/'site'
-# Rhizome's site: the home page (with the simulator) and the manual; Monades' manual (monades/manuel/) keeps its own.
-ITEMS=[('Accueil',''),('Simulateur','#jouer'),("Mode d'emploi",'manuel/'),("Monades (pages héritées)",'monades/manuel/'),
+# Rhizome's site: the home page (with the simulator) and the manual.
+ITEMS=[('Accueil',''),('Simulateur','#jouer'),("Mode d'emploi",'manuel/'),
        ('Feuille de route','https://github.com/Dr-John-8bits/rhizome/blob/main/docs/rhizome/FEUILLE-DE-ROUTE.md'),('Sources','https://github.com/Dr-John-8bits/rhizome')]
 PAGES=['index.html','manuel/index.html']
 for page in PAGES:

@@ -62,7 +62,7 @@ page=f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rhizome · Mode d'emploi</title>
-<meta name="description" content="Mode d'emploi de Rhizome, firmware ambient pour le M-VAVE FM-1 : séquenceur orbital, bande, réverbe HALL, granulaire Beads.">
+<meta name="description" content="Mode d'emploi de Rhizome, firmware ambient pour le M-VAVE FM-1 : séquenceur orbital, SIX-OP FM et STRING MACHINE, bande, réverbe HALL, nuage de grains.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
