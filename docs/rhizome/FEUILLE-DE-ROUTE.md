@@ -180,6 +180,8 @@ L'équation de Kepler se résout avec une table (anomalie moyenne → position, 
 ## Les sons
 
 ### Le granulaire : Beads au centre
+> **4 novembre 2026 :** Beads prenait 50 à 70 % du processeur dès qu'il recevait du son ; il est remplacé par le granulaire de Monades (mêmes réglages, mêmes médias). Le texte ci-dessous est l'idée de départ.
+
 - **Beads** (Mutable Instruments) : **sources publiques, licence MIT**, dans le dépôt `pichenettes/eurorack` (vérifié le 2 novembre 2026). C'est le successeur de Clouds. Ce qu'il apporte :
   - granulaire, delay et grains déclenchés au hasard ou réguliers (la densité) ;
   - **quatre « médias » d'enregistrement** : DIRTY TAPE, CLEAN TAPE, VINTAGE DIGITAL, DIGITAL. On retrouve l'esprit de la bande jusque dans le granulaire ;
@@ -196,6 +198,8 @@ L'équation de Kepler se résout avec une table (anomalie moyenne → position, 
   - la sortie du delay à bande (granuler la bande).
 
 ### Les voix : ce que Monades n'a pas
+> **4 novembre 2026 : plan LEAD.** Les huit moteurs de Plaits coûtaient trop sur le FM-1 ; Rhizome reprend ceux de Monades et ne garde que SIX-OP FM et STRING MACHINE (voir « Première mesure sur le FM-1 »). Le texte ci-dessous est l'idée de départ.
+
 Monades n'utilise de Plaits que trois moteurs (FM, VA, additif) et les batteries, mais **le code de tous les moteurs de Plaits 1.2 est déjà dans son dossier `third_party`**. Pour Rhizome :
 - **Plaits 1.2** : String Machine (nappes façon Solina avec ensemble), Wavetable, Wave Terrain, Phase Distortion, Six-op FM (sons DX7) ;
 - **Plaits** : Chords, Granular formant, Swarm, Particle ;
@@ -507,6 +511,8 @@ Rhizome est installé sur le second FM-1 (identité `FM-1_968000001`, depuis la 
 Que les autres voix sonnent comme celles de Monades n'est pas un problème : ça sonne déjà très bien.
 
 **Le profil sur l'appareil (4 novembre 2026)**, en % du processeur : KEPLER NIGHT 95 (séquenceur 5, moteurs 32, traitement autour des voix 25, grains 8, effets et mélange 24) ; CHOKED DAWN 92 (4, 29, 24, 7, 25) ; BLACK ORCHARD 74 (4, 22, 18, 7, 22) ; NO STARS 50 (3, 8, 12, 6, 19). Pas de défaut unique à corriger : le traitement autour des voix est celui de Monades, les moteurs de Plaits coûtent environ 8 % chacun même à demi-fréquence, et la bande, la HALL et le mélange 20 à 25 %. **Verdict : plan LEAD.**
+
+**Le plan LEAD, fait le 4 novembre 2026 (à mesurer sur le FM-1).** Les douze moteurs de Monades reviennent (KICK, SNARE, HAT, FM, VA, RINGS, HARMONIC, CHOIR, BASS, ELEMENTS, MELLOW, SATIN), avec **SIX-OP FM** et **STRING MACHINE** en moteurs 13 et 14, construits dans une petite zone de mémoire par voix (le reste de Plaits est retiré de la compilation). La bibliothèque compte 256 sons : les 224 de Monades, puis 16 pour SIX-OP FM et 16 pour STRING MACHINE. Les douze premiers Mondes retrouvent leurs sons de Monades ; les six DEEP sont recomposés avec eux, SIX-OP FM et STRING MACHINE sur une ou deux pistes. Toujours quatre voix au plus par Monde. ECO : FM, VA, HARMONIC, SIX-OP et STRING MACHINE à demi-fréquence. Les patchs passent en version 13 : une sauvegarde de Monades se charge telle quelle, une sauvegarde de l'essai à huit moteurs de Plaits reçoit les moteurs les plus proches. Le séquenceur orbital, le tape echo, la HALL et les grains de Monades ne changent pas. Reste : compiler, installer, mesurer les 18 Mondes (objectif : pic sous 85 %, vers 70 %).
 
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).

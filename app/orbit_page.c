@@ -117,7 +117,7 @@ static void ov_knob(const md_patch *p,int page,int k,const char **label,char *va
   else if(k==2){static const char *const brief_names[MD_MOON_INTERVALS]={"SAME","UP","DOWN","3RD+","3RD-","HARM"},
     *const names[MD_MOON_INTERVALS]={"REPEAT","STEPS UP","STEPS DOWN","THIRDS UP","THIRDS DOWN","HARMONICS"},
     *const infos[MD_MOON_INTERVALS]={"THE SAME NOTE AGAIN","UP THE SCALE, STEP BY STEP","DOWN THE SCALE, STEP BY STEP","UP THE SCALE IN THIRDS","DOWN THE SCALE IN THIRDS","OCTAVE, +FIFTH, 2 OCTAVES"};
-   *label="INTERVAL";ov_append(value,(brief?brief_names:names)[o->moon_interval]);ov_append(info,infos[o->moon_interval]);}
+   *label="INTERVAL";ov_append(value,(brief?brief_names:names)[o->moon_interval]);ov_append(info,p->track[tr].model<MD_FM?"A DRUM: THE SAME HIT":infos[o->moon_interval]);}
   else{*label="LEVEL";md_num(o->moon_level,value);ov_append(info,"OF THE NOTE'S VELOCITY");}
  }else{
   if(k==0){*label="COMET";if(!p->orbit_comet){ov_append(value,"OFF");ov_append(info,"NO RARE EVENT");}
@@ -162,7 +162,7 @@ static void ov_closeup(const md_patch *p,int tr,int hk,uint32_t now){
 }
 // The gates in the order the body will cross them (from where it is; stopped, from the top, gate there included), each
 // with the phrase's next note: the engine's walk, from its cursor, rests skipped.
-static int ov_motif_ok(const md_patch *p,int tr){const md_orbit *o=&p->orbit[tr];return o->gates&&o->pitch==MD_PITCH_MOTIF;}
+static int ov_motif_ok(const md_patch *p,int tr){const md_orbit *o=&p->orbit[tr];return o->gates&&o->pitch==MD_PITCH_MOTIF&&p->track[tr].model>=MD_FM;}
 static int ov_motif_empty(const md_patch *p,int tr){for(int k=0;k<16;k++)if(p->ext[tr].notes[k]>=0)return 0;return 1;}
 static void ov_motif_labels(const md_patch *p,int tr,uint16_t col){
  const OrbitView *o=&ov[tr];if(!o->on||!ov_motif_ok(p,tr)||ov_motif_empty(p,tr))return;
@@ -237,7 +237,7 @@ static void md_orbit_page(const md_patch *p,uint16_t col){
    else{md_num((int)hz,b);ov_append(t,b);ov_append(t," HZ");}md_text(10,44,t,MD_DIM);
    if(ov_band(48,53)){const int w=(int)(150*fm_logf(hz/60)/fm_logf(300));cv_rect(90,50,150,1,MD_EDGE);cv_rect(90,49,w<0?0:w>150?150:w,3,col);}}}
  else if(!p->orbit[tr].gates)md_text(10,44,page==ORBIT?"K3 GATES STARTS THIS ORBIT":"NO ORBIT: ORBIT PAGE, K3 GATES",MD_DIM);
- else if(page!=ORBIT_MOONS&&p->orbit[tr].pitch==MD_PITCH_MOTIF&&ov_motif_empty(p,tr))md_text(10,44,"MOTIF EMPTY: KEYS ON GENERATOR",MD_DIM);
+ else if(page!=ORBIT_MOONS&&p->orbit[tr].pitch==MD_PITCH_MOTIF&&p->track[tr].model>=MD_FM&&ov_motif_empty(p,tr))md_text(10,44,"MOTIF EMPTY: KEYS ON GENERATOR",MD_DIM);
  else if(page==ORBIT_MOONS&&!p->orbit[tr].moons)md_text(10,44,"K1 MOONS: ORNAMENTS AFTER NOTES",MD_DIM);
  else if(!md_playing())md_text(10,44,page==ORBIT_MOONS?"EACH NOTE SPINS ITS MOONS ONCE":"PLAY: ALL START FROM THE TOP",MD_DIM);
  // The strip: four knobs, value and a short gauge.

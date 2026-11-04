@@ -11,21 +11,22 @@ for(let demo=0;demo<5;demo++){const bytes=[...fs.readFileSync(root+`/docs/develo
 const p=[...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)];await f.onMessage({type:'app',cmd:'patch-export',id:77});render(2);assert.deepEqual(messages.find(m=>m.id===77).bytes,p);
 const bad=p.slice();bad[0]=0;await f.onMessage({type:'app',cmd:'patch-import',id:78,bytes:bad});render(2);assert(messages.find(m=>m.id===78).error);assert.deepEqual([...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)],p);
 const old=p.slice(0,652);old[4]=4;await f.onMessage({type:'app',cmd:'patch-import',id:79,bytes:old});render(2);assert(messages.find(m=>m.id===79).loaded);
-await f.onMessage({type:'app',cmd:'command',c:45,t:0,v:127});render(2);assert.equal(f.ex.dream_value(45,0),127);
+await f.onMessage({type:'app',cmd:'command',c:45,t:0,v:207});render(2);assert.equal(f.ex.dream_value(45,0),207);
 
 // User Biome save/load and explicit overwrite guard, then reboot persisted objects.
 const command=(c,v)=>f.ex.dream_command(c,0,v);
 command(112,0);command(111,15);command(114,0);render(2);
 assert(f.ex.web_store_len(18)>0);
 const saved=[...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)];
-command(45,100);render(2);command(114,0);render(2); // arms overwrite, leaves old slot
+command(45,160);render(2);command(114,0);render(2); // arms overwrite, leaves old slot
 command(113,0);render(2);assert.notDeepEqual([...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)],saved); // unsaved edits: the load waits for SEL (Monades 0.1.3)
 f.ex.web_buttons(2);render(40);f.ex.web_buttons(0);render(40);assert.deepEqual([...new Uint8Array(f.mem.buffer,f.ex.dream_patch_data(),1976)],saved); // SEL: discard the edits and load
 command(112,1);command(111,63);command(114,0);render(2);assert(f.ex.web_store_len(22)>0);
 const stores={};for(let i=0;i<f.ex.web_nobj();i++){const n=f.ex.web_store_len(i);if(n>0)stores[i]=[...new Uint8Array(f.mem.buffer,f.ex.web_store(i),n)];}
 const g=new Processor();await g.onMessage({type:'load',wasm:fs.readFileSync(root+'/app/build/wasm/dreams.wasm'),master:2400,store:stores});g.ex.dream_command(111,0,15);g.ex.dream_command(113,0,0);
 assert.deepEqual([...new Uint8Array(g.mem.buffer,g.ex.dream_patch_data(),1976)],saved);
-// Rhizome: every sound of the library (its eight voices) renders without invalid output.
-for(let id=0;id<128;id++){command(45,id);render(2);f.ex.web_midi_in(0,(0x90<<8)|(48<<16)|(100<<24)|9);render(100);f.ex.web_midi_in(0,(0x80<<8)|(48<<16)|8);render(100);}
-console.log('PASS user Biome / sound banks, overwrite guard, restart, the 128 Rhizome sounds');
-console.log(JSON.stringify({result:'PASS',pages:19,patchBytes:1976,legacyImport:true,invalidPatchUnchanged:true,exportRoundTrip:true,newDemos:5,tones128:true,peak,wasmMemory:f.mem.buffer.byteLength,hardwareTest:false},null,2));
+// Every new warm tone renders without invalid output.
+for(let id=160;id<208;id++){command(45,id);render(2);f.ex.web_midi_in(0,(0x90<<8)|(48<<16)|(100<<24)|9);render(100);f.ex.web_midi_in(0,(0x80<<8)|(48<<16)|8);render(100);}
+for(let id=208;id<256;id++){command(45,id);render(2);f.ex.web_midi_in(0,(0x90<<8)|(48<<16)|(100<<24)|9);render(100);f.ex.web_midi_in(0,(0x80<<8)|(48<<16)|8);render(100);}
+console.log('PASS user Biome / sound banks, overwrite guard, restart, 64 added warm tones');
+console.log(JSON.stringify({result:'PASS',pages:19,patchBytes:1976,legacyImport:true,invalidPatchUnchanged:true,exportRoundTrip:true,newDemos:5,tone207:true,peak,wasmMemory:f.mem.buffer.byteLength,hardwareTest:false},null,2));

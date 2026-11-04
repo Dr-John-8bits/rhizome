@@ -4,20 +4,24 @@
 #include "dreams.h"
 extern "C" { __attribute__((weak)) uint32_t plat_ticks(void){return 0;} } // profiling (plat.h); the DSP alone (tests) has none
 static const float PLAT_TICKS=24.0f; // plat.h PLAT_TICKS_PER_US
+#include "elements/dsp/exciter.h"
+#include "elements/dsp/resonator.h"
+// Rhizome's two own voices (Plaits): SIX-OP FM and STRING MACHINE; the other twelve are Monades'
+#include "plaits/dsp/engine2/string_machine_engine.h"
+#include "plaits/dsp/engine2/six_op_engine.h"
+#include "plaits/resources.h"
 #include <math.h>
 #include <string.h>
 #include <new>
 #include <stddef.h>
-// Rhizome's voices: eight Plaits engines (none of Monades')
-#include "plaits/dsp/engine2/string_machine_engine.h"
-#include "plaits/dsp/engine/wavetable_engine.h"
-#include "plaits/dsp/engine2/wave_terrain_engine.h"
-#include "plaits/dsp/engine2/six_op_engine.h"
-#include "plaits/dsp/engine/swarm_engine.h"
-#include "plaits/dsp/engine2/phase_distortion_engine.h"
-#include "plaits/dsp/engine/chord_engine.h"
-#include "plaits/dsp/engine/grain_engine.h"
-#include "plaits/resources.h"
+#include "plaits/dsp/engine/fm_engine.h"
+#include "plaits/dsp/engine/virtual_analog_engine.h"
+#include "plaits/dsp/drums/analog_bass_drum.h"
+#include "plaits/dsp/drums/analog_snare_drum.h"
+#include "plaits/dsp/drums/hi_hat.h"
+#include "rings/dsp/resonator.h"
+#include "plaits/dsp/engine/additive_engine.h"
+#include "plaits/dsp/oscillator/sine_oscillator.h"
 #include "stmlib/dsp/filter.h"
 #include "stmlib/utils/random.h"
 // The Rings chorus lives in chorus.cpp: its resources.h redefines Plaits' LUT_* macros.
@@ -28,32 +32,36 @@ extern "C" { void md_chorus_reset(uint16_t *line); void md_chorus_process(float 
 #define POOL
 #endif
 namespace {
+#include "satin_tables.inc"
 #include "scale_table.inc"
 constexpr unsigned Q=64;
-// Rhizome: a voice holds only the engine of its model, built in its own arena (the engine first, then the RAM the
-// engine asks for); the arena is as large as the hungriest engine (SIX-OP, whose DX7 bank is shared: sixop_bank).
+// Rhizome: SIX-OP FM and STRING MACHINE are built in each voice's arena (the engine, then the RAM it asks for), as large
+// as the hungrier of the two; SIX-OP's DX7 bank is shared (sixop_bank).
 template<class E,unsigned RAM> struct EngineSize { enum { bytes=(sizeof(E)+15)/16*16+RAM }; };
 constexpr unsigned cmax(unsigned a,unsigned b){return a>b?a:b;}
-enum : unsigned { ARENA=cmax(cmax(cmax(EngineSize<plaits::StringMachineEngine,1024*4>::bytes,EngineSize<plaits::WavetableEngine,4*64*sizeof(void*)>::bytes /* kNumBanks x kNumWavesPerBank, private to wavetable_engine.cc */),
- cmax(EngineSize<plaits::WaveTerrainEngine,plaits::kMaxBlockSize*4*4>::bytes,EngineSize<plaits::SixOpEngine,plaits::kMaxBlockSize*(4+plaits::kNumSixOpVoices)*4>::bytes)),
- cmax(cmax(EngineSize<plaits::SwarmEngine,plaits::kNumSwarmVoices*sizeof(plaits::SwarmVoice)>::bytes,EngineSize<plaits::PhaseDistortionEngine,plaits::kMaxBlockSize*4*4>::bytes),
- cmax(EngineSize<plaits::ChordEngine,0>::bytes,EngineSize<plaits::GrainEngine,0>::bytes)))+64 };
+enum : unsigned { ARENA=cmax(EngineSize<plaits::StringMachineEngine,1024*4>::bytes,EngineSize<plaits::SixOpEngine,plaits::kMaxBlockSize*(4+plaits::kNumSixOpVoices)*4>::bytes)+64 };
 static size_t arena_spare=ARENA; // the least room an engine left in its arena (tests: never 0)
 struct Voice {
- alignas(16) unsigned char arena[ARENA]; plaits::Engine *engine; int half; // half: SIX-OP built for half rate (ECO)
- stmlib::Svf filter1,filter2;
- float expression_smooth,pan_smooth,midi_gate;
- float target_note,tide_phase,warp_phase,warp_smooth,delay_send_smooth,reverb_send_smooth;
- float env,amp,note,fade,velocity,cut_smooth,res_smooth,breath_phase,lpg,eco_previous,eco_next;
+ alignas(16) unsigned char arena[ARENA]; plaits::Engine *engine; int half; // Rhizome: SIX-OP or STRING MACHINE, built here; half: SIX-OP built for half rate (ECO)
+ plaits::AdditiveEngine additive; plaits::SineOscillator choir[3]; stmlib::Svf filter1,filter2;
+ plaits::FMEngine fm; plaits::VirtualAnalogEngine va;
+ plaits::AnalogBassDrum kick; plaits::AnalogSnareDrum snare;
+ plaits::HiHat<plaits::SquareNoise,plaits::SwingVCA,true,false> hat;
+ rings::Resonator rings;
+ float satin_morph,satin_tone;
+ float expression_smooth,pan_smooth,midi_gate,mellow_phase,mellow_drift;
+ float strike_gate,target_note,sub_phase,tide_phase,warp_phase,warp_smooth,delay_send_smooth,reverb_send_smooth;
+ float mem[112],env,amp,note,excite,fade,velocity,cut_smooth,res_smooth,breath_phase,lpg,eco_previous,eco_next;
  int model,trigger,attacking,active,eco_phase;
  float orn_from,orn_age; int orn_style; // Monades gamaka: start offset, seconds since the note, style
 };
 alignas(Voice) static unsigned char voices_raw[sizeof(Voice)*6] POOL;
 static Voice *voices;
-// Each engine brought to about -31 dB RMS (its 16 library sounds, dry, notes every 0.5 s; measured 3 November 2026).
-static const float model_gain[MD_MODELS]={2.54f,1.0f,.73f,1.08f,1.95f,.51f,1.12f,1.24f};
 // SIX-OP's DX7 sounds, decoded once at start for all six voices: Plaits' three banks, 96 patches.
 static plaits::fm::Patch sixop_bank[96] POOL;
+// Strike resonators use ordinary RAM; the large tape/effect pool stays bounded.
+static elements::Resonator element_body[6];
+static elements::Exciter element_strike[6];
 static void reel_reset(); // Rhizome's tape echo (tape_echo.inc) holds the echo's 32 KiB
 static bool fx_active;
 static float fx_smooth,fx_highpass_in,fx_highpass_out;
@@ -66,14 +74,13 @@ static stmlib::Svf send_hp_filter[2];static int send_hp_set=-1; // the knob valu
 static uint16_t chorus_line[2048]; // ordinary RAM: the pool must keep 8 KB spare (base/tools/build.py)
 // Monades: 12 dB high-pass on the echo and room sends
 static void reset_fx(){send_hp_filter[0].Init();send_hp_filter[1].Init();memset(chorus_line,0,sizeof chorus_line);md_chorus_reset(chorus_line);send_hp_set=-1;fx_active=false;reel_reset();hall_reset();fx_smooth=fx_highpass_in=fx_highpass_out=0;}
-// Rhizome v12: Rhizome's own voices. A patch from before (Monades, or Rhizome v11 with Monades' voices) gets the nearest
-// one for each track, and no library sound.
-static void rhizome_voices(md_patch &p){
- static const int8_t nearest[12]={MD_FORMANT,MD_SWARM,MD_SWARM,MD_SIXOP,MD_PD,MD_WAVETABLE,MD_WAVETABLE,MD_CHORDS,MD_TERRAIN,MD_SIXOP,MD_STRINGS,MD_WAVETABLE};
- for(int i=0;i<6;i++){if(p.track[i].model>=0&&p.track[i].model<12)p.track[i].model=nearest[p.track[i].model];p.tone_preset[i]=-1;} // out of range: left for md_validate to refuse
- p.version=12;
+// Rhizome v13: Monades' twelve voices again, and Rhizome's SIX-OP FM and STRING MACHINE. A v12 patch (Rhizome's eight
+// Plaits voices) gets the nearest for each track, and no library sound; a v11 patch had Monades' already.
+static void rhizome_v12_voices(md_patch &p){
+ static const int8_t nearest[8]={MD_STRINGS,MD_SATIN,MD_MELLOW,MD_SIXOP,MD_VA,MD_FM,MD_CHOIR,MD_HARMONIC}; // STRINGS, WAVETABLE, TERRAIN, SIX-OP, SWARM, PD, CHORDS, FORMANT
+ for(int i=0;i<6;i++){if(p.track[i].model>=0&&p.track[i].model<8)p.track[i].model=nearest[p.track[i].model];else p.track[i].model=-1;p.tone_preset[i]=-1;} // -1: refused by md_validate
 }
-static void v11_defaults(md_patch &p){rhizome_voices(p);for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;p.tape_heads=1;p.tape_wow=p.tape_drive=p.tape_age=0;p.hall_size=700;p.hall_predelay=20;p.hall_bass=550;p.hall_mod=300;p.hall_vintage=0;p.beads_shape=500;p.beads_density=800;p.beads_random=200;p.beads_media=MD_BEADS_DIGITAL;} // Beads: frequent random grains // the echo: head 1 alone (40 ms to 0.95 s), a clean tape // Rhizome: orbits off, one bar a turn
+static void v11_defaults(md_patch &p){p.version=13;for(int i=0;i<6;i++)p.orbit[i]={0,4,0,0,MD_PITCH_ORBIT,0,1,MD_MOON_UP,60};p.orbit_prec=p.orbit_pert=0;p.orbit_comet=0;p.comet_event=MD_COMET_SWELL;p.comet_amount=60;p.orbit_conj=MD_CONJ_ACCENT;p.orbit_system=0;p.tape_heads=1;p.tape_wow=p.tape_drive=p.tape_age=0;p.hall_size=700;p.hall_predelay=20;p.hall_bass=550;p.hall_mod=300;p.hall_vintage=0;p.beads_shape=500;p.beads_density=800;p.beads_random=200;p.beads_media=MD_BEADS_DIGITAL;} // Beads: frequent random grains // the echo: head 1 alone (40 ms to 0.95 s), a clean tape // Rhizome: orbits off, one bar a turn
 static void v10_defaults(md_patch &p){p.motion_every=0;v11_defaults(p);}
 static void v9_defaults(md_patch &p){for(int i=0;i<6;i++){p.gamaka[i]=MD_GAMAKA_OFF;p.gamaka_amount[i]=500;}p.vadi=p.samvadi=-1;v10_defaults(p);}
 static void v8_defaults(md_patch &p){for(int i=0;i<6;i++)p.gen[i]={MD_GEN_OFF,500,8,12};p.form=0;p.form_bars=1;p.form_drops=2;v9_defaults(p);}
@@ -137,28 +144,25 @@ static float clip(float x) { float a=fabsf(x);if(a<=.8f)return x;float y=.8f+.2f
 // Keep existing warm settings up to 90%; open the final tenth to 18 kHz.
 static float filter_q(float resonance) { return .707f+2.0f*resonance*resonance; }
 static float cutoff_hz(float u) { return 60.0f*stmlib::SemitonesToRatio(u*84.0f+fmaxf(0.0f,u-.9f)*147.458f); }
-// The engine of a model, built in the voice's arena; the rest of the arena is the RAM it asks for.
+// Rhizome: SIX-OP or STRING MACHINE, built in the voice's arena; the rest of the arena is the RAM it asks for.
 template<class E> static plaits::Engine *build(Voice &v){E *e=new (v.arena) E();const unsigned at=(sizeof(E)+15)/16*16;
  stmlib::BufferAllocator a(v.arena+at,ARENA-at);e->Init(&a);e->Reset();arena_spare=a.free()<arena_spare?a.free():arena_spare;return e;}
 static void build_engine(Voice &v,int model){
- switch(model){
-  case MD_STRINGS:v.engine=build<plaits::StringMachineEngine>(v);break;
-  case MD_WAVETABLE:v.engine=build<plaits::WavetableEngine>(v);v.engine->LoadUserData(nullptr);break; // Plaits' own waves
-  case MD_TERRAIN:v.engine=build<plaits::WaveTerrainEngine>(v);break;
-  case MD_SIXOP:{plaits::SixOpEngine *e=static_cast<plaits::SixOpEngine*>(build<plaits::SixOpEngine>(v));v.half=patch.quality==0;e->set_half_rate(v.half);e->set_patches(sixop_bank,96);v.engine=e;break;}
-  case MD_SWARM:v.engine=build<plaits::SwarmEngine>(v);break;
-  case MD_PD:v.engine=build<plaits::PhaseDistortionEngine>(v);break;
-  case MD_CHORDS:v.engine=build<plaits::ChordEngine>(v);break;
-  default:v.engine=build<plaits::GrainEngine>(v);break;
- }
+ v.engine=nullptr;
+ if(model==MD_STRINGS)v.engine=build<plaits::StringMachineEngine>(v);
+ else if(model==MD_SIXOP){plaits::SixOpEngine *e=static_cast<plaits::SixOpEngine*>(build<plaits::SixOpEngine>(v));v.half=patch.quality==0;e->set_half_rate(v.half);e->set_patches(sixop_bank,96);v.engine=e;}
 }
 static void reset_voice(unsigned i) {
  memset(static_cast<void*>(&voices[i]),0,sizeof(Voice));
  Voice *v=new (&voices[i]) Voice();
- build_engine(*v,patch.track[i].model);v->filter1.Init();v->filter2.Init();
+ stmlib::BufferAllocator a(v->mem,sizeof v->mem);
+ v->fm.Init(&a); v->va.Init(&a);v->kick.Init();v->snare.Init();v->hat.Init();v->rings.Init();
+ v->additive.Init(&a);v->additive.Reset();build_engine(*v,patch.track[i].model);v->filter1.Init();v->filter2.Init();for(int k=0;k<3;k++)v->choir[k].Init();
  v->cut_smooth=patch.track[i].cutoff*.001f;v->res_smooth=patch.track[i].resonance*.001f;v->breath_phase=i*.137f;
  v->expression_smooth=1;v->pan_smooth=unit(patch.track[i].pan);held[i]=-1;sustain[i]=0;bend[i]=bend_smooth[i]=0;expression[i]=1;
  v->model=patch.track[i].model;v->note=(float)patch.track[i].note;v->target_note=v->note;v->fade=0;v->velocity=.8f;
+ memset(static_cast<void*>(&element_body[i]),0,sizeof(element_body[i]));element_body[i].Init();element_body[i].set_modulation_frequency(.5f/MD_RATE);element_body[i].set_modulation_offset(.25f);
+ memset(static_cast<void*>(&element_strike[i]),0,sizeof(element_strike[i]));element_strike[i].Init();
  repeats[i].remaining=0;
 }
 #include "preset_bank.inc"
@@ -224,7 +228,7 @@ static float tone_coef(int v,float lo,float mid,float hi){return v==500?mid:v<50
 static void fire(unsigned i,float note,float velocity) {
  Voice &v=voices[i];
  {int style=patch.gamaka[i];v.orn_style=0;v.orn_age=0;
-  if(style){
+  if(style&&patch.track[i].model>=MD_FM){
    if(style==MD_GAMAKA_MIX){unsigned r=patch.seed^(stats.events[i]*0x9e3779b9u)^(i*0x85ebca6bu);random_word(r);style=MD_GAMAKA_KAN+(int)(r%3);}
    float prev=stats.last_pitch[i]>0?stats.last_pitch[i]:note;
    v.orn_from=style==MD_GAMAKA_KAN?scale_neighbour(note,1)-note:style==MD_GAMAKA_ANDOLAN?scale_neighbour(note,-1)-note:fmaxf(-7.0f,fminf(7.0f,prev-note));
@@ -246,10 +250,10 @@ static void dice_audible_fx(int i){
 static void dice(int i,int page){
  if(!drift_on)previous=patch; /* during DERIVE, ENV goes home */patch.edited_mask|=1u;dice_rng^=stats.frames|1u;md_track &t=patch.track[i];md_extension &x=patch.ext[i];
  switch(page){
- case MD_DICE_SOUND:t.tone=dice_in(0,1000);t.harm=dice_in(0,1000);t.shape=dice_in(0,1000);break;
+ case MD_DICE_SOUND:t.tone=dice_in(0,1000);t.harm=dice_in(0,1000);if(md_has_envelope(t.model)||t.model==MD_ELEMENTS)t.shape=dice_in(0,1000);else t.decay=dice_in(150,900);break;
  case MD_DICE_FILTER:{static const int modes[]={1,1,2,2,3,4,5,6,7};t.filter=modes[dice_in(0,8)];t.resonance=dice_in(0,650);t.breathe=dice_in(0,600);
   t.cutoff=t.filter==4||t.filter==7?dice_in(0,450):t.filter==5?dice_in(300,800):dice_in(400,1000);break;} // high-pass low, band-pass in the middle
- case MD_DICE_ENVELOPE:t.attack=dice_in(0,350);t.decay=dice_in(150,900);t.send=dice_in(0,600);break;
+ case MD_DICE_ENVELOPE:if(md_has_envelope(t.model))t.attack=dice_in(0,350);t.decay=dice_in(150,900);t.send=dice_in(0,600);break;
  case MD_DICE_MIX:t.send=dice_in(0,600);t.pan=dice_in(150,850);t.speed=dice_in(1,4);break;
  case MD_DICE_MIXER:t.level=dice_in(300,800);t.send=dice_in(0,600);x.delay_send=dice_in(0,600);x.reverb_send=dice_in(0,600);break;
  case MD_DICE_RHYTHM:t.length=dice_in(5,16);t.hits=dice_in(1,t.length*3/4>1?t.length*3/4:1);t.rotate=dice_in(0,t.length-1);t.prob=dice_in(550,1000);break;
@@ -310,7 +314,7 @@ static void apply_command(Command e) {
  case MD_FEEDBACK:patch.feedback=bound(v,0,850);break;
  case MD_QUALITY:if(patch.quality!=bound(v,0,1)){patch.quality=bound(v,0,1);for(unsigned j=0;j<6;j++){voices[j].eco_phase=0;voices[j].eco_previous=voices[j].eco_next=0;voices[j].fade=0;}}break;
  case MD_OVERLOAD:stats.quality_reductions++;if(patch.quality){patch.quality=0;for(unsigned j=0;j<6;j++){voices[j].eco_phase=0;voices[j].eco_previous=voices[j].eco_next=0;voices[j].fade=0;}}else fx_shed=1;break; // already ECO: the chorus and diffusion go
- case MD_TRIGGER:v=bound(v,0,127);fire(i,quantize_any((float)(v+patch.transpose),patch.root,patch.scale,0),.8f);break;
+ case MD_TRIGGER:v=bound(v,0,127);fire(i,t.model>=MD_FM?quantize_any((float)(v+patch.transpose),patch.root,patch.scale,0):(float)bound(v,24,96),.8f);break;
  case MD_ATTACK:t.attack=bound(v,0,1000);break;
  case MD_RATCHET:t.ratchet=bound(v,1,4);break;
  case MD_SHAPE:t.shape=bound(v,0,1000);break;
@@ -453,7 +457,7 @@ static void tick() {
     unsigned mr=patch.seed^(i*0x9e3779b9u)^((local%16+1)*0x85ebca6bu);unsigned choice=random_word(mr);
     if((local%4)!=0&&choice%1000<(unsigned)e.marbles){static const int interval[]={0,3,5,7};note=t.note+interval[(choice>>12)&3];}
    }
-   { // Rhizome: every voice is melodic
+   if(t.model>=MD_FM) {
     if(gen&&!e.bass_mode)note+=gen_off;
     else if(!e.bass_mode&&patch.motion_every){const unsigned every=1u<<bound(patch.motion_every,0,4); // a new variation on the beat, held in between
      if(local%every==0)motion_held[i]=(roll>>10)%1000<(unsigned)patch.macro[1]?degree[(roll>>20)%7]:0;note+=motion_held[i];}
@@ -464,7 +468,8 @@ static void tick() {
       if(pr%3==0)for(int k=0;k<2;k++){if(pivots[k]<0)continue;int pc=(patch.root+pivots[k])%12,d=((pc-target)%12+18)%12-6;if(d>=-2&&d<=2&&d){target+=d;break;}}}pitch=quantize_any((float)target,patch.root,patch.scale,target<last_generated[i]);note=(int)floorf(pitch+.5f);last_generated[i]=note;}
    }
    float velocity=.8f+unit(t.accent)*((local%t.length)==0?.2f:-.25f);
-   if(patch.vadi>=0||patch.samvadi>=0){int pc=((note-patch.root)%12+12)%12;if(pc==patch.vadi)velocity=fminf(1.0f,velocity+.15f);else if(pc==patch.samvadi)velocity=fminf(1.0f,velocity+.08f);} // pivots sing out
+   if(t.model>=MD_FM&&(patch.vadi>=0||patch.samvadi>=0)){int pc=((note-patch.root)%12+12)%12;if(pc==patch.vadi)velocity=fminf(1.0f,velocity+.15f);else if(pc==patch.samvadi)velocity=fminf(1.0f,velocity+.08f);} // pivots sing out
+   if(t.model<MD_FM)pitch=(float)note;
    fire(i,pitch,velocity);out_note(i,pitch,velocity,duration*.5f/t.ratchet);
    repeats[i]={(duration/t.ratchet),duration/t.ratchet,pitch,velocity,(unsigned)t.ratchet-1};
   }
@@ -480,16 +485,21 @@ static void quantum(float *lr,unsigned n) {
  // Conservative admission guard from 0.4.1 FM-1 costs with full-rate tape, LP24 and maximum repeats.
  // Count unmuted slots before playback so the tape cannot prefill four FULL grains
  // immediately before a dense six-voice attack. Existing audible tails also count.
- if(patch.quality){static const unsigned weight[MD_MODELS]={13,6,6,7,6,9,7,8};unsigned cost=7;
-  // Rhizome: percent of the FM-1's processor, measured on the device on 4 November 2026 (a sounding voice; the tape and
-  // HALL together; Beads with its 3 grains, estimated from 6 grains at 28 %).
-  if(fx_active||patch.fx_level)cost+=14;if(patch.macro[3])cost+=14;
+ if(patch.quality){static const unsigned weight[MD_MODELS]={8,13,8,18,10,26,17,8,8,30,10,12,7,13};unsigned cost=7;
+  // Monades' weights for its voices; Rhizome's measured on the FM-1 on 4 November 2026 (SIX-OP, STRING MACHINE, the
+  // base, the tape and HALL together, Monades' grains).
+  if(fx_active||patch.fx_level)cost+=14;if(patch.macro[3])cost+=8;
   if(patch.chorus)cost+=3;if(patch.send_hp||patch.room_diffusion)cost+=2; // Monades estimates, pending FM-1 measurement
   for(unsigned j=0;j<6;j++)if(!patch.track[j].mute&&patch.ext[j].warps)cost+=2;
   for(unsigned i=0;i<6;i++)if(voices[i].active||!patch.track[i].mute)cost+=weight[patch.track[i].model];
   if(cost>85){patch.quality=0;stats.quality_reductions++;for(unsigned i=0;i<6;i++){voices[i].eco_phase=0;voices[i].eco_previous=voices[i].eco_next=0;voices[i].fade=0;}}
  }
 
+ // A shared mode budget also applies in ECO. All six tracks remain audible.
+ unsigned element_count=0;
+ for(unsigned j=0;j<6;j++)if(patch.track[j].model==MD_ELEMENTS&&(voices[j].active||!patch.track[j].mute))element_count++;
+ unsigned element_modes=element_count>1?16/element_count:(patch.quality?16:8);
+ element_modes=element_modes<2?2:element_modes;stats.element_modes=element_modes;
  const float block_ratio=n>32?n/32.0f:1.0f;
  const float slew25=n>32?.025f*block_ratio*(1-.0125f*(block_ratio-1)):.025f;
  const float slew40=n>32?.04f*block_ratio*(1-.02f*(block_ratio-1)):.04f;
@@ -499,14 +509,14 @@ static void quantum(float *lr,unsigned n) {
  for(unsigned j=0;j<4;j++)smooth[j]+=(unit(patch.macro[j])-smooth[j])*slew25;
  lfo_update(n);
  float delay_send[Q]={},room_send[Q]={};
- float send[Q]={},out[Q],aux[Q],tmp[Q],duck[Q];memset(lr,0,n*2*sizeof(float));
+ float send[Q]={},out[Q],aux[Q],tmp[Q],exc[Q],duck[Q];memset(lr,0,n*2*sizeof(float));
  float duckdec=1.0f-1.0f/(MD_RATE*(.04f+unit(patch.duck_release)*1.46f));
  for(unsigned k=0;k<n;k++){duck[k]=1-duckenv*unit(patch.duck_amount)*.9f;duckenv*=duckdec;}
  stats.duck_gain=n?duck[n-1]:1;
  const uint32_t pt1=plat_ticks();prof_acc[0]+=pt1-pt0; // the sequencer, the orbits, the LFOs
  for(unsigned i=0;i<6;i++) {
   md_track &t=patch.track[i];Voice &v=voices[i];bool trig=v.trigger;v.trigger=0;
-  if(trig) {v.active=1;v.attacking=t.attack>0; if(!v.attacking)v.env=1;v.lpg=1;}
+  if(trig) {v.active=1;v.attacking=t.attack>0; if(!v.attacking)v.env=1;v.excite=1;v.lpg=1;}
   /* Only FM/VA have an observable final envelope. Never cut resonator/drum tails. */
   if(!v.active){stats.skipped_quanta++;continue;}stats.voice_quanta++;
   const md_extension &e=patch.ext[i];const float *lm=lfo_mod[i];
@@ -517,24 +527,100 @@ static void quantum(float *lr,unsigned n) {
   v.tide_phase+=n/(MD_RATE*(.5f+unit(e.tides_rate)*19.5f));if(v.tide_phase>=1)v.tide_phase-=1;
   stats.tide_phase[i]=v.tide_phase;
   float tidal=(1.0f-4.0f*fabsf(v.tide_phase-.5f))*unit(e.tides);
-  float tone=fminf(.98f,fmaxf(.02f,unit(t.tone)+(smooth[2]-.5f)*.65f+lm[MD_TO_TONE]*.5f));
+  float tone=fminf(.98f,fmaxf(t.model==MD_HARMONIC?0.0f:.02f,unit(t.tone)+(smooth[2]-.5f)*.65f+lm[MD_TO_TONE]*.5f));
   bend_smooth[i]+=(bend[i]-bend_smooth[i])*slew40;
   float ornament=0;if(v.orn_style){ornament=gamaka_shape(v.orn_style,patch.gamaka_amount[i],v.orn_from,v.orn_age*1000);v.orn_age+=n*(1.0f/MD_RATE);}
   stats.gamaka_now[i]=ornament;stats.gamaka_age[i]=v.orn_age*1000;
   float played_note=v.note+bend_smooth[i]+lm[MD_TO_PITCH]*12.0f+ornament;
   float f=440.0f*stmlib::SemitonesToRatio(played_note-69.0f)/MD_RATE;
-  // Plaits' gate: high from the note for as long as its envelope still sounds (SIX-OP's DX7 envelopes hold on it).
-  const bool gate=trig||v.attacking||v.env>.3f||v.midi_gate>0;
-  plaits::EngineParameters p={(int)((trig?plaits::TRIGGER_RISING_EDGE:0)|(gate?plaits::TRIGGER_HIGH:0)),played_note,tone,shp,harm*.999f,fminf(v.velocity,.999f)};bool done=false; // accent below 1: SIX-OP reads one table entry past it at 1
+  // Rhizome: SIX-OP and STRING MACHINE get Plaits' gate, high from the note for as long as its envelope still sounds
+  // (SIX-OP's DX7 envelopes hold on it), and an accent below 1 (SIX-OP reads one table entry past it at 1).
+  const bool gate=t.model>=MD_SIXOP&&(trig||v.attacking||v.env>.3f||v.midi_gate>0);
+  plaits::EngineParameters p={(int)((trig?plaits::TRIGGER_RISING_EDGE:0)|(gate?plaits::TRIGGER_HIGH:0)),played_note,tone,shp,harm*.999f,t.model>=MD_SIXOP?fminf(v.velocity,.999f):v.velocity};bool done=false;
   memset(out,0,sizeof out);memset(aux,0,sizeof aux);
-  // ECO: every engine runs at half rate (an octave up, interpolated below): on the FM-1 a voice costs 6 to 13 % at full
-  // rate (measured 4 November 2026). SIX-OP's envelopes are rebuilt for the half rate; STRING MACHINE's ensemble turns
-  // a little slower.
-  bool eco=patch.quality==0;
+  // ECO: FM, VA and HARMONIC at half rate as in Monades, and Rhizome's two (SIX-OP's envelopes rebuilt for the half rate).
+  bool eco=patch.quality==0&&(t.model==MD_FM||t.model==MD_VA||t.model==MD_HARMONIC||t.model==MD_SIXOP||t.model==MD_STRINGS);
   if(t.model==MD_SIXOP&&v.engine&&v.half!=(int)eco){static_cast<plaits::SixOpEngine*>(v.engine)->set_half_rate(eco);v.half=eco;}
   unsigned engine_n=eco?(n+(v.eco_phase?0:1))/2:n;
   if(eco)p.note+=12.0f; // same concert pitch at 22.05 kHz; linear reconstruction below.
-  if(engine_n&&v.engine){const uint32_t e0=plat_ticks();v.engine->Render(p,out,aux,engine_n,&done);prof_acc[1]+=plat_ticks()-e0;}
+  const uint32_t e0=plat_ticks();
+  switch(t.model) {
+   case MD_SIXOP:case MD_STRINGS:if(engine_n&&v.engine)v.engine->Render(p,out,aux,engine_n,&done);break;
+   case MD_KICK:v.kick.Render(false,trig,v.velocity,f,tone,decay_u,harm,.2f,out,n);break;
+   case MD_SNARE:v.snare.Render(false,trig,v.velocity,f,tone,decay_u,harm,out,n);break;
+   case MD_HAT:v.hat.Render(false,trig,v.velocity,f,tone,decay_u,harm,tmp,exc,out,n);break;
+   case MD_FM:if(engine_n)v.fm.Render(p,out,nullptr,engine_n,&done);break;
+   case MD_VA:if(engine_n)v.va.Render(p,out,nullptr,engine_n,&done);break;
+   case MD_HARMONIC:if(engine_n)v.additive.Render(p,out,nullptr,engine_n,&done);break;
+   case MD_ELEMENTS:{
+    elements::Exciter &strike=element_strike[i];elements::Resonator &body=element_body[i];
+    if(trig)v.strike_gate=MD_RATE*(.03f+.5f*shp);
+    unsigned strike_flags=(trig?elements::EXCITER_FLAG_RISING_EDGE:0)|(v.strike_gate>0?elements::EXCITER_FLAG_GATE:0);v.strike_gate=fmaxf(0,v.strike_gate-n);
+    strike.set_model(t.shape<334?elements::EXCITER_MODEL_MALLET:t.shape<667?elements::EXCITER_MODEL_PLECTRUM:elements::EXCITER_MODEL_PARTICLES);
+    // In the Plectrum region, keep its main pulse 1.7-5.2 ms after the primer.
+    // The original 14-38 ms mapping was continually restarted by 220 BPM
+    // four-ratchet rolls (17 ms spacing), leaving only the tiny primer audible.
+    strike.set_parameter(t.shape>=334&&t.shape<667?.05f+.15f*(t.shape-334)/332.0f:.1f+.8f*shp);
+    strike.set_timbre(fminf(.95f,tone));strike.Process(strike_flags,exc,n);
+    body.set_frequency(f);body.set_geometry(fminf(.999f,harm));body.set_brightness(tone);body.set_damping(decay_u*.8f);body.set_position(.3f);body.set_resolution(element_modes);
+    memset(tmp,0,sizeof tmp);body.Process(tmp,exc,out,aux,n);break;}
+   case MD_SATIN:{
+    // Original rounded wavetable oscillator. Reduce harmonics continuously
+    // before Nyquist; interpolate phase and waveform, with no oversampling RAM.
+    v.satin_morph+=(harm*2.999f-v.satin_morph)*slew35;
+    v.satin_tone+=(tone-v.satin_tone)*slew35;
+    int shape=(int)v.satin_morph;float morph=v.satin_morph-shape;
+    v.mellow_drift+=n/(MD_RATE*(9.0f+i));if(v.mellow_drift>=1)v.mellow_drift-=1;
+    float f2=f*stmlib::SemitonesToRatio(.13f*shp*plaits::Sine(v.mellow_drift));
+    int band=3;float highest=fmaxf(f,f2);
+    while(band>0&&highest*(1<<band)>.45f)band--;
+    float fade=band?fminf(1.0f,fmaxf(0.0f,(.45f-highest*(1<<band))/.1125f)):1;
+    for(unsigned k=0;k<n;k++){
+     v.sub_phase+=f;if(v.sub_phase>=1)v.sub_phase-=1;
+     v.mellow_phase+=f2;if(v.mellow_phase>=1)v.mellow_phase-=1;
+     float sum=0;float phases[2]={v.sub_phase,v.mellow_phase};
+     for(int osc=0;osc<2;osc++){
+      float index=phases[osc]*256;int at=(int)index;float frac=index-at;
+      const float *a=satin_table[band][shape],*b=satin_table[band][shape+1];
+      float x=a[at]+(a[at+1]-a[at])*frac,y=b[at]+(b[at+1]-b[at])*frac;
+      float wave=x+(y-x)*morph;
+      if(band&&fade<1){a=satin_table[band-1][shape];b=satin_table[band-1][shape+1];x=a[at]+(a[at+1]-a[at])*frac;y=b[at]+(b[at+1]-b[at])*frac;float low=x+(y-x)*morph;wave=low+(wave-low)*fade;}
+      sum+=wave;
+     }
+     float fundamental=plaits::Sine(v.sub_phase);
+     out[k]=.76f*fundamental+(sum*.42f-.76f*fundamental)*v.satin_tone;
+    }break;}
+   case MD_MELLOW:{
+    // Finite odd-harmonic triangle blend: no discontinuous saw/square aliasing.
+    // Small, slow independent drift; Tone adds rounded harmonics, Shape detune.
+    v.mellow_drift+=n/(MD_RATE*(8.0f+i));if(v.mellow_drift>=1)v.mellow_drift-=1;
+    float detune=stmlib::SemitonesToRatio(.10f*shp*plaits::Sine(v.mellow_drift));
+    for(unsigned k=0;k<n;k++){
+     v.sub_phase+=f;if(v.sub_phase>=1)v.sub_phase-=1;
+     v.mellow_phase+=f*detune;if(v.mellow_phase>=1)v.mellow_phase-=1;
+     float a=plaits::Sine(v.sub_phase),b=plaits::Sine(v.mellow_phase);
+     float tri=(f*5<.45f?plaits::Sine(v.sub_phase*5)*.04f:0)-(f*3<.45f?plaits::Sine(v.sub_phase*3)/9:0);
+     out[k]=.38f*(a+b)+tone*.25f*tri+.08f*harm*plaits::Sine(v.sub_phase*2);
+    }break;}
+   case MD_BASS:
+    for(unsigned k=0;k<n;k++){v.sub_phase+=f*.5f;if(v.sub_phase>=1)v.sub_phase-=1;
+     out[k]=.65f*plaits::Sine(v.sub_phase*2)+.2f*harm*plaits::Sine(v.sub_phase)+.12f*tone*plaits::Sine(v.sub_phase*4);}
+    break;
+   case MD_CHOIR:{
+    static const int chord[4][3]={{0,3,7},{0,4,7},{0,5,7},{0,7,12}};
+    int ci=bound(t.harm*4/1001,0,3);
+    for(int j=0;j<3;j++){
+     int note=md_quantize((int)played_note+chord[ci][j],patch.root,patch.scale);
+     float hz=440.0f*stmlib::SemitonesToRatio(note-69.0f+(j-1)*shp*.20f)/MD_RATE;
+     v.choir[j].Render(hz,j?(.25f+.12f*tone):.45f,out,n);
+    }break;}
+   case MD_RINGS:
+    v.rings.set_frequency(f);v.rings.set_structure(harm*.999f);v.rings.set_brightness(tone);
+    v.rings.set_damping(decay_u*.9f);v.rings.set_position(.35f);v.rings.set_resolution(patch.quality?24:8);
+    for(unsigned k=0;k<n;k++){exc[k]=noise()*v.excite*.65f*v.velocity;v.excite*=.985f;}
+    v.rings.Process(exc,out,aux,n);break;
+  }
+  prof_acc[1]+=plat_ticks()-e0;
   if(eco){memcpy(tmp,out,engine_n*sizeof(float));unsigned j=0;
    for(unsigned k=0;k<n;k++){if(!v.eco_phase){v.eco_previous=v.eco_next;v.eco_next=tmp[j++];out[k]=(v.eco_previous+v.eco_next)*.5f;}else out[k]=v.eco_next;v.eco_phase^=1;}
   }
@@ -550,13 +636,14 @@ static void quantum(float *lr,unsigned n) {
   float target=t.mute?0:unit(t.level)*.24f*(1+lm[MD_TO_LEVEL]);
   float pan=clamp01(unit(t.pan)+lm[MD_TO_PAN]*.5f),dec=1.0f-1.0f/(MD_RATE*(.06f+decay_u*decay_u*16.0f));
   float attackstep=1.0f/(1+MD_RATE*8.0f*att*att),sendlevel=clamp01(unit(t.send)+lm[MD_TO_GRAIN_SEND]*.5f);
-  const bool melodic=true;const float gain=model_gain[t.model]; // every Rhizome voice has the envelope; gain: the engines brought to one level
+  const bool melodic=md_has_envelope(t.model);
   const float velocity=melodic?v.velocity:1,warp_target=unit(e.warps),ds=clamp01(unit(e.delay_send)+lm[MD_TO_ECHO_SEND]*.5f),rs=clamp01(unit(e.reverb_send)+lm[MD_TO_ROOM_SEND]*.5f+comet_swell),expr=expression[i];
   float track_peak=stats.track_peak[i];
+  const float plaits_gain=t.model==MD_STRINGS?2.54f:t.model==MD_SIXOP?1.08f:1.0f; // Rhizome: its two voices at FM's level (measured 3 November 2026)
   // Keep the exact envelope -> filter -> gain order, but let the SVF retain
   // coefficients and state in registers across a tile instead of the mixer.
   for(unsigned k=0;k<n;k++){
-   float x=out[k]*gain;
+   float x=t.model==MD_ELEMENTS?(out[k]+aux[k]*.3f)*3.0f*v.velocity:t.model==MD_RINGS?(out[k]+aux[k])*12.0f:out[k]*plaits_gain;
    if(melodic){if(v.midi_gate<0){v.env*=.9975f;v.attacking=0;}else if(v.attacking){v.env+=attackstep;if(v.env>=1){v.env=1;v.attacking=0;}}else if(v.midi_gate==0)v.env*=dec;x*=v.env;}
    out[k]=x;
   }
@@ -779,7 +866,7 @@ void md_render(float *lr,unsigned n) {
 }
 const md_patch *md_state(){return &patch;}const md_stats *md_status(){return &stats;}int md_playing(){return playing;}
 int md_validate(const md_patch *p) {
- if(!p||p->magic!=0x4D445231||p->version!=12||!p->seed||p->tempo<30||p->tempo>220)return 0;
+ if(!p||p->magic!=0x4D445231||p->version!=13||!p->seed||p->tempo<30||p->tempo>220)return 0;
  if(p->biome_id< -1||p->biome_id>=MD_BIOMES||p->edited_mask>127)return 0;
  for(int i=0;i<6;i++)if(p->tone_preset[i]< -1||p->tone_preset[i]>=MD_TONE_PRESETS)return 0;
  for(int j=0;j<4;j++)if(p->macro[j]<0||p->macro[j]>1000)return 0;
@@ -808,10 +895,10 @@ int md_validate(const md_patch *p) {
  return 1;
 }
 int md_load(const md_patch *p){if(playing||!md_validate(p))return 0;patch=*p;orbit_prepared=-1;previous=patch;returnable=0;morph_on=0;drift_on=0;drift_slow=0;morph_span=0;fx_shed=0;seqrng=patch.seed;clear_audio();for(int j=0;j<4;j++)smooth[j]=unit(patch.macro[j]);for(int i=0;i<6;i++)reset_voice(i);mark_saved();return 1;}
-unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof hall_buf+sizeof sixop_bank+sizeof gr_tape+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof voices_raw+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
+unsigned md_memory_bytes(){return sizeof drift_home+sizeof morph_before+sizeof morph_a+sizeof morph_b+sizeof morph_kind+sizeof chorus_line+64+sizeof hall_buf+sizeof sixop_bank+sizeof element_body+sizeof element_strike+sizeof gr_tape+sizeof reel+sizeof reel_decode+sizeof reel_trace+sizeof voices_raw+sizeof patch+sizeof previous+sizeof stats+sizeof queue+sizeof repeats+512;}
 int md_decode(md_patch *out,const void *data,unsigned bytes){
  if(!out||!data)return 0;
- if(bytes==sizeof(md_patch)){md_patch p;memcpy(&p,data,sizeof p);if(p.version==11){rhizome_voices(p);p.biome_id=-1;}if(!md_validate(&p))return 0;*out=p;return 1;} // v11: Monades' voices
+ if(bytes==sizeof(md_patch)){md_patch p;memcpy(&p,data,sizeof p);if(p.version==12){rhizome_v12_voices(p);p.version=13;p.biome_id=-1;}else if(p.version==11){p.version=13;p.biome_id=-1;}if(!md_validate(&p))return 0;*out=p;return 1;}
  // Older patches (Monades, Mutable Dreams): their Monde numbers mean nothing here, so they come back as your own.
  // Monades v10 (1680 bytes): no orbits.
  if(bytes==offsetof(md_patch,orbit)){md_patch p;memcpy(&p,data,bytes);if(p.version!=10)return 0;v11_defaults(p);p.biome_id=-1;if(!md_validate(&p))return 0;*out=p;return 1;}
@@ -854,7 +941,7 @@ const char *md_biome_name(int id){return id<0?"USER MONDE":biome_bank[bound(id,0
 const char *md_biome_family(int id){return id<0?"CUSTOM":biome_families[biome_bank[bound(id,0,MD_BIOMES-1)].family];}
 const char *md_tone_name(int id){return id<0?"MONDE VOICE":tone_bank[bound(id,0,MD_TONE_PRESETS-1)].name;}
 int md_tone_model(int id){return tone_bank[bound(id,0,MD_TONE_PRESETS-1)].model;}
-int md_has_envelope(int model){return model>=0&&model<MD_MODELS;} // Rhizome: every voice
+int md_has_envelope(int model){return model==MD_FM||model==MD_VA||model==MD_HARMONIC||model==MD_CHOIR||model==MD_BASS||model==MD_MELLOW||model==MD_SATIN||model==MD_SIXOP||model==MD_STRINGS;}
 int md_cutoff_hz(int value){return (int)cutoff_hz(unit(value));}
 
 unsigned md_scale_mask(int scale){return scale_mask_for(scale,0);}
@@ -913,13 +1000,13 @@ float md_echo_sync_len16(int s){return echo_sync_len[bound(s,0,MD_ECHO_SYNCS-1)]
 const char *md_echo_sync_name(int s){static const char *const n[MD_ECHO_SYNCS]={"OFF","1/32","1/16 T","1/16","1/8 T","1/16 .","1/8","1/4 T","1/8 .","1/4","1/4 .","1/2","1/2 ."};return n[bound(s,0,MD_ECHO_SYNCS-1)];}
 int md_send_hp_hz(int v){return v>0?(int)(20.0f*stmlib::SemitonesToRatio(bound(v,0,1000)*.0797262f)+.5f):0;}
 void md_set_custom_scale(unsigned mask){custom_scale=(uint16_t)((mask&0xfff)|1u);}
-const char *md_model_name(int m){static const char *names[]={"STRING MACHINE","WAVETABLE","WAVE TERRAIN","SIX-OP FM","SWARM","PHASE DISTORT","CHORDS","FORMANT"};return names[bound(m,0,MD_MODELS-1)];}
+const char *md_model_name(int m){static const char *names[]={"PLAITS KICK","PLAITS SNARE","PLAITS HAT","PLAITS FM","PLAITS VA","RINGS MODAL","PLAITS HARMONIC","SINE CHOIR","ROUND BASS","ELEMENTS STRIKE","MELLOW DRIFT","SATIN MORPH","SIX-OP FM","STRING MACHINE"};return names[bound(m,0,MD_MODELS-1)];}
 unsigned md_voice_arena_spare(){return (unsigned)arena_spare;}
-const char *md_knob_name(int m,int k){static const char *const names[MD_MODELS][3]={{"BRIGHT","CHORD","REGISTER"},{"WAVE X","BANK","WAVE Y"},
- {"RADIUS","TERRAIN","PATH"},{"BRIGHT","SOUND","ENVELOPE"},{"DENSITY","SPREAD","GRAIN"},{"AMOUNT","RATIO","WIDTH"},{"INVERSION","CHORD","WAVE"},
- {"FORMANT","RATIO","WIDTH"}};return names[bound(m,0,MD_MODELS-1)][bound(k,0,2)];}
+// Rhizome's two voices name their knobs (Plaits' TIMBRE, HARMONICS, MORPH); Monades' keep TONE, HARMONICS, SHAPE.
+const char *md_knob_name(int m,int k){static const char *const sixop[3]={"BRIGHT","SOUND","ENVELOPE"},*const strings[3]={"BRIGHT","CHORD","REGISTER"},*const plain[3]={"TONE","HARMONICS","SHAPE"};
+ return (m==MD_SIXOP?sixop:m==MD_STRINGS?strings:plain)[bound(k,0,2)];}
 const char *md_harm_name(int m,int harm){
- if(m==MD_STRINGS||m==MD_CHORDS){static const char *const chords[11]={"OCTAVE","FIFTH","SUS4","MINOR","MINOR 7","MINOR 9","MINOR 11","6/9","MAJOR 9","MAJOR 7","MAJOR"};
+ if(m==MD_STRINGS){static const char *const chords[11]={"OCTAVE","FIFTH","SUS4","MINOR","MINOR 7","MINOR 9","MINOR 11","6/9","MAJOR 9","MAJOR 7","MAJOR"};
   return chords[bound((int)(harm*.001f*1.02f*11),0,10)];} // as Plaits' chord quantizer, without its hysteresis
  if(m==MD_SIXOP){static char name[11];const int k=bound((int)(harm*.001f*1.02f*96),0,95);static const uint8_t *const banks[3]={plaits::syx_bank_0,plaits::syx_bank_1,plaits::syx_bank_2};
   const uint8_t *at=banks[k/32]+(k%32)*plaits::fm::Patch::SYX_SIZE+118;int n=0;for(int c=0;c<10;c++){char x=(char)(at[c]&0x7f);if(x>='a'&&x<='z')x-=32;if(x==' '&&n&&name[n-1]==' ')continue;name[n++]=x;}

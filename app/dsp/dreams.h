@@ -4,10 +4,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-enum { MD_TRACKS=6, MD_MODELS=8, MD_RATE=44100, MD_QUANTUM=64, MD_BIOMES=19, MD_TONE_PRESETS=128, MD_BLANK_BIOME=18 }; /* Rhizome: 18 Mondes and EMPTY SKY */
-/* Rhizome's eight voices, all from Plaits (Mutable Instruments, MIT), none of them Monades': no drums, no Rings or
- * Elements, which the other FM-1 plays. K1 TONE is Plaits' TIMBRE, K2 HARMONICS its HARMONICS, K3 SHAPE its MORPH. */
-enum { MD_STRINGS, MD_WAVETABLE, MD_TERRAIN, MD_SIXOP, MD_SWARM, MD_PD, MD_CHORDS, MD_FORMANT };
+enum { MD_TRACKS=6, MD_MODELS=14, MD_RATE=44100, MD_QUANTUM=64, MD_BIOMES=19, MD_TONE_PRESETS=256, MD_BLANK_BIOME=18 }; /* Rhizome: 18 Mondes and EMPTY SKY */
+/* Monades' twelve voices, then Rhizome's two own, from Plaits (Mutable Instruments, MIT): SIX-OP FM (K2 picks one of
+ * 96 DX7 sounds) and STRING MACHINE (K2 the chord). For these two, K1 TONE is Plaits' TIMBRE, K3 SHAPE its MORPH. */
+enum { MD_KICK, MD_SNARE, MD_HAT, MD_FM, MD_VA, MD_RINGS, MD_HARMONIC, MD_CHOIR, MD_BASS, MD_ELEMENTS, MD_MELLOW, MD_SATIN, MD_SIXOP, MD_STRINGS };
 enum { MD_MODEL, MD_TONE, MD_HARM, MD_DECAY, MD_LEVEL, MD_SEND, MD_HITS,
  MD_LENGTH, MD_ROTATE, MD_PROB, MD_NOTE, MD_PAN, MD_MUTE, MD_SPEED,
  MD_MACRO, MD_TEMPO, MD_PLAY, MD_LOCK, MD_MUTATE, MD_RETURN, MD_SCENE,
@@ -201,9 +201,9 @@ int md_orbit_gate_angles(const md_patch *p,int track,float *phi); /* directions 
 float md_orbit_eccentric(float mean,float e); /* Kepler's equation: the eccentric anomaly E, M = E - e sin E */
 float md_atan2(float y,float x);
 const char *md_model_name(int model);
-const char *md_knob_name(int model,int knob); /* Rhizome: what K1 TONE, K2 HARMONICS, K3 SHAPE do on this voice */
+const char *md_knob_name(int model,int knob); /* Rhizome: what K1, K2, K3 do on this voice (named on SIX-OP and STRING MACHINE) */
 const char *md_harm_name(int model,int harm); /* the chord or the DX7 sound K2 picks, or 0 when K2 is a plain amount */
-unsigned md_voice_arena_spare(void); /* the least room any voice's engine has left in its arena so far (bytes) */
+unsigned md_voice_arena_spare(void); /* the least room SIX-OP or STRING MACHINE has left in a voice's arena so far (bytes) */
 const char *md_biome_name(int id);
 const char *md_biome_family(int id);
 const char *md_tone_name(int id);

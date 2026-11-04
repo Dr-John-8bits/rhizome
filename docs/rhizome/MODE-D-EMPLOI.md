@@ -4,11 +4,11 @@ Rhizome est un firmware pour le M-VAVE FM-1, écrit pour **When Day Chokes The N
 - un **séquenceur orbital**, où des corps tournent autour d'une étoile et jouent quand ils passent leurs portes ;
 - une **bande** à trois têtes ;
 - une **réverbe HALL** ;
-- un **granulaire Beads**.
+- des **grains** (le granulaire de Monades).
 
 Il est complémentaire de Monades (le premier FM-1, qui fait les notes) et joue aussi très bien seul.
 
-> **État au 3 novembre 2026.** Rhizome tourne dans le simulateur et se compile pour le FM-1. **Il n'a pas encore été mesuré sur un FM-1** : ne l'installez pas sur votre appareil avant que la charge du processeur ait été vérifiée (voir « Points de vigilance »).
+> **État au 4 novembre 2026.** Rhizome reprend les moteurs de Monades, plus SIX-OP FM et STRING MACHINE. Cette version se compile et passe ses tests ; **sa charge sur le FM-1 reste à mesurer** avant de l'installer pour de bon (voir « Points de vigilance »).
 
 Rhizome repart du code de **Monades 0.1.3**. Tout ce que Monades sait faire est encore là : voix, filtres, rythmes, phrases, générateurs, gammes, MIDI, sauvegardes. Ce mode d'emploi décrit ce que Rhizome ajoute ou change. Pour les pages héritées, voir le [mode d'emploi de Monades](https://dr-john-8bits.github.io/rhizome/monades/manuel/).
 
@@ -56,7 +56,7 @@ Les autres commandes ne changent pas :
 
 Deux différences :
 - sur les pages de Rhizome, **REC** ne tire pas la page au sort : il donne une nouvelle variation, comme sur LIVE ;
-- le bouton **LFO** fige la mémoire de Beads.
+- le bouton **LFO** fige la mémoire des grains.
 
 ## L'accueil : le système du Monde
 
@@ -78,16 +78,16 @@ Deux différences :
 
 Rhizome a **18 Mondes**, écrits pour When Day Chokes The Night. Les trois premières familles vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. La quatrième, DEEP, fait évoluer la musique sur plusieurs minutes. Le 19e, **EMPTY SKY**, est une page blanche : aucune porte, aucun coup, les effets à zéro.
 
-**Chaque Monde joue quatre voix au plus** : sur le FM-1, une voix qui sonne coûte 6 à 13 % du processeur (mesuré le 4 novembre 2026). Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas). Sur le Mac, les douze premiers sont estimés entre 36 et 53 % du processeur du FM-1, Beads grand ouvert compris : loin de la limite de 85 %. Ce n'est qu'une estimation, que l'appareil devra confirmer.
+**Chaque Monde joue quatre voix au plus**, pour rester loin de la limite de 85 % du processeur : la bande, la HALL et les grains en prennent déjà une bonne part. Les sons sont ceux de Monades, avec SIX-OP FM et STRING MACHINE, les deux voix propres à Rhizome, dans les Mondes DEEP. Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO STARS, SLOW TIDES et LOOPS OF ASH, plus clairsemés, un peu plus bas).
 
 **DUSK, les résonances.** Des orbites rondes ou presque, dont les périodes sont des rapports simples. On entend des polyrythmes lents et réguliers.
 
 | Monde | Gamme · tempo | Ce qu'on entend |
 |---|---|---|
-| 1 LAST LIGHT | D DORIAN · 64 | Quatre corps en 8:3:4:6 : un terrain grave fait le 8, des sons DX7 et une table d'ondes au-dessus. |
-| 2 AMBER HOUR | A MINOR PENT · 72 | Une résonance de Laplace : 1:2:4, comme Io, Europe et Ganymède. Des cloches et un piano électrique DX7. |
+| 1 LAST LIGHT | D DORIAN · 64 | Quatre corps en 8:3:4:6 : la basse fait le 8, des cloches et un sinus au-dessus. |
+| 2 AMBER HOUR | A MINOR PENT · 72 | Une résonance de Laplace : 1:2:4, comme Io, Europe et Ganymède. Des cloches FM. |
 | 3 LONG SHADOWS | F LYDIAN · 60 | Trois corps de cinq portes en 6:7:8 : ils se décalent lentement, puis se retrouvent. |
-| 4 SLOW EMBERS | E MINOR · 54 | Tintinnabuli : une voix soufflée (FORMANT) joue sa phrase (MOTIF), un son doux lui répond sur l'accord (ECHO). |
+| 4 SLOW EMBERS | E MINOR · 54 | Tintinnabuli : une flûte joue sa phrase (MOTIF), un sinus lui répond sur l'accord (ECHO). |
 
 **NIGHT, les orbites excentriques.** Le rubato : les corps pressent près de l'étoile et restent suspendus loin d'elle. Les ellipses tournent (précession), certaines portes sautent (perturbation).
 
@@ -112,36 +112,44 @@ Rhizome a **18 Mondes**, écrits pour When Day Chokes The Night. Les trois premi
 | Monde | Gamme · tempo | Ce qu'on entend |
 |---|---|---|
 | 13 COLD IN THE DARK | D MINOR · 72 | La vitrine : des boucles de quelques pas, les trois sources de notes, une phrase que son générateur fait muter, des lunes, une nappe en période libre qui ne tombe jamais en place, la précession, une comète, des accords, des LFO lents et la forme. |
-| 14 KEPLER NIGHT | A DORIAN · 60 | Le système Kepler-223 tel qu'il a été mesuré (3:4:6:8), la couleur des tables d'ondes qui tourne avec un LFO lent ; toutes les 16 mesures, une comète dont le FILTER ouvre tout le ciel à son passage. |
+| 14 KEPLER NIGHT | A DORIAN · 60 | Le système Kepler-223 tel qu'il a été mesuré (3:4:6:8), une nappe DX7 et des cordes STRING MACHINE, la couleur de la FM qui tourne avec un LFO lent ; toutes les 16 mesures, une comète dont le FILTER ouvre tout le ciel à son passage. |
 | 15 TRAPPIST DUST | E HIRAJOSHI · 66 | La chaîne résonante de TRAPPIST-1 (2:3:4:6), ses notes tirées par des générateurs qui s'en souviennent (déjà-vu), puis les lâchent peu à peu. |
-| 16 RAGA OF ASH | D BHAIRAVI · 52 | Un raga de nuit : un bourdon, une voix soufflée qui chante sa phrase en meend, une anche qui ondule (andolan), des cloches avec kan, et les notes pivots. |
+| 16 RAGA OF ASH | D BHAIRAVI · 52 | Un raga de nuit : un bourdon d'orgue, une flûte qui chante sa phrase en meend, une anche qui ondule (andolan), des cloches DX7 avec kan, et les notes pivots. |
 | 17 SLOW TIDES | F MIXOLYDIAN · 58 | La forme : calme, montée, sommet, retombée, seize mesures chacun, des pistes qui se taisent et reviennent ; des LFO ouvrent les filtres et déplacent les voix. |
 | 18 LOOPS OF ASH | F MINOR · 60 | Quatre périodes libres, une porte chacune : des longueurs des boucles de bande de *Music for Airports* (Brian Eno). Quatre voix qui ne retombent jamais ensemble : la musique ne se répète jamais. |
 
-## Les voix : les 8 moteurs
+## Les voix : les 14 moteurs
 
-Chaque piste fabrique son son avec un **moteur**, une méthode de synthèse calculée en direct. Rhizome a les siens, **huit moteurs de Plaits** (Mutable Instruments), et aucun de ceux de Monades : pas de batterie, pas de Rings ni d'Elements. Monades, sur l'autre FM-1, fait les notes et le rythme ; Rhizome fait les nappes, les drones et les textures. Chaque moteur va sur chaque piste : **ALGO** le change, **PRESET** (sur la page SOUND) choisit l'un des **128 sons** de la bibliothèque de Rhizome, 16 par moteur.
+Chaque piste fabrique son son avec un **moteur**, une méthode de synthèse calculée en direct. Douze sont ceux de Monades ; deux sont propres à Rhizome, **SIX-OP FM** et **STRING MACHINE** (tirés de Plaits), pour les nappes. Chacun va sur chaque piste : **ALGO** le change, **PRESET** (sur la page SOUND) choisit l'un des **256 sons** tout faits : les 224 de Monades, puis 16 pour SIX-OP FM et 16 pour STRING MACHINE.
 
-Sur la page **SOUND** (EDIT 1 fois), K1 à K3 règlent le moteur de la piste choisie et K4 son niveau. **Chaque potard porte le nom de ce qu'il fait sur ce moteur**, et pour les accords et les sons DX7, l'écran écrit le nom de l'accord ou du son.
+Dix viennent du code publié par Mutable Instruments (huit de Plaits, un de Rings, un d'Elements). Quatre ont été écrits pour Mutable Dreams.
 
-| Moteur | Ce qu'il fait | K1 | K2 | K3 |
-|---|---|---|---|---|
-| STRING MACHINE | Des cordes analogiques, comme les Solina des années 70, avec leur effet d'ensemble : la nappe d'ambient par excellence. Il joue un accord. | BRIGHT : filtre et ensemble | CHORD : l'accord, nommé | REGISTER : le mélange des registres |
-| WAVETABLE | Des tables d'ondes qu'on parcourt : un timbre qui change de couleur quand on bouge les potards (ou un LFO lent). | WAVE X : la colonne | BANK : la banque (quatre) | WAVE Y : la rangée |
-| WAVE TERRAIN | Le son d'un chemin qui survole un relief : des textures mouvantes, minérales. | RADIUS : la taille du chemin | TERRAIN : le relief | PATH : le décalage du chemin |
-| SIX-OP FM | La synthèse des DX7 : 96 sons d'époque, nappes de verre, cloches, pianos électriques. | BRIGHT : le niveau des modulateurs | SOUND : le son DX7, nommé | ENVELOPE : étire ou resserre ses enveloppes |
-| SWARM | Un essaim de huit oscillateurs qui dérivent : un drone vivant, une masse qui grouille. | DENSITY : la densité de l'essaim | SPREAD : l'écart entre les oscillateurs | GRAIN : la longueur des grains |
-| PHASE DISTORT | La synthèse des Casio CZ : du son doux et chaud au son mordant. | AMOUNT : la distorsion de phase | RATIO : sa fréquence | WIDTH : son asymétrie |
-| CHORDS | Un accord entier sur une seule voix, d'orgue ou de cordes : idéal sur une orbite lente. | INVERSION : le renversement | CHORD : l'accord, nommé | WAVE : de l'orgue aux cordes, puis aux tables d'ondes |
-| FORMANT | Des voix sans paroles, des souffles : deux formants qui se répondent. | FORMANT : la hauteur du formant | RATIO : l'écart entre les deux | WIDTH : leur largeur |
+Sur la page **SOUND** (EDIT 1 fois), K1 à K3 règlent le moteur de la piste choisie et K4 son niveau. Ce que fait chaque potard dépend du moteur ; sur SIX-OP FM et STRING MACHINE, chaque potard porte son nom, et l'écran écrit le nom du son DX7 ou de l'accord choisi.
 
-- **Tous les moteurs ont l'enveloppe** de la page **ENVELOPE** (attaque jusqu'à 8 s, déclin jusqu'à 16 s). SIX-OP FM garde en plus les enveloppes de son DX7.
-- **Les huit sont réglés au même niveau** : passer d'un moteur à l'autre ne fait pas sauter le volume.
-- **Le calcul**, mesuré sur le FM-1 : de 6 à 9 % par voix qui sonne, **13 % pour STRING MACHINE**. Une voix dont le son s'est éteint se met en veille et ne coûte plus rien jusqu'à sa note suivante. Les nappes aux longues queues restent éveillées longtemps : quatre voix ensemble, c'est la bonne mesure.
-- **En ECO** (page SYSTEM), tous les moteurs sont calculés à demi-fréquence pour soulager le processeur : les aigus s'adoucissent un peu. SIX-OP FM garde la durée de ses enveloppes ; l'ensemble de STRING MACHINE tourne un peu plus lentement. Les Mondes de Rhizome se chargent en ECO.
-- **Un Monde ou une sauvegarde de Monades** se charge avec, pour chaque piste, le moteur de Rhizome le plus proche (la FM devient SIX-OP FM, l'additif WAVETABLE, le chœur CHORDS…), et sans son de bibliothèque.
+| Moteur | Ce qu'il fait | K1 TONE | K2 HARMONICS | K3 | Calcul |
+|---|---|---|---|---|---|
+| PLAITS KICK | Une grosse caisse analogique simulée. | Couleur | Claquement de l'attaque | DECAY : longueur | léger |
+| PLAITS SNARE | Une caisse claire : une peau qui résonne et le bruit du timbre. | Couleur | Part du timbre | DECAY : longueur | moyen |
+| PLAITS HAT | Une charleston : un son métallique mêlé de bruit. | Couleur | Part du bruit | DECAY : longueur | léger |
+| PLAITS FM | Deux ondes dont l'une fait vibrer l'autre : cloches, piano électrique, métal. | Brillance | Rapport des deux ondes (le caractère) | SHAPE : réinjection, vers le grain | moyen |
+| PLAITS VA | Deux oscillateurs analogiques simulés, comme sur un synthé classique. | Forme de l'onde carrée | Écart d'accord entre les deux | SHAPE : forme de la dent de scie | léger |
+| PLAITS HARMONIC | Synthèse additive : des harmoniques qu'on additionne, comme les tirettes d'un orgue. | L'harmonique mise en avant | Nombre d'harmoniques | SHAPE : groupe large ou pointu | moyen |
+| RINGS MODAL | Un objet qui vibre (corde, plaque, cloche), frappé à chaque note. | Brillance | De la corde (harmonieux) à la cloche (inharmonique) | DECAY : amortissement | **lourd** |
+| ELEMENTS STRIKE | Un excitateur et un corps qui résonne. | Brillance | Géométrie du corps | EXCITER : maillet, médiator, particules | **lourd** |
+| SINE CHOIR | Trois sinus qui chantent un accord, ramené dans la gamme. | Volume des deux voix du haut | L'accord : mineur, majeur, suspendu, quinte et octave | SHAPE : écart d'accord (chœur plus large) | léger |
+| ROUND BASS | Une basse ronde en sons purs. | Ajoute l'octave au-dessus | Ajoute l'octave en dessous | sans effet (longueur : page ENVELOPE) | léger |
+| MELLOW DRIFT | Deux sons purs qui se désaccordent lentement : un son doux qui flotte. | Harmoniques douces | Ajoute l'octave | SHAPE : ampleur de la dérive | léger |
+| SATIN MORPH | Deux oscillateurs qui glissent entre des formes d'onde arrondies. | Du son pur à la forme choisie | Passe d'une forme à la suivante | SHAPE : dérive entre les deux | moyen |
+| SIX-OP FM | La synthèse des DX7 : 96 sons d'époque, nappes de verre, cloches, pianos électriques. | BRIGHT : le niveau des modulateurs | SOUND : le son DX7, nommé | ENVELOPE : étire ou resserre ses enveloppes | moyen |
+| STRING MACHINE | Des cordes analogiques, comme les Solina des années 70, avec leur effet d'ensemble : la nappe d'ambient par excellence. Il joue un accord. | BRIGHT : filtre et ensemble | CHORD : l'accord, nommé | REGISTER : le mélange des registres | moyen |
 
-Le détail des pages héritées (filtres, enveloppes, LFO, gammes) est dans le [mode d'emploi de Monades](https://dr-john-8bits.github.io/rhizome/monades/manuel/). Dans Rhizome, les cibles de LFO **ECHO** visent la bande, **ROOM** la HALL et **GRAIN** Beads.
+- **La colonne « Calcul »** donne l'estimation qui sert à la garde automatique (celle de Monades ; pour SIX-OP FM et STRING MACHINE, la mesure sur le FM-1). Sur le FM-1, chaque voix qui sonne coûte aussi son filtre, son enveloppe et ses envois, environ 6 % : quatre voix ensemble, c'est la bonne mesure. Les Mondes de Rhizome n'utilisent pas d'ELEMENTS et un seul RINGS (dans BLACK ORCHARD). Une voix dont le son s'est éteint se met en veille et ne coûte plus rien jusqu'à sa note suivante.
+- **KICK, SNARE, HAT et RINGS** règlent leur longueur avec DECAY ; les autres ont une enveloppe (page **ENVELOPE** : attaque et déclin). SIX-OP FM garde en plus les enveloppes de son DX7.
+- **En ECO** (page SYSTEM), FM, VA, HARMONIC, SIX-OP FM et STRING MACHINE sont calculés à mi-cadence pour soulager le processeur : les aigus s'adoucissent un peu. SIX-OP FM garde la durée de ses enveloppes. Les Mondes de Rhizome se chargent en ECO.
+- **Un Monde ou une sauvegarde de Monades** se charge tel quel : ce sont les mêmes moteurs. Une sauvegarde d'une version d'essai de Rhizome à huit moteurs de Plaits reçoit, pour chaque piste, le moteur le plus proche d'aujourd'hui.
+- **Les batteries ne jouent pas de mélodie** : sur une orbite, elles ignorent la source des notes (ORBIT, MOTIF, ECHO) et leurs lunes répètent le même coup.
+
+Le détail des pages héritées (filtres, enveloppes, LFO, gammes) est dans le [mode d'emploi de Monades](https://dr-john-8bits.github.io/rhizome/monades/manuel/). Dans Rhizome, les cibles de LFO **ECHO** visent la bande, **ROOM** la HALL et **GRAIN** les grains.
 
 ## Premiers pas : faire tourner des orbites
 
@@ -383,7 +391,7 @@ Le granulaire est celui de Monades : jusqu'à quatre grains qui relisent une ban
 
 ### TAPE / MOTION
 - **K1 PITCH** : la hauteur des grains, de −24 à +24 demi-tons.
-- **K2 DIRECTION** : à l'endroit, ou à l'envers (Beads joue alors ses grains à rebours).
+- **K2 DIRECTION** : à l'endroit, ou à l'envers (les grains sont alors lus à rebours).
 
 ### Ce que montrent GRANULAR BUS et BEADS
 - La mémoire, avec le présent à droite et toute sa durée vers la gauche.
@@ -421,7 +429,7 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 
 ## Points de vigilance
 
-- **La charge du processeur.** Comme pour Monades, **la limite de 85 % ne doit jamais être atteinte**, même dans le pire cas. Sur le Mac, les Mondes de Rhizome sont estimés entre 36 et 53 %, Beads grand ouvert compris. Un Monde fait à la main peut être plus lourd : six voix toutes jouées, avec la bande, la HALL et Beads grand ouverts, par exemple. Seule une mesure sur l'appareil le dira.
+- **La charge du processeur.** Comme pour Monades, **la limite de 85 % ne doit jamais être atteinte**, même dans le pire cas. Sur le FM-1, la bande et la HALL prennent ensemble 20 à 25 %, les grains 5 à 12 %, et chaque voix qui sonne son moteur plus environ 6 % pour son filtre, son enveloppe et ses envois : c'est pourquoi les Mondes jouent quatre voix au plus. Un Monde fait à la main peut être plus lourd : six voix toutes jouées, avec la bande, la HALL et les grains grands ouverts, par exemple. La garde automatique passe alors en ECO avant de jouer.
 - **Si la charge ne tient pas, Rhizome renoncera à un effet plutôt que de risquer le FM-1.** La première candidate est la HALL : sa mémoire et son calcul serviraient à enrichir le delay ou à un effet plus léger.
 - En cas de surcharge, le firmware passe déjà de lui-même en mode économie, et la HALL en VINTAGE.
 
@@ -462,8 +470,8 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 | **Têtes** | Les points de lecture de la bande : chacune rejoue ce qui a été enregistré, plus ou moins tard. |
 | **Pré-délai** | Le silence entre la note et le début de la réverbe. |
 | **RT60** | Le temps qu'il faut à une réverbe pour baisser de 60 dB : sa longueur. C'est DECAY. |
-| **Grain** | Un court morceau de son relu dans la mémoire de Beads. |
-| **Média** | Le grain de la mémoire de Beads : DIGITAL, CLEAN TAPE, DIRTY TAPE. |
+| **Grain** | Un court morceau de son relu dans la mémoire des grains. |
+| **Média** | Le grain de la mémoire des grains : DIGITAL, CLEAN TAPE, DIRTY TAPE. |
 | **ECO, FULL** | Deux qualités de calcul : ECO soulage le processeur, FULL calcule tout à pleine cadence. |
 
 ## Crédits
