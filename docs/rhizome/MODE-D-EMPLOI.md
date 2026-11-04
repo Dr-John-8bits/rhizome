@@ -539,6 +539,34 @@ Dix moteurs viennent du code publié par Mutable Instruments (huit de Plaits, un
 - **Les batteries ne jouent pas de mélodie** : sur une orbite, elles ignorent la source des notes et leurs lunes répètent le même coup.
 - **En ECO** (QUALITY / SYSTEM), FM, VA, HARMONIC, SIX-OP FM et STRING MACHINE sont calculés à mi-cadence pour soulager le processeur : les aigus s'adoucissent un peu. SIX-OP FM garde la durée de ses enveloppes.
 
+### Les accords de STRING MACHINE
+Chaque note de STRING MACHINE joue **un accord entier**, que **K2 CHORD** choisit parmi onze ; l'écran écrit son nom. L'accord se construit sur la note jouée, et il ne suit pas la gamme : on choisit donc un accord qui va avec elle (MINOR, MINOR 7, MINOR 9 ou MINOR 11 dans une gamme mineure, MAJOR, MAJOR 7, MAJOR 9 ou 6/9 dans une gamme majeure ; OCTAVE, FIFTH et SUS4 vont presque partout).
+
+| K2 | Accord | Ses notes, depuis la note jouée | Sa couleur |
+|---|---|---|---|
+| 0 à 8 | OCTAVE | la note et son octave | nu, sans couleur |
+| 9 à 17 | FIFTH | la note, la quinte, l'octave | ouvert, médiéval |
+| 18 à 26 | SUS4 | la note, la quarte, la quinte | suspendu, en attente |
+| 27 à 35 | MINOR | la note, la tierce mineure, la quinte | sombre |
+| 36 à 44 | MINOR 7 | mineur, plus la septième mineure | sombre et doux |
+| 45 à 53 | MINOR 9 | mineur 7, plus la neuvième | sombre et ample |
+| 54 à 62 | MINOR 11 | mineur 9, plus la onzième | flottant, très ouvert |
+| 63 à 71 | 6/9 | majeur, plus la sixte et la neuvième | lumineux, sans tension |
+| 72 à 80 | MAJOR 9 | majeur 7, plus la neuvième | clair et ample |
+| 81 à 89 | MAJOR 7 | majeur, plus la septième majeure | clair et rêveur |
+| 90 à 100 | MAJOR | la note, la tierce majeure, la quinte | clair |
+
+**K1 BRIGHT** ouvre le filtre et l'ensemble (le chorus des cordes), **K3 REGISTER** mélange les registres, du grave à l'aigu. Ses 16 sons de la bibliothèque, avec leur accord : Solina Dusk (MINOR) · Ensemble Haze (MINOR 9) · Cold Strings (FIFTH) · Octave Veil (OCTAVE) · Night Ensemble (MINOR 7) · Pale Orchestra (MAJOR 9) · Thin Strings (SUS4) · Warm Ensemble (6/9) · Distant Strings (MINOR 11) · Organ Strings (MAJOR 7) · Glass Ensemble (MAJOR) · Low Strings (OCTAVE) · Wide Ensemble (MINOR 7) · Frozen Strings (FIFTH) · Hollow Choir (SUS4) · Last Ensemble (MINOR).
+
+### Les 96 sons de SIX-OP FM
+**K2 SOUND** choisit l'un des 96 sons de DX7 des trois banques de Plaits ; l'écran écrit son nom. Ils défilent dans cet ordre en tournant K2 de 0 à 100 :
+
+- **Banque 1, basses, synthés et effets** : SOLID BASS · MOOGER LOW · LEADERTAPE · MORHOL TB1 · BASS 3 · BILL BASS · BASS 1 · ELEC BASS · S.BAS 27.7 · RESONANCES · SYN-BASS 2 · PRC SYNTH1 · CROMA 2 · ANALOG 4 · ANALOG A · ANALOG 6 · CS 80 · INSERT 1 · SPIRAL · DX-TROTT · GASHAUS · RING DING · PAPAGAYO · WINEGLASS · AMYTAL · FAIRLIGHT · *PPG*VOL.1 · *PPG*VOL.2 · *FAIRL. 3 · *VOCODER 2 · *SEQUENCE · BOUNCE 4.
+- **Banque 2, claviers, percussions accordées et cloches** : E.PIANO 1 · FENDER 1 · WINTRHODES · RS-EP C · *MARK III · CLAV-E.PNO · SYN-CLAV · CLAVINET · PIANO 5 · GRD PIANO1 · STEINWAY · GUIT ACOUS · SITAR · KOTO · HARPSICH 1 · CLAV 3 · XYLOPHONE · MARIMBA · VIBE 1 · GLOKENSPL · BELL C · BELLS · TUB BELLS · GONG 2 · KETTLE 6 · MID DRM 3 · ORI DRUM 1 · WOOD 6 · LATN DRM 4 · CIMBAL · SYNDM 25.8 · B.DRM-SNAR.
+- **Banque 3, orgues, nappes, cordes et cuivres** : CLICK 124 · *HAMMOND 1 · E.ORGAN 3 · 60-S ORGAN · OPTIC 28 · PIPES 1 · PIPES 3 · PIPES 2 · JX-33-P · SOUNDTRACK · ICE PAD 2 · M1 PADS · CARLOS 2 · SOFT TOUCH · *PLANETS · CIRRUS · ENTRIX · MAL POLY · TEXTURES 6 · ETHERIAL5A · 'AIRY' · BORON A · VANGELIS 1 · STRINGS C · STRINGS 3 · STRINGS 2 · STRINGS 7 · FULL STRIN · SYN-ORCH · BRASS 1 · BRASS 6 BC · BR TRUMPET.
+
+Pour l'ambient, les nappes de la troisième banque (SOUNDTRACK, ICE PAD 2, M1 PADS, PLANETS, CIRRUS, TEXTURES 6, ETHERIAL5A, 'AIRY', VANGELIS 1) et les cloches de la deuxième (VIBE 1, BELLS, TUB BELLS) sont les plus utiles. **K1 BRIGHT** règle le niveau des modulateurs (le son plus terne ou plus brillant), **K3 ENVELOPE** étire ou resserre ses enveloppes. Ses 16 sons de la bibliothèque, avec leur son DX7 : DX Ice Pad (ICE PAD 2) · DX M1 Pads (M1 PADS) · DX Soundtrack (SOUNDTRACK) · DX Planets (*PLANETS) · DX Cirrus (CIRRUS) · DX Textures (TEXTURES 6) · DX Etherial (ETHERIAL5A) · DX Airy ('AIRY') · DX Vangelis (VANGELIS 1) · DX Strings (STRINGS C) · DX Wineglass (WINEGLASS) · DX Fairlight (FAIRLIGHT) · DX E.Piano (E.PIANO 1) · DX Winter Rhodes (WINTRHODES) · DX Tub Bells (TUB BELLS) · DX Vibe (VIBE 1).
+
 ### SOUND (EDIT 1 fois, piste choisie)
 Un petit oscilloscope montre la voix après son filtre. En haut : la piste, le moteur et le nom du son (`*` s'il a été modifié).
 
