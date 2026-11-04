@@ -21,7 +21,7 @@ Il joue très bien seul, et il est le compagnon de Monades, l'autre FM-1 du proj
 Maintenir n'importe quel bouton affiche son aide à l'écran, sans faire son action.
 
 ### Faire tourner ses propres orbites
-1. Aller au Monde 22, **EMPTY SKY** : une page blanche, aucune porte, aucune note.
+1. Aller au Monde 31, **EMPTY SKY** : une page blanche, aucune porte, aucune note.
 2. Appuyer sur **SEQ** : la page **ORBIT** s'ouvre. Tourner **K3 GATES** : la piste choisie devient un corps qui tourne autour de l'étoile, avec autant de portes que le réglage.
 3. Avec SELECT, passer à une autre piste et lui donner aussi des portes, avec une autre durée de tour (**K1 PERIOD**).
 4. Appuyer sur **PLAY**. Tous les corps partent du haut, ensemble.
@@ -78,7 +78,7 @@ Les boutons du FM-1 portent les noms du firmware d'origine de M-VAVE, qui ne son
 | **SELECT** (encodeur) | Choisit la piste, 1 à 6. Les pages d'une piste et le clavier la suivent. |
 | **SEL** | Coupe ou rétablit la piste choisie. Allumé quand elle est coupée. |
 | **ALGO** (encodeur) | Change le moteur de la piste choisie (14 moteurs) et ouvre SOUND. |
-| **PRESET** (encodeur) | Sur les pages d'une piste : un des 256 sons. Ailleurs : un des 21 Mondes, ou EMPTY SKY. Sur MORPH : le Monde d'arrivée. Sur USER BANKS : la lettre du nom. Le bas de l'écran dit ce que fait PRESET. |
+| **PRESET** (encodeur) | Sur les pages d'une piste : un des 256 sons. Ailleurs : un des 30 Mondes, ou EMPTY SKY. Sur MORPH : le Monde d'arrivée. Sur USER BANKS : la lettre du nom. Le bas de l'écran dit ce que fait PRESET. |
 | **PLAY** | Lance ou arrête. L'arrêt laisse le son s'éteindre ; un nouveau départ fait repartir tous les corps du haut. |
 | **REC** | N'enregistre rien. Sur LIVE, les pages GLO (sauf RAGA / GAMAKA) et les pages propres à Rhizome (les quatre pages ORBIT, TAPE ECHO, HALL et GRAIN CLOUD) : une nouvelle variation (nouvelle graine). Sur les autres pages EDIT, SEQ et FX, et sur RAGA / GAMAKA : **DICE**, les réglages K1 à K4 de la page tirés au sort. Sur GENERATOR : efface le motif. Sur QUALITY / SYSTEM et MIDI : panique (tout se tait). Sur MORPH : garde le mélange. Sur DERIVE : l'état actuel devient la maison. |
 | **ENV** | Annule : revient à l'état d'avant la dernière variation ou le dernier DICE. Une seule étape. Luit faiblement quand il y a quelque chose à annuler. Il ne règle pas les enveloppes. |
@@ -156,9 +156,9 @@ REC : l'état actuel devient la maison. ENV : retour à la maison. Avec ARP, la 
 
 Un **Monde** est une scène complète : les six pistes avec leur moteur et leur son, leurs orbites et leurs notes, les quatre macros, les effets, la gamme et le tempo. Charger un Monde remplace tout, y compris la mémoire des grains.
 
-Rhizome a **21 Mondes**, écrits pour When Day Chokes The Night, en six familles. Les trois premières vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. DEEP fait évoluer la musique sur plusieurs minutes. ECHO met la bande et la HALL au premier plan, VOICE les deux voix propres à Rhizome. Le 22e, **EMPTY SKY**, est une page blanche : six pistes jouables au clavier, aucune porte, aucun coup, les effets à zéro (C MINOR, 64 BPM).
+Rhizome a **30 Mondes**, écrits pour When Day Chokes The Night, en neuf familles. Les trois premières vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. DEEP fait évoluer la musique sur plusieurs minutes. ECHO met la bande et la HALL au premier plan, VOICE les deux voix propres à Rhizome. RAGA, MAQAM et EAST parcourent les gammes du monde : les ragas de l'Inde, les modes arabes et persans avec leurs quarts de ton, le gamelan de Java, la Thaïlande et le Japon. Le 31e, **EMPTY SKY**, est une page blanche : six pistes jouables au clavier, aucune porte, aucun coup, les effets à zéro (C MINOR, 64 BPM).
 
-Chaque Monde joue **quatre voix au plus**, et ceux des familles ECHO et VOICE trois : c'est ce qui les garde loin de la limite du processeur, la bande, la HALL et les grains en prenant déjà une bonne part. Tous sont réglés au même niveau d'écoute (NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas).
+Chaque Monde joue **quatre voix au plus**, et ceux des familles ECHO, VOICE, RAGA, MAQAM et EAST trois : c'est ce qui les garde loin de la limite du processeur, la bande, la HALL et les grains en prenant déjà une bonne part. Tous sont réglés au même niveau d'écoute (NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas).
 
 **DUSK, les résonances.** Des orbites rondes ou presque, dont les durées de tour sont des rapports simples. On entend des polyrythmes lents et réguliers.
 
@@ -211,6 +211,30 @@ Chaque Monde joue **quatre voix au plus**, et ceux des familles ECHO et VOICE tr
 | 20 ASH ENSEMBLE | F MELODIC MIN · 56 | Les cordes de STRING MACHINE sur une période libre de 23,5 s, quel que soit le tempo ; des accords quand les corps s'alignent. |
 | 21 NIGHT BELLS | G BHUPALI · 60 | Les cloches tubulaires du DX7 sur un chœur tenu ; une comète toutes les 32 mesures fige les grains. |
 
+**RAGA, les ragas des heures.** En Inde, chaque raga a son heure. Trois ragas, du coucher du soleil à l'aube, avec leurs notes pivots (VADI et SAMVADI, page RAGA / GAMAKA) et leurs ornements (gamakas).
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 22 MARWA AT SUNSET | A MARWA · 52 | Le raga du coucher du soleil : pas de quinte, la seconde bémol qui tire contre le bourdon. Une flûte glisse vers ses notes (meend) en jouant la tournure du raga, une nappe DX7 lui répond ; toutes les 16 mesures, la comète ouvre le ciel (FILTER). |
+| 23 MALKAUNS MIDNIGHT | C# MALKAUNS · 46 | Le raga du cœur de la nuit, cinq notes. Une anche ondule sur elles (andolan) et improvise avec les enchaînements de la phrase (Markov) ; un chœur en période libre ; la comète vagabonde bouscule les corps. |
+| 24 BHAIRAV DAWN | E BHAIRAV · 60 | Le raga de l'aube : des cloches de temple (DX7) frôlées d'une note (kan), leurs harmoniques en lunes, une anche qui répond ; des accords quand les corps s'alignent. |
+
+**MAQAM, les modes arabes et persans.** Avec leurs quarts de ton : des notes entre les touches du piano.
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 25 SABA LAMENT | D SABA · 54 | Le maqam de la plainte, sa seconde en quart de ton et sa quarte abaissée : un ney (flûte) qui glisse, un qanun pincé, le bourdon ; une bande usée, une HALL VINTAGE. |
+| 26 BAYATI WINDS | G BAYATI · 66 | Un santour (marimba) dont un générateur tire les notes en s'en souvenant, ses lunes qui descendent le mode, une anche au-dessus ; la comète vagabonde passe de temps en temps. |
+| 27 ORIENTAL GLASS | E ORIENTAL · 58 | La gamme orientale et ses deux secondes augmentées : des verres à vin DX7, une anche, des ellipses qui tournent (précession) et respirent (perturbation) dans une grande salle. |
+
+**EAST, Java, la Thaïlande, le Japon.**
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 28 PELOG RAIN | D PELOG · 72 | Un gamelan : deux corps de bronze qui s'imbriquent (l'un tourne deux fois plus vite que l'autre), un gong sur une longue orbite, une pluie de lunes ; toutes les 8 mesures, la comète fige les grains. |
+| 29 THAI MOON | C THAI 7-TET · 70 | Les sept degrés égaux de la musique thaïe : un ranat (marimba) et un pi (anche) sur des orbites en 3:4, avec du rubato. |
+| 30 INSEN SNOW | A INSEN · 50 | Le mode japonais du koto : une nappe DX7 glacée, une flûte de bambou qui glisse, deux périodes libres qui ne se rencontrent jamais ; la comète fige les grains comme de la neige. |
+
 **Changer de Monde.** Sur LIVE, tourner PRESET. Si le Monde en cours a changé depuis qu'il a été chargé ou sauvé, une carte demande d'abord « KEEP YOUR CHANGES? » : **SEL** abandonne les changements et charge le Monde demandé, **SAVE** ouvre l'écran de sauvegarde, **HOME** garde le Monde en cours, **PRESET** en choisit un autre. La lecture continue pendant la question.
 
 ## Le séquenceur orbital
@@ -233,6 +257,27 @@ Concrètement :
 - **Au-delà, les périodes libres** : 5,1 s, 7,3 s, 11,6 s, 17,8 s, 20,1 s, 23,5 s, 29,9 s et 31,8 s, quel que soit le tempo. Aucune ne divise une autre : deux corps libres ne retombent jamais ensemble, et la musique ne se répète pas. Les cinq dernières sont les longueurs des boucles de bande de *Music for Airports* de Brian Eno. Sur une orbite libre, les portes sont placées sur 16 directions.
 - **Le nombre de notes par tour**, c'est GATES, de 1 à 16. Il ne peut pas dépasser le nombre de pas du tour : un tour d'un temps compte 4 pas, donc 4 portes au plus. À 0, la piste n'est plus un corps et reprend son rythme de la page RHYTHM.
 - **Les portes sont placées comme un rythme euclidien** : réparties le plus régulièrement possible sur les pas du tour. Par exemple, 5 portes sur un tour d'une mesure (16 pas) tombent sur les pas 1, 5, 8, 11 et 14. Avec 4 portes, on obtient quatre noires.
+
+### Les portes
+Une **porte**, c'est l'endroit de l'orbite où le corps joue une note. Imaginez un cadran d'horloge autour de l'étoile : chaque porte est une heure de ce cadran, une direction vue depuis l'étoile. Le corps tourne sans jamais s'arrêter ; **chaque fois qu'il passe devant une de ses portes, la piste joue une note**. Entre deux portes, il ne joue rien.
+- **Combien** : K3 **GATES** (page ORBIT), de 1 à 16 portes par tour. 4 portes sur un tour d'une mesure : quatre notes par mesure. À **0**, la piste n'a plus d'orbite (voir ci-dessous).
+- **Où** : les portes sont réparties le plus régulièrement possible sur le tour, comme un rythme euclidien. K4 **PHASE** les fait tourner toutes ensemble autour de l'étoile, pour décaler le motif.
+- **Plus ou moins** : la macro **DENSITY** (LIVE K1) en ajoute ou en retire à toutes les orbites, sans changer leur période.
+- **À l'écran** : de petits traits sur l'ellipse. Une porte devient **blanche** quand le corps la franchit et joue, **grise** quand la perturbation l'a refusée. Sur LIVE MONDE, les portes sont en pointillé autour de chaque ellipse.
+
+Sur une orbite ronde, le corps va à vitesse constante : les portes tombent à intervalles réguliers. Sur une orbite ovale, il passe ses portes vite près de l'étoile et lentement loin d'elle : c'est le rubato (voir plus bas).
+
+### Orbite ou rythme : qui joue la piste ?
+Chaque piste a deux façons de jouer : **son orbite** (pages ORBIT) ou **son rythme** (page RHYTHM, des coups sur une boucle de pas). **Tant que l'orbite d'une piste a au moins une porte, c'est l'orbite qui la joue**, et son rythme se tait.
+- Pour la faire jouer par son rythme : **SEQ 1 fois (ORBIT), K3 GATES à 0**. Les réglages HITS, LENGTH, ROTATION et CHANCE de RHYTHM reprennent la main.
+- Pour la remettre en orbite : GATES au-dessus de 0.
+- Les réglages de RHYTHM restent gardés même quand l'orbite joue. Pendant la lecture, la page RHYTHM montre ce qui est vraiment joué : 0 coup quand l'orbite a la main, et l'écran l'écrit en rouge, « ORBIT PLAYS THIS TRACK: SET GATES TO 0 ».
+- Dans les Mondes d'usine, presque toutes les pistes qui jouent sont des corps. Pour en mettre une en rythme, c'est donc GATES à 0 d'abord.
+
+### Le trajet d'une note
+Le schéma suit une note, de l'horloge jusqu'à la sortie. À gauche, les étapes ; à droite, ce qui agit sur elle en chemin : la gravité de l'étoile (le rubato, la note qui monte quand le corps s'approche), les autres corps (les conjonctions), les générateurs, et la comète, qui peut changer la note, ouvrir le filtre de tout le son, gonfler la HALL ou figer les grains.
+
+![Le trajet d'une note : à gauche, ses sept étapes, de l'horloge à la sortie ; à droite, ce qui agit sur elle en chemin.](schemas/trajet-note.svg)
 
 ### L'étoile
 L'étoile ne joue pas. C'est le centre de gravité : **tout se mesure par rapport à elle**.
@@ -343,7 +388,7 @@ Le choc peut passer au corps voisin, puis au suivant, chaque fois deux fois moin
 
 ## Les pistes sans orbite : rythmes, phrases, générateurs, forme
 
-Une piste dont l'orbite n'a aucune porte (GATES à 0) joue un rythme classique, réglé sur ces pages. Les phrases, les générateurs et la forme agissent aussi sur les corps.
+Une piste dont l'orbite n'a aucune porte (GATES à 0, page ORBIT) joue un rythme classique, réglé sur ces pages ; tant qu'elle a des portes, c'est son orbite qui joue (voir [Orbite ou rythme](#orbite-ou-rythme-qui-joue-la-piste)). Les phrases, les générateurs et la forme agissent aussi sur les corps.
 
 ### RHYTHM (SEQ 5 fois, piste choisie)
 L'anneau euclidien que le séquenceur utilise vraiment. Plein : joué au dernier passage. Rouge : un coup refusé par CHANCE.
@@ -768,7 +813,7 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 | **Orbite** | Le chemin d'un corps : un cercle, ou un ovale (une ellipse) dont l'étoile n'occupe pas le centre mais un foyer. |
 | **Période** (PERIOD) | La durée d'un tour, de 1 temps à 12 mesures : la longueur de la boucle. |
 | **Période libre** | Une période en secondes, qui ne suit pas le tempo (5,1 à 31,8 s). Deux périodes libres ne retombent jamais ensemble. |
-| **Porte** (GATES) | Une direction, vue de l'étoile, où le corps joue en passant. |
+| **Porte** (GATES) | Un point de l'orbite, comme une heure sur un cadran autour de l'étoile : chaque fois que le corps passe devant, la piste joue une note. De 1 à 16 par tour ; à 0, la piste joue son rythme (page RHYTHM). |
 | **Rythme euclidien** | N coups répartis le plus régulièrement possible sur un nombre de pas : 5 sur 16 donne les pas 1, 5, 8, 11 et 14. Beaucoup de rythmes du monde sont euclidiens. |
 | **Phase** (PHASE) | Fait tourner toutes les portes d'un corps : décale son motif. |
 | **Excentricité** (ECCENTRICITY) | À quel point l'orbite est ovale. 0 : rond, notes régulières ; plus haut : notes pressées près de l'étoile, retenues loin d'elle. |
@@ -800,6 +845,10 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 | **Gamme microtonale** | Une gamme qui utilise des notes entre les demi-tons du piano (gammes arabes, indiennes, gamelan). |
 | **Raga** | En musique indienne, une gamme avec sa façon d'être jouée : ses notes pivots (vadi, samvadi) et ses ornements. |
 | **Gamaka** | Un ornement de la musique indienne autour d'une note : kan (une note frôlée avant), meend (un glissé depuis la note d'avant), andolan (une lente oscillation). |
+| **Raga des heures** | En Inde, chaque raga a son moment : Marwa au coucher du soleil, Malkauns au cœur de la nuit, Bhairav à l'aube. |
+| **Maqam** | Un mode de la musique arabe, turque ou persane, avec ses notes, ses quarts de ton et ses tournures (Saba, Bayati, Rast…). |
+| **Quart de ton** | Une note à mi-chemin entre deux touches voisines du piano, comme dans les maqams Saba, Bayati et Rast. |
+| **Pelog, slendro** | Les deux accords du gamelan de Java et de Bali, aux intervalles inégaux. |
 | **Swing** | Le petit retard des contretemps, qui fait balancer le rythme. |
 
 ### Le son

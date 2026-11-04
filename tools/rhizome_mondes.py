@@ -8,13 +8,16 @@ Families from dusk to dawn, each showing one side of the orbital sequencer, then
  DEEP  long forms: LFOs, generators, the form, real planetary systems and free periods, Mondes that keep changing
        for minutes (not all in one);
  ECHO  the tape echo and the HALL in front;
- VOICE Rhizome's own voices, SIX-OP FM and STRING MACHINE.
+ VOICE Rhizome's own voices, SIX-OP FM and STRING MACHINE;
+ RAGA  the ragas of the hours (sunset, midnight, dawn), with their pivot notes and ornaments;
+ MAQAM the Arabic and Persian modes, quarter tones included;
+ EAST  Java (pelog), Thailand (seven equal steps), Japan (insen).
 Then EMPTY SKY, a blank start (no gates, silent).
 
 Each Monde reuses the FDDS writer (tools/fdds_mondes.py) for Monades' part of the patch, then adds Rhizome's: the six
 orbits, the comet and conjunctions, the tape, the HALL and the grains. Sounds come from the tone bank. To stay well
 under the FM-1's 85 % ceiling (measured on the device), a Monde plays four voices at most, and at most one of
-Rhizome's two; the ECHO and VOICE Mondes play three."""
+Rhizome's two; the ECHO, VOICE, RAGA, MAQAM and EAST Mondes play three."""
 from fdds_mondes import fdds,c_patch
 
 PERIOD={4:0,6:1,8:2,12:3,16:4,24:5,32:6,48:7,64:8,96:9,112:10,128:11,192:12, # one turn, in sixteenths
@@ -22,12 +25,12 @@ PERIOD={4:0,6:1,8:2,12:3,16:4,24:5,32:6,48:7,64:8,96:9,112:10,128:11,192:12, # o
 SPIN={1:0,2:1,3:2,4:3,6:4,8:5,12:6,16:7} # one spin of the moons, in sixteenths
 PITCH={'ORBIT':0,'MOTIF':1,'ECHO':2}
 MOON={'SAME':0,'UP':1,'DOWN':2,'3RD+':3,'3RD-':4,'HARM':5}
-COMET={0:0,4:1,8:2,16:3,32:4,64:5} # one turn, in bars
+COMET={0:0,4:1,8:2,16:3,32:4,64:5,'WANDER':6} # one turn, in bars; WANDER: the wandering comet
 EVENT={'SWELL':0,'FREEZE':1,'BOTH':2,'FILTER':3}
 CONJ={'OFF':0,'ACCENT':1,'CHORD':2}
 MEDIA={'DIRTY':0,'CLEAN':1,'DIGITAL':2}
-FAMILIES=['Dusk: resonances','Night: eccentric orbits','Dawn: moons and comets','Deep: long forms','Echo: the tape and the HALL','Voice: SIX-OP FM and STRING MACHINE','Blank']
-SHORT=['DUSK','NIGHT','DAWN','DEEP','ECHO','VOICE','BLANK']
+FAMILIES=['Dusk: resonances','Night: eccentric orbits','Dawn: moons and comets','Deep: long forms','Echo: the tape and the HALL','Voice: SIX-OP FM and STRING MACHINE','Raga: the ragas of the hours','Maqam: Arabic and Persian modes','East: Java, Thailand, Japan','Blank']
+SHORT=['DUSK','NIGHT','DAWN','DEEP','ECHO','VOICE','RAGA','MAQAM','EAST','BLANK']
 SYSTEM={'OWN':0,'JUPITER':1,'KEPLER-223':2,'TRAPPIST-1':3,'PLUTO':4}
 
 # A silent track: no gates, no hits, muted.
@@ -205,16 +208,100 @@ MONDES=[
    ('Round Step',31,2,16,dict(level=400,send=60,room=150)),REST,REST,REST],
   orbits={0:body(3,96,ecc=500,moons=1,spin=4,interval='HARM',moon_level=45),1:body(1,192,phase=12),2:body(2,64,ecc=200)},
   sky=(10,20,32,'FREEZE',50,'CHORD'),tape=(3,200,100,250),hall=(900,50,650,450,0),beads=(700,800,300,'CLEAN')),
+ # ---- RAGA: the ragas of the hours, from sunset to dawn ----
+ # Raga Marwa, sung at sunset: no fifth, the flat second (vadi) and the sixth (samvadi) pulling against the drone; the
+ # flute slides into its notes (meend) on an eccentric orbit; a DX7 pad echoes it; every 16 bars a comet opens the sky.
+ dict(name='MARWA AT SUNSET',family=6,tempo=52,root='A',scale='MARWA',macro=[500,40,460,320],vadi=1,samvadi=9,
+  echo='1/4',delay_fb=380,fx=520,room=720,diffusion=800,grain=(750,500,300),
+  tracks=[('Deep Root',33,1,16,dict(level=400,send=60,room=150)),('Hollow Flute',45,6,16,dict(level=240,attack=150,echo=350,room=450,send=250)),
+   ('DX Etherial',57,1,16,dict(level=200,attack=600,decay=950,room=500,send=200)),REST,REST,REST],
+  phrase={1:[11,-1,13,-1,16,-1,13,-1,18,-1,21,-1,23,-1,21,-1]}, # Ni Re Ga Re, Ma Dha Ni Dha: the raga's turn of phrase
+  gamaka={1:('MEEND',650)},
+  orbits={0:body(1,192),1:body(6,64,ecc=350,pitch='MOTIF'),2:body(1,128,phase=12,pitch='ECHO')},
+  sky=(0,0,16,'FILTER',50,'ACCENT'),tape=(3,150,100,200),hall=(850,45,650,400,0),beads=(700,790,250,'CLEAN')),
+ # Raga Malkauns, the deep of the night: five notes, the reed sways on them (andolan) and improvises with the phrase's
+ # own turns (Markov); a choir on a free period; the wandering comet jostles the bodies.
+ dict(name='MALKAUNS MIDNIGHT',family=6,tempo=46,root='C#',scale='MALKAUNS',macro=[500,40,440,340],vadi=5,samvadi=0,
+  echo='1/4',delay_fb=420,fx=540,room=780,diffusion=850,grain=(800,500,350),
+  tracks=[('Night Floor',37,1,16,dict(level=400,send=60,room=150)),('Warm Reed',61,5,16,dict(level=230,attack=100,echo=400,room=450,send=250)),
+   ('Night Voices',49,1,16,dict(level=200,attack=700,decay=950,room=500,send=200)),REST,REST,REST],
+  phrase={1:[0,-1,3,-1,5,-1,8,-1,10,-1,8,-1,5,-1,3,-1]},
+  gamaka={1:('ANDOLAN',600)},gen={1:('MARKOV',600,8,12)},
+  orbits={0:body(1,192),1:body(5,96,ecc=500,pitch='MOTIF'),2:body(1,'20.1s',phase=8)},
+  sky=(15,10,'WANDER','SWELL',40,'ACCENT'),tape=(3,200,100,300),hall=(900,55,700,450,0),beads=(750,800,300,'CLEAN')),
+ # Raga Bhairav, at dawn: the flat second and sixth (samvadi, vadi), temple bells (DX7) touched by a grace note (kan)
+ # and their harmonics (moons), a reed answering; when the bodies align, chords.
+ dict(name='BHAIRAV DAWN',family=6,tempo=60,root='E',scale='BHAIRAV',macro=[500,60,480,300],vadi=8,samvadi=1,
+  echo='1/8 .',delay_fb=420,fx=500,room=700,grain=(650,450,300),
+  tracks=[('Velvet Foundation',28,1,16,dict(level=400,send=60,room=150)),('DX Tub Bells',64,3,16,dict(level=200,echo=400,room=500,send=280)),
+   ('Cloud Reed',52,4,16,dict(level=220,attack=200,echo=350,room=450,send=250)),REST,REST,REST],
+  phrase={2:[0,-1,1,-1,4,-1,5,-1,7,-1,8,-1,7,-1,4,-1]},
+  gamaka={1:('KAN',500),2:('MEEND',550)},
+  orbits={0:body(1,192),1:body(3,96,ecc=400,moons=1,spin=4,interval='HARM',moon_level=45),2:body(4,64,ecc=250,phase=6,pitch='MOTIF')},
+  sky=(10,0,32,'SWELL',60,'CHORD'),tape=(3,150,100,200),hall=(850,45,650,400,0),beads=(650,800,250,'DIGITAL')),
+ # ---- MAQAM: the Arabic and Persian modes, quarter tones included ----
+ # Maqam Saba, the lament: its quarter-tone second and its flat fourth; a ney (flute) that slides, a plucked qanun, the
+ # drone; worn tape, a vintage HALL.
+ dict(name='SABA LAMENT',family=7,tempo=54,root='D',scale='SABA',macro=[500,40,460,340],
+  echo='1/8 .',delay_fb=450,fx=540,room=700,grain=(700,450,350),
+  tracks=[('Deep Root',38,1,16,dict(level=400,send=60,room=150)),('Hollow Flute',62,5,16,dict(level=240,attack=150,echo=400,room=450,send=250)),
+   ('Muted Pluck',50,4,16,dict(level=220,echo=350,room=400,send=250)),REST,REST,REST],
+  phrase={1:[0,-1,2,-1,3,-1,4,-1,3,-1,2,-1,0,-1,-1,-1]},
+  gamaka={1:('MEEND',700)},
+  orbits={0:body(1,192),1:body(5,96,ecc=550,pitch='MOTIF'),2:body(4,64,ecc=300,phase=6)},
+  sky=(20,15,0,'SWELL',60,'ACCENT'),tape=(5,450,250,500),hall=(850,45,650,500,1),beads=(650,820,300,'DIRTY')),
+ # Maqam Bayati: a santur (marimba) whose notes are drawn by a generator that remembers, its moons stepping down the
+ # mode, a reed above; the wandering comet passes now and then.
+ dict(name='BAYATI WINDS',family=7,tempo=66,root='G',scale='BAYATI',macro=[500,60,480,320],
+  echo='1/8 .',delay_fb=400,fx=500,room=650,grain=(650,450,300),
+  tracks=[('Round Step',31,2,16,dict(level=400,send=60,room=150)),('Dream Marimba',67,5,16,dict(level=230,echo=350,room=400,send=280)),
+   ('Cloud Reed',55,2,16,dict(level=220,attack=250,echo=300,room=450,send=250)),REST,REST,REST],
+  gen={1:('RANDOM',750,8,7)},
+  orbits={0:body(2,128,ecc=200),1:body(5,64,ecc=350,moons=2,spin=2,interval='DOWN',moon_level=45),2:body(2,96,ecc=450,phase=10)},
+  sky=(10,10,'WANDER','SWELL',50,'ACCENT'),tape=(3,200,150,250),hall=(800,40,600,400,0),beads=(600,800,300,'CLEAN')),
+ # The Oriental scale (two augmented seconds): DX7 wine glasses, a reed, the ellipses turning slowly (precession) and
+ # breathing (perturbation) in a large hall.
+ dict(name='ORIENTAL GLASS',family=7,tempo=58,root='E',scale='ORIENTAL',macro=[500,60,480,320],
+  echo='1/4',delay_fb=350,fx=520,room=750,diffusion=800,grain=(750,500,300),
+  tracks=[('Sub Bloom',28,1,16,dict(level=400,send=60,room=150)),('DX Wineglass',64,4,16,dict(level=210,echo=300,room=500,send=280)),
+   ('Warm Reed',57,3,16,dict(level=220,attack=150,echo=350,room=450,send=250)),REST,REST,REST],
+  orbits={0:body(1,192,ecc=200),1:body(4,96,ecc=600,phase=4),2:body(3,64,ecc=550,phase=14)},
+  sky=(40,25,0,'SWELL',60,'ACCENT'),tape=(3,150,100,200),hall=(900,50,700,450,0),beads=(700,800,250,'CLEAN')),
+ # ---- EAST: Java, Thailand, Japan ----
+ # A gamelan in pelog: two bronze bodies interlocking (one twice the other, kotekan), a gong on a long orbit, rain of
+ # moons; every 8 bars the comet freezes the grains.
+ dict(name='PELOG RAIN',family=8,tempo=72,root='D',scale='PELOG ~',macro=[500,60,500,300],
+  echo='1/8',delay_fb=380,fx=480,room=620,grain=(600,400,300),
+  tracks=[('Sub Bloom',38,1,16,dict(level=400,send=60,room=200)),('Copper Bell',62,4,16,dict(level=220,echo=300,room=400,send=280)),
+   ('Hollow Chime',69,4,16,dict(level=200,echo=350,room=450,send=280)),REST,REST,REST],
+  orbits={0:body(1,128),1:body(4,32,moons=1,spin=2,interval='UP',moon_level=40),2:body(4,64,phase=3)},
+  sky=(0,0,8,'FREEZE',60,'CHORD'),tape=(3,120,100,150),hall=(750,30,550,350,0),beads=(600,820,300,'DIGITAL')),
+ # The Thai seven equal steps: a ranat (marimba) and a pi (reed) on orbits in 3:4, rubato on both, a soft bass.
+ dict(name='THAI MOON',family=8,tempo=70,root='C',scale='THAI 7-TET',macro=[500,60,500,300],
+  echo='1/8 .',delay_fb=380,fx=480,room=600,grain=(600,400,300),
+  tracks=[('Felt Octave',36,2,16,dict(level=400,send=60,room=150)),('Dream Marimba',72,6,16,dict(level=230,echo=300,room=400,send=280)),
+   ('Silk Lead',60,4,16,dict(level=210,attack=100,echo=350,room=450,send=250)),REST,REST,REST],
+  orbits={0:body(2,128),1:body(6,48,ecc=300),2:body(4,64,ecc=450,phase=8)},
+  sky=(15,0,16,'SWELL',60,'CHORD'),tape=(3,150,100,200),hall=(800,35,600,400,0),beads=(600,800,250,'CLEAN')),
+ # Insen, the Japanese mode of the koto: a DX7 ice pad, a bamboo flute that slides (meend), two free periods that never
+ # meet; the comet freezes the grains like snow.
+ dict(name='INSEN SNOW',family=8,tempo=50,root='A',scale='INSEN',macro=[500,40,440,340],
+  echo='1/4',delay_fb=380,fx=540,room=800,diffusion=850,grain=(800,500,300),
+  tracks=[('Slow Earth',33,1,16,dict(level=380,send=60,room=200)),('DX Ice Pad',57,1,16,dict(level=200,attack=600,decay=950,room=500,send=220)),
+   ('Paper Flute',69,3,16,dict(level=220,attack=150,echo=400,room=450,send=250)),REST,REST,REST],
+  gamaka={2:('MEEND',500)},
+  orbits={0:body(1,192),1:body(1,'29.9s',phase=6),2:body(3,'11.6s',ecc=300,phase=12)},
+  sky=(0,0,32,'FREEZE',70,'OFF'),tape=(3,150,80,200),hall=(950,60,700,450,0),beads=(800,800,300,'CLEAN')),
 ]
 # A blank start, as Monades' blank: no gates, no hits, the effects returned at zero.
-BLANK=dict(name='EMPTY SKY',family=6,tempo=64,root='C',scale='MINOR',macro=[500,0,500,0],fx=0,room=600,
+BLANK=dict(name='EMPTY SKY',family=9,tempo=64,root='C',scale='MINOR',macro=[500,0,500,0],fx=0,room=600,
  tracks=[('Soft Tine',48+i*7 if i<4 else 60,0,16,dict(level=300,room=0)) for i in range(6)],orbits={},
  phrase={i:[0 if j%4==0 else 7 if j%4==2 else -1 for j in range(16)] for i in range(6)}, # as Monades' blank: room for Marbles
  sky=(0,0,0,'SWELL',60,'ACCENT'),tape=(1,0,0,0),hall=(700,20,550,300,0),beads=(500,800,200,'DIGITAL'))
 
 # Levels: every Monde near -30 dB RMS over a minute (NO STARS and LOOPS OF ASH, sparse by design, near -36), measured with Rhizome's
 # voices by tests/next_features.cpp; the tracks' levels above are the balance inside a Monde, these the Monde's own.
-GAIN={'LAST LIGHT':0.83,'AMBER HOUR':0.89,'LONG SHADOWS':1.22,'SLOW EMBERS':1.16,'NIGHT SWALLOWS':1.23,'BLACK ORCHARD':1.32,'SLEEPLESS TIDE':1.21,'NO STARS':4.9,'FIRST BIRD':1.86,'PALE COMET':1.11,'CHOKED DAWN':0.78,'DAY BREAKS':1.3,'TRAPPIST DUST':0.93,'SLOW TIDES':1.56,'LOOPS OF ASH':1.12,'RUST REELS':0.47,'CATHEDRAL OF SMOKE':3.76,'DRIFTING SIGNAL':2.32,'GLASS PLANETS':1.43,'ASH ENSEMBLE':2.48,'NIGHT BELLS':3.51}
+GAIN={'LAST LIGHT':0.83,'AMBER HOUR':0.89,'LONG SHADOWS':1.22,'SLOW EMBERS':1.16,'NIGHT SWALLOWS':1.23,'BLACK ORCHARD':1.32,'SLEEPLESS TIDE':1.21,'NO STARS':4.9,'FIRST BIRD':1.86,'PALE COMET':1.11,'CHOKED DAWN':0.78,'DAY BREAKS':1.3,'TRAPPIST DUST':0.93,'SLOW TIDES':1.54,'LOOPS OF ASH':1.12,'RUST REELS':0.46,'CATHEDRAL OF SMOKE':3.76,'DRIFTING SIGNAL':2.32,'GLASS PLANETS':1.4,'ASH ENSEMBLE':2.48,'NIGHT BELLS':3.67,'MARWA AT SUNSET':2.21,'MALKAUNS MIDNIGHT':2.88,'BHAIRAV DAWN':3.85,'SABA LAMENT':2.09,'BAYATI WINDS':3.16,'ORIENTAL GLASS':3.71,'PELOG RAIN':1.6,'THAI MOON':1.45,'INSEN SNOW':2.66}
 
 # The HALL as a voice of its own: the melodic tracks' sends, raised from the values above (where it sat 15 to 20 dB under
 # the direct sound and went unheard) to about 10 dB under it; the bass keeps its small send, for a clear low end.

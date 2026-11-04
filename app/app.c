@@ -62,7 +62,7 @@ static const char *help_lines[NB][5]={
  {"LFO: freeze the granular memory","The cloud keeps playing.","Tracks remain live and playable.","LFO again: resume recording","FX: edit the cloud and tape"},
  {"EDIT: Sound/Filter/Env/Mix/Mixer","PRESET: 256 sound presets","ALGO: 12 Monades + 2 Rhizome","Rhythm and notes are preserved.","HOME + PRESET: whole Monde"},
  {"GLO: Harmony > Raga > System >","Look > MIDI > Channels > Zones >","Banks. Harmony: root / scale","System: tempo / quality","SAVE stores these preferences."},
- {"K1 DENSITY: number of events","K2 MOTION: melodic movement","K3 COLOUR: brighter / darker","K4 SPACE: granular level","PRESET: 21 Mondes + Blank"},
+ {"K1 DENSITY: number of events","K2 MOTION: melodic movement","K3 COLOUR: brighter / darker","K4 SPACE: granular level","PRESET: 30 Mondes + Blank"},
  {"Stop PLAY; use internal clock.","SAVE stores Monde and preferences,","then opens the save screen:","16 Mondes / 64 tones, free slot.","Granular audio is not stored."},
  {"ARP: lock the random seed","The same seed repeats.","REC: create a new variation","ENV: undo the last variation","Unequal lengths keep cycling."},
  {"SEQ: Orbit > System > Moons >","Comet > Rhythm > Groove > Bass >","Phrase > Gen > Form","K4: event probability","REC: dice this page"},
@@ -84,7 +84,10 @@ static int md_context_help(void){
         ((p==SPACE||p==MODULATION||p==LFO_A||p==LFO_B||p==SPACE_TONE||p==ECHO_CHORUS||tape_echo_page(p)||hall_page(p)||p==BEADS)&&b==B_FX)||
         ((p==MIDI||p==BANKS||p==RAGA||p==ZONES||p==CHANNELS)&&b==B_GLO)||((p==MORPH||p==DRIFT)&&b==B_HOME)||(p==BANKS&&b==B_SAVE);
 }
-static int dream_cmd(int c,int t,int v){uint32_t f=plat_lock();int r=md_command(c,t,v);plat_unlock(f);return r;}
+// Rhizome: loading a Monde clears the grain memory, the tape and the HALL in one audio block, which can run past 90 %
+// of its time once; that block is not a dense patch, so the overload it reports is ignored for half a second.
+static uint32_t load_quiet_until;
+static int dream_cmd(int c,int t,int v){if(c==MD_SCENE)load_quiet_until=plat_ms()+500;uint32_t f=plat_lock();int r=md_command(c,t,v);plat_unlock(f);return r;}
 static int zone_sel;
 static int motif_at=-1,motif_track;static uint32_t motif_until; /* next motif step while the engine catches up */
 static void dream_apply_midi(void){uint32_t f=plat_lock();md_set_midi_channels(dream_prefs.ch_in,dream_prefs.ch_out);md_set_midi_routing(&dream_prefs.midi);plat_unlock(f);}
@@ -906,7 +909,7 @@ void app_render(int32_t *lr,uint32_t n,uint32_t master) {
  lr[2*k]=(int32_t)((md_audio[2*k]+chime)*md_gain*8380000.0f);lr[2*k+1]=(int32_t)((md_audio[2*k+1]+chime)*md_gain*8380000.0f);}lr+=z*2;n-=z;}
 }
 void app_panic(void) {dream_cmd(MD_PANIC,0,0);}
-void app_overload(void) {overloads++;dream_cmd(MD_OVERLOAD,0,0);}
+void app_overload(void) {if((int32_t)(plat_ms()-load_quiet_until)<0)return;overloads++;dream_cmd(MD_OVERLOAD,0,0);}
 // Lights say what is in use: the button of the page shown, SEL when the selected track is muted, ARP locked,
 // LFO frozen, PLAY playing (green); ENV glows when there is something to undo.
 // The five page buttons and their pages, in the order each press goes through them.
@@ -982,7 +985,8 @@ void app_input_only(void) {
    int id=p->tone_preset[dream_ui.track];if(id<0)id=p->track[dream_ui.track].model*16-(d>0?1:0);
    id=clamp(id+d,0,MD_TONE_PRESETS-1);dream_cmd(MD_TONE_PRESET,dream_ui.track,id);app_say(md_tone_name(id),"");
   }else if(dream_ui.page==MORPH)morph_choose(d);
-  else{int id=clamp(p->biome_id+d,0,MD_BIOMES-1);if(dream_unsaved())monde_pending=id;else{dream_cmd(MD_SCENE,0,id);app_say(monde_label(id),"");}}
+  else{int id=clamp(p->biome_id+d,0,MD_BIOMES-1);if(id==p->biome_id)app_say(monde_label(id),""); /* past the first or last Monde: nothing to load */
+   else if(dream_unsaved())monde_pending=id;else{dream_cmd(MD_SCENE,0,id);app_say(monde_label(id),"");}}
  }
  for(b=0;b<4;b++)if((d=plat_enc(EN_K1+b))&&dream_ui.help<0) {
   dream_dismiss_intro();const md_track *t=&p->track[dream_ui.track];int c=0,v=0,tr=dream_ui.track;

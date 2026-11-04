@@ -265,13 +265,15 @@ int main(){
    if(!strcmp(fam,"DUSK"))assert(round);else if(!strcmp(fam,"NIGHT"))assert(eccentric>=2&&(p->orbit_prec||p->orbit_pert));
    else if(!strcmp(fam,"DAWN"))assert(moons||p->orbit_comet||p->orbit_conj==MD_CONJ_CHORD);
    else if(!strcmp(fam,"ECHO"))assert(p->fx_level>=500&&(p->tape_heads>1||p->hall_size>=850));
+   else if(!strcmp(fam,"RAGA")){int g=0;for(int i=0;i<6;i++)g+=p->gamaka[i]!=0;assert(p->vadi>=0&&p->samvadi>=0&&g>0);} // pivot notes and ornaments
+   else if(!strcmp(fam,"MAQAM")||!strcmp(fam,"EAST")){}
    else if(!strcmp(fam,"VOICE")){int own=0;for(int i=0;i<6;i++)own+=!p->track[i].mute&&p->track[i].model>=MD_SIXOP;assert(own==1);}
    else{assert(!strcmp(fam,"DEEP"));int lfos=0,gens=0,gamakas=0,free=0;for(int i=0;i<6;i++){lfos+=p->lfo[i][0].depth||p->lfo[i][1].depth;gens+=p->gen[i].source!=0;gamakas+=p->gamaka[i]!=0;free+=p->orbit[i].gates&&md_orbit_tenths(p->orbit[i].period);}
     assert(lfos||gens||gamakas||free||p->form||p->orbit_system);} // a long form: LFOs, generators, gamakas, free periods, the form or a real system
    cmd(MD_PLAY,0,1);double e=0;float peak=0;for(int b=0;b<20700;b++){md_render(audio,128);for(int k=0;k<256;k++){peak=fmaxf(peak,fabsf(audio[k]));e+=audio[k]*audio[k];}}cmd(MD_PLAY,0,0);
    level[id]=(float)(10*log10(e/(20700.0*256)));printf("  %-15s %-5s peak %.3f RMS %.1f dB\n",md_biome_name(id),fam,peak,level[id]);assert(peak>.01f&&peak<.95f);}
   for(int a=0;a<MD_BLANK_BIOME;a++)for(int b=0;b<MD_BLANK_BIOME;b++){auto sparse=[](int id){return !strcmp(md_biome_name(id),"NO STARS")||!strcmp(md_biome_name(id),"LOOPS OF ASH");};if(!sparse(a)&&!sparse(b))assert(fabsf(level[a]-level[b])<6);}
-  puts("PASS Rhizome Mondes: 21 v13 patches, six families, all audible and balanced");
+  puts("PASS Rhizome Mondes: 30 v13 patches, nine families, all audible and balanced");
   // The home page's macros act on the orbits: DENSITY adds or takes gates (a body keeps its orbit), MOTION moves notes.
   {cmd(MD_SCENE,0,0);md_patch q=*md_state();float phi[MD_ORBIT_GATES_MAX];int n[3];
    for(int k=0;k<3;k++){q.macro[0]=k*500;n[k]=md_orbit_gate_angles(&q,2,phi);}
