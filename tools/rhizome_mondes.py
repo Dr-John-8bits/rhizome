@@ -48,7 +48,7 @@ MONDES=[
  dict(name='LAST LIGHT',family=0,tempo=64,root='D',scale='DORIAN',macro=[500,120,480,300],
   echo='1/8 .',delay_fb=380,fx=480,room=620,diffusion=700,grain=(700,420,300),
   tracks=[('Velvet Dusk',38,2,16,dict(level=420,send=100,room=200)),('Soft Tine',62,3,16,dict(level=300,echo=350,room=350,send=250)),
-   ('Glass Drop',69,4,16,dict(level=230,echo=300,room=400,send=300)),('Sine Lantern',57,2,16,dict(level=230,attack=500,decay=850,room=500,send=200)),
+   ('Glass Drop',69,4,16,dict(level=230,echo=300,room=400,send=300)),('Mellow Moon',57,2,16,dict(level=230,attack=500,decay=850,room=500,send=200)),
    ('Mellow Dusk',50,1,16,dict(level=220,attack=650,decay=900,room=500,send=150)),REST],
   orbits={0:body(2,128),1:body(3,48,ecc=150),2:body(4,64,ecc=200,phase=6),3:body(2,96,ecc=100,phase=12),4:body(1,192,phase=18)},
   sky=(0,0,0,'SWELL',60,'ACCENT'),tape=(3,150,100,200),hall=(750,30,550,350,0),beads=(600,800,250,'DIGITAL')),
@@ -111,23 +111,23 @@ MONDES=[
   orbits={0:body(2,64),1:body(3,48,ecc=200,moons=2,spin=3,interval='UP',moon_level=55),2:body(4,32,ecc=150,phase=6,moons=3,spin=4,interval='3RD+',moon_level=50),3:body(1,192)},
   sky=(0,0,0,'SWELL',60,'ACCENT'),tape=(3,120,100,150),hall=(650,25,500,300,0),beads=(500,800,200,'DIGITAL')),
  dict(name='PALE COMET',family=2,tempo=62,root='E',scale='LYDIAN',macro=[500,80,500,300],
-  echo='1/8 .',delay_fb=400,fx=480,room=640,diffusion=750,grain=(700,450,300),
+  echo='1/8 .',delay_fb=400,fx=480,room=640,diffusion=750,grain=(450,450,300),
   tracks=[('Velvet Lagoon',28,2,16,dict(level=400,send=80,room=200)),('Hollow Chime',71,4,16,dict(level=220,echo=350,room=400,send=280)),
-   ('Amber Pad',59,2,16,dict(level=210,attack=600,decay=900,room=500,send=220)),('Linen Strings',64,2,16,dict(level=220,attack=500,decay=900,room=450,send=220)),
+   ('Mellow Amber',59,2,16,dict(level=210,attack=600,decay=900,room=500,send=220)),('Linen Strings',64,2,16,dict(level=220,attack=500,decay=900,room=450,send=220)),
    REST,REST],
   orbits={0:body(2,128),1:body(4,48,ecc=250,moons=1,spin=6,interval='HARM',moon_level=45),2:body(2,128,ecc=100,phase=12),3:body(2,96,ecc=150,phase=6)},
   sky=(0,0,16,'SWELL',85,'ACCENT'),tape=(3,150,100,200),hall=(800,35,600,350,0),beads=(650,800,250,'DIGITAL')),
  dict(name='CHOKED DAWN',family=2,tempo=56,root='F#',scale='DORIAN',macro=[500,80,460,360],
-  echo='1/8 .',delay_fb=550,fx=500,room=700,diffusion=800,grain=(750,450,350),
-  tracks=[('Velvet Haze',30,2,16,dict(level=400,send=100,room=200)),('Warm Fifth',54,3,16,dict(level=230,attack=300,echo=400,room=400,send=280)),
+  echo='1/8 .',delay_fb=550,fx=500,room=700,diffusion=800,grain=(450,450,350),
+  tracks=[('Velvet Haze',30,2,16,dict(level=400,send=100,room=200)),('Mellow Ember',54,3,16,dict(level=230,attack=300,echo=400,room=400,send=280)),
    ('Dusky Organ',61,3,16,dict(level=220,attack=250,echo=400,room=400,send=280)),('Mellow Haze',66,3,16,dict(level=210,attack=200,echo=400,room=450,send=280)),
    REST,REST],
   orbits={0:body(2,128,ecc=200),1:body(3,32,ecc=300),2:body(3,48,ecc=300,phase=8),3:body(3,64,ecc=300,phase=16)},
   sky=(10,10,8,'BOTH',50,'CHORD'),tape=(7,450,400,700),hall=(800,40,600,400,0),beads=(650,820,350,'CLEAN')),
  dict(name='DAY BREAKS',family=2,tempo=84,root='D',scale='MIXOLYDIAN',macro=[500,100,560,240],
-  echo='1/8 .',delay_fb=380,fx=450,room=560,grain=(600,350,250),
+  echo='1/8 .',delay_fb=380,fx=450,room=560,grain=(400,350,250),
   tracks=[('Clear Foundation',38,3,16,dict(level=400,send=80,room=150)),('Morning Ribbon',62,6,16,dict(level=230,echo=350,room=350,send=250)),
-   ('Felt Keys',69,5,16,dict(level=230,echo=300,room=300,send=250)),('Sunlit Voices',57,1,16,dict(level=180,attack=700,decay=950,room=450,send=200)),
+   ('Mellow Linen',69,5,16,dict(level=230,echo=300,room=300,send=250)),('Sunlit Voices',57,1,16,dict(level=180,attack=700,decay=950,room=450,send=200)),
    REST,REST],
   phrase={1:[0,-1,4,-1,7,-1,9,-1,7,-1,4,-1,2,-1,-1,-1]},
   orbits={0:body(3,64),1:body(6,64,pitch='MOTIF',moons=2,spin=2,interval='HARM',moon_level=45),2:body(5,32,ecc=200,phase=3,moons=1,spin=3,interval='UP',moon_level=50),3:body(1,192)},
@@ -136,8 +136,8 @@ MONDES=[
  # ---- DEEP: long forms ----
  # TRAPPIST-1's resonant chain (2:3:4:6), its notes drawn by generators that remember (deja-vu) and slowly let go.
  dict(name='TRAPPIST DUST',family=3,tempo=66,root='E',scale='HIRAJOSHI',macro=[500,40,480,360],
-  echo='1/8 .',delay_fb=450,fx=500,room=680,grain=(650,450,400),
-  tracks=[('Wool Pad',52,4,16,dict(level=200,room=400,send=300)),('Sine Pearl',64,4,16,dict(level=220,echo=300,room=450,send=280)),
+  echo='1/8 .',delay_fb=450,fx=500,room=680,grain=(450,450,400),
+  tracks=[('Mellow Cloud',52,4,16,dict(level=200,room=400,send=300)),('Sine Pearl',64,4,16,dict(level=220,echo=300,room=450,send=280)),
    ('Velvet Choir',57,4,16,dict(level=200,attack=300,room=450,send=250)),('Hollow Chime',69,4,16,dict(level=200,echo=350,room=450,send=280)),
    ('Deep Root',40,1,16,dict(level=360,send=100,room=200)),REST],
   orbits={0:body(4,32,ecc=5),1:body(4,48,ecc=10,phase=4),2:body(4,64,ecc=3,phase=8),3:body(4,96,ecc=4,phase=12),4:body(1,192)},
@@ -301,7 +301,7 @@ BLANK=dict(name='EMPTY SKY',family=9,tempo=64,root='C',scale='MINOR',macro=[500,
 
 # Levels: every Monde near -30 dB RMS over a minute (NO STARS and LOOPS OF ASH, sparse by design, near -36), measured with Rhizome's
 # voices by tests/next_features.cpp; the tracks' levels above are the balance inside a Monde, these the Monde's own.
-GAIN={'LAST LIGHT':0.83,'AMBER HOUR':0.89,'LONG SHADOWS':1.22,'SLOW EMBERS':1.16,'NIGHT SWALLOWS':1.23,'BLACK ORCHARD':1.32,'SLEEPLESS TIDE':1.21,'NO STARS':4.9,'FIRST BIRD':1.86,'PALE COMET':1.11,'CHOKED DAWN':0.78,'DAY BREAKS':1.3,'TRAPPIST DUST':0.93,'SLOW TIDES':1.54,'LOOPS OF ASH':1.12,'RUST REELS':0.46,'CATHEDRAL OF SMOKE':3.76,'DRIFTING SIGNAL':2.32,'GLASS PLANETS':1.4,'ASH ENSEMBLE':2.48,'NIGHT BELLS':3.67,'MARWA AT SUNSET':2.21,'MALKAUNS MIDNIGHT':2.88,'BHAIRAV DAWN':3.85,'SABA LAMENT':2.09,'BAYATI WINDS':3.16,'ORIENTAL GLASS':3.71,'PELOG RAIN':1.6,'THAI MOON':1.45,'INSEN SNOW':2.66}
+GAIN={'LAST LIGHT':0.88,'AMBER HOUR':0.89,'LONG SHADOWS':1.22,'SLOW EMBERS':1.16,'NIGHT SWALLOWS':1.23,'BLACK ORCHARD':1.3,'SLEEPLESS TIDE':1.21,'NO STARS':4.9,'FIRST BIRD':1.86,'PALE COMET':1.29,'CHOKED DAWN':0.77,'DAY BREAKS':1.24,'TRAPPIST DUST':0.92,'SLOW TIDES':1.54,'LOOPS OF ASH':1.12,'RUST REELS':0.46,'CATHEDRAL OF SMOKE':3.76,'DRIFTING SIGNAL':2.32,'GLASS PLANETS':1.4,'ASH ENSEMBLE':2.48,'NIGHT BELLS':3.67,'MARWA AT SUNSET':2.21,'MALKAUNS MIDNIGHT':2.88,'BHAIRAV DAWN':3.85,'SABA LAMENT':2.09,'BAYATI WINDS':3.16,'ORIENTAL GLASS':3.71,'PELOG RAIN':1.6,'THAI MOON':1.45,'INSEN SNOW':2.66}
 
 # The HALL as a voice of its own: the melodic tracks' sends, raised from the values above (where it sat 15 to 20 dB under
 # the direct sound and went unheard) to about 10 dB under it; the bass keeps its small send, for a clear low end.
