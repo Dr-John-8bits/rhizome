@@ -18,6 +18,7 @@ Le nom vient de Deleuze et Guattari (*Rhizome*, 1976) : un réseau sans centre, 
 - Site, avec le simulateur dans le navigateur : [dr-john-8bits.github.io/rhizome](https://dr-john-8bits.github.io/rhizome/)
 - Mode d'emploi : [docs/rhizome/MODE-D-EMPLOI.md](docs/rhizome/MODE-D-EMPLOI.md) (le même [sur le site](https://dr-john-8bits.github.io/rhizome/manuel/))
 - Pourquoi d'autres voix ont été essayées puis écartées : [docs/rhizome/VOIX-ECARTEES.md](docs/rhizome/VOIX-ECARTEES.md)
+- Retour d'expérience, pour un prochain firmware : [docs/rhizome/RETOUR-EXPERIENCE.md](docs/rhizome/RETOUR-EXPERIENCE.md)
 - Feuille de route, mesures sur le FM-1, budget mémoire : [docs/rhizome/FEUILLE-DE-ROUTE.md](docs/rhizome/FEUILLE-DE-ROUTE.md)
 
 ## Construire et installer
