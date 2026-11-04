@@ -477,6 +477,24 @@ D'après `bsp/docs/CPU.md`, des multiplications 64 bits mêlées à des lectures
   - passer un bloc sur le second cœur (`plat_cpu2_*`).
 - Le grand nettoyage (retirer les voix lourdes de Monades au profit de celles de Rhizome) devrait de toute façon redonner de la marge.
 
+## Première mesure sur le FM-1 (4 novembre 2026)
+Rhizome est installé sur le second FM-1 (identité `FM-1_968000001`, depuis la V15). Mesures avec `tools/measure_fm1.py` (par USB, sans écriture en flash) : **beaucoup trop lourd**, le banc du Mac avait sous-estimé d'un facteur 2 environ.
+
+| Ce qui tourne | Charge sur le FM-1 |
+|---|---|
+| Rien (EMPTY SKY, effets à 0, SPACE 0) | 7 % |
+| Beads, silencieux, SPACE à 30 | **+24 à 28 %** (le Mac disait 6 à 9) |
+| Bande et HALL (retour à 48) | +14 % (pic +29) |
+| Une voix qui sonne | +6 à 9 % (WAVETABLE, TERRAIN, SWARM, SIX-OP, CHORDS, FORMANT, PD), **+13 % STRING MACHINE** |
+| LAST LIGHT à l'arrêt, SPACE 0 | 55 % : les voix ne se mettent jamais en veille, même silencieuses |
+| Les Mondes 1 à 4 en jeu | **121 à 130 %**, des milliers de décrochages |
+
+À faire avant tout autre ajout :
+1. **mettre les voix en veille** quand leur enveloppe est éteinte (elles calculent aujourd'hui pour rien) ;
+2. **alléger Beads** (moins de grains, ou demi-fréquence, ou un seul média) ;
+3. **moins de voix jouées ensemble** dans les Mondes (3 ou 4, comme prévu au départ), et STRING MACHINE avec parcimonie ;
+4. recaler la garde automatique et le banc du Mac sur ces chiffres, puis remesurer.
+
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
 - Même plateforme fm1-base, même chaîne de compilation, mêmes outils.
