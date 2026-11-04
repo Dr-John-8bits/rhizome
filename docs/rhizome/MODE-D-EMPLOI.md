@@ -8,7 +8,7 @@ Rhizome est un firmware pour le M-VAVE FM-1, écrit pour **When Day Chokes The N
 
 Il est complémentaire de Monades (le premier FM-1, qui fait les notes) et joue aussi très bien seul.
 
-> **État au 4 novembre 2026.** Rhizome reprend les moteurs de Monades, plus SIX-OP FM et STRING MACHINE. Cette version se compile et passe ses tests ; **sa charge sur le FM-1 reste à mesurer** avant de l'installer pour de bon (voir « Points de vigilance »).
+> **État au 4 novembre 2026.** Rhizome reprend les moteurs de Monades, plus SIX-OP FM et STRING MACHINE. Mesuré sur le FM-1 : ses 21 Mondes restent entre 60 et 78 % du processeur au plus fort, sans aucun décrochage (la limite est 85 %).
 
 Rhizome repart du code de **Monades 0.1.3**. Tout ce que Monades sait faire est encore là : voix, filtres, rythmes, phrases, générateurs, gammes, MIDI, sauvegardes. Ce mode d'emploi décrit ce que Rhizome ajoute ou change. Pour les pages héritées, voir le [mode d'emploi de Monades](https://dr-john-8bits.github.io/rhizome/monades/manuel/).
 

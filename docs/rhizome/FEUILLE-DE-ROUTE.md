@@ -518,6 +518,8 @@ Que les autres voix sonnent comme celles de Monades n'est pas un problème : ça
 
 **Décision du 4 novembre 2026 : trois Mondes retirés, six nouveaux, plus légers.** COLD IN THE DARK, KEPLER NIGHT et RAGA OF ASH (99 à 101 %) sont retirés. Six Mondes à trois voix arrivent, chacun dans sa gamme : la famille **ECHO** (la bande et la HALL en avant : RUST REELS, CATHEDRAL OF SMOKE, DRIFTING SIGNAL) et la famille **VOICE** (SIX-OP FM et STRING MACHINE : GLASS PLANETS, ASH ENSEMBLE, NIGHT BELLS). Rhizome passe à 21 Mondes plus EMPTY SKY. TRAPPIST DUST, à 82 %, est allégé (un FM remplace l'additif). Reste : compiler, installer, mesurer.
 
+**Mesuré sur le FM-1 (4 novembre 2026, 21 Mondes).** Tous sous la limite : pics de 60 à 78 %, charge de 48 à 75 %, **aucun décrochage**. Le plus haut : PALE COMET, 78 %. Les familles ECHO et VOICE, à trois voix, sont les plus légères (pics de 60 à 71 %). Seule réserve : quelques blocs isolés dépassent 90 % de leur temps dans PALE COMET (29 en 40 s), TRAPPIST DUST (3) et CHOKED DAWN (1) ; le firmware coupe alors le chorus et la diffusion, sans décrochage.
+
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
 - Même plateforme fm1-base, même chaîne de compilation, mêmes outils.
