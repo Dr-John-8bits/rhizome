@@ -520,6 +520,8 @@ Que les autres voix sonnent comme celles de Monades n'est pas un problème : ça
 
 **Mesuré sur le FM-1 (4 novembre 2026, 21 Mondes).** Tous sous la limite : pics de 60 à 78 %, charge de 48 à 75 %, **aucun décrochage**. Le plus haut : PALE COMET, 78 %. Les familles ECHO et VOICE, à trois voix, sont les plus légères (pics de 60 à 71 %). Seule réserve : quelques blocs isolés dépassent 90 % de leur temps dans PALE COMET (29 en 40 s), TRAPPIST DUST (3) et CHOKED DAWN (1) ; le firmware coupe alors le chorus et la diffusion, sans décrochage.
 
+**Mesuré sur le FM-1 (4 novembre 2026, 30 Mondes).** Avec SIX-OP qui rejoue chaque note et les neuf Mondes des familles RAGA, MAQAM et EAST : pics de 60 à 77 %, charge de 50 à 73 %, **aucun décrochage**. Les neuf nouveaux, à trois voix : 60 à 73 %. Quelques blocs isolés au-dessus de 90 % de leur temps restent dans PALE COMET (8 en 40 s), TRAPPIST DUST (6) et CHOKED DAWN (1), sans décrochage. Le chargement d'un Monde ne déclenche plus de fausse alerte ECO.
+
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
 - Même plateforme fm1-base, même chaîne de compilation, mêmes outils.

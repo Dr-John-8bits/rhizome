@@ -9,7 +9,7 @@ Rhizome fait l'espace et le temps :
 - une **réverbe HALL** dans l'esprit des grandes réverbes numériques des années 80 ;
 - un **nuage de grains**.
 
-**21 Mondes**, en six familles (DUSK, NIGHT, DAWN, DEEP, ECHO, VOICE). Mesuré sur le FM-1 : de 60 à 78 % du processeur au plus fort, sans aucun décrochage (la limite est 85 %).
+**30 Mondes**, en neuf familles (DUSK, NIGHT, DAWN, DEEP, ECHO, VOICE, RAGA, MAQAM, EAST). Mesuré sur le FM-1 : de 60 à 77 % du processeur au plus fort, sans aucun décrochage (la limite est 85 %).
 
 Rhizome est le compagnon de [Monades](https://github.com/Dr-John-8bits/monades), l'autre FM-1 du projet, qui fait les notes et le rythme. Il joue aussi très bien seul.
 
