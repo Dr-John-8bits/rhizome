@@ -27,7 +27,7 @@ Maintenir n'importe quel bouton affiche son aide à l'écran, sans faire son act
 4. Appuyer sur **PLAY**. Tous les corps partent du haut, ensemble.
 5. Ovaliser une orbite avec **K2 ECCENTRICITY** : le corps accélère près de l'étoile et ralentit loin d'elle. On entend un rubato qui revient à chaque tour.
 
-Plus rapide encore : **SEQ 2 fois**, puis **K4 SYSTEM**, pour charger un vrai système planétaire.
+Plus rapide encore : **SEQ 2 fois**, puis **K4 SYSTEM**, pour charger un vrai système planétaire. Et pour construire une séquence entière, étape par étape : [Programmer une séquence complète](#programmer-une-séquence-complète).
 
 ## Où trouver quoi
 
@@ -510,6 +510,56 @@ Le Monde enchaîne quatre sections en boucle, **CALM → BUILD → PEAK → RELE
 **À l'écran** : les quatre sections en blocs (leur hauteur est la tension), la section en cours en clair avec un trait qui avance ; sous chaque section, les six pistes : en couleur elles jouent, en gris elles se reposent dans ce cycle.
 
 **Pour l'entendre** : K1 DEPTH vers 80, K2 SECTION sur 4 mesures, K3 RESTING sur 2, PLAY : le morceau commence dépouillé, se remplit, culmine, puis redescend, toutes les 16 mesures. Le Monde SLOW TIDES est construit dessus.
+
+## Programmer une séquence complète
+
+Le séquenceur de Rhizome offre plusieurs façons de faire jouer une piste. Ce chapitre les met à plat, montre comment les pistes agissent les unes sur les autres, puis construit une séquence entière en partant d'une page blanche. Chaque geste du pas à pas a été rejoué dans le simulateur.
+
+### Une piste, trois questions
+Pour chaque piste, on répond à trois questions, dans cet ordre :
+1. **Quand joue-t-elle ?** Soit **en orbite** : elle a des portes (SEQ 1 fois, K3 GATES de 1 à 16), et elle joue en les franchissant. Soit **en rythme** : aucune porte (GATES à 0), et c'est la page RHYTHM qui décide (HITS sur LENGTH). Jamais les deux à la fois : tant qu'il y a des portes, l'orbite a la main.
+2. **Quelle note ?** Pour un corps, c'est K3 PITCH (SEQ 2 fois) : **ORBIT** (la distance à l'étoile, plus près = plus aigu), **MOTIF** (une phrase qu'on joue au clavier sur GENERATOR, rejouée porte après porte) ou **ECHO** (la note de la piste d'avant). Pour une piste en rythme : sa note de base, une **phrase** écrite (BASS / MOTIFS puis PHRASE / NOTES), ou un **générateur** (GENERATOR : RANDOM, MARKOV, MOTIF). Ensuite, pour toutes, MOTION et le générateur peuvent écarter la note, et la gamme la range.
+3. **Quels ornements ?** Les **lunes** (un corps : des notes après la note), les **REPEATS** (une piste en rythme : un coup répété), le **gamaka** (toutes : un glissé, une oscillation).
+
+![Programmer une piste en trois questions : quand joue-t-elle (en orbite ou en rythme), quelle note (ORBIT, MOTIF, ECHO pour un corps ; note de base, phrase ou générateur pour un rythme), quels ornements (lunes, repeats, gamaka) ; et ce qui agit sur tout le Monde.](schemas/programmer-piste.svg)
+
+**Ce qui agit sur tout le Monde**, quelle que soit la façon de programmer : le tempo et la gamme (GLO 1 fois), le swing (GROOVE), les macros **DENSITY** (plus ou moins de portes et de coups partout) et **MOTION** (des notes qui s'écartent), la **forme** (FORM : des pistes qui se reposent puis reviennent), la **comète**, et la **graine** (ARP : la même variation se rejoue).
+
+### Les pistes entre elles
+Les pistes ne jouent pas chacune dans leur coin. Six liens les relient :
+
+| Lien | Ce qu'il fait | Où le régler |
+|---|---|---|
+| **Écho** | Un corps en source ECHO reprend la dernière note de la piste d'avant (la piste 3 répond à la piste 2), ramenée sur l'accord : un dialogue. | SEQ 2 fois, K3 PITCH sur ECHO |
+| **Conjonction** | Quand deux corps s'alignent avec l'étoile : un accent sur leur temps suivant, ou un accord (le second prend la note de l'accord du premier). | SEQ 4 fois, K4 CONJUNCTION |
+| **Polyrythmie** | Des périodes en rapports simples (2, 3 et 4 mesures) se retrouvent régulièrement ; des périodes libres ne se retrouvent jamais. | SEQ 1 fois, K1 PERIOD de chaque piste |
+| **Comète vagabonde** | Elle choque le corps le plus proche (note sautée, avancée, déplacée), et le choc peut passer au voisin. | SEQ 4 fois, K1 COMET sur WANDER |
+| **Ducking** | Une piste source fait baisser les autres à chacune de ses notes. | FX 7 fois, K3 et K4 |
+| **Forme** | Dans le calme, certaines pistes se reposent ; au sommet, toutes jouent. | SEQ 10 fois |
+
+Toutes partagent aussi le tempo, la gamme, les macros et les effets.
+
+![Les pistes entre elles : l'écho d'une piste à l'autre, la conjonction de deux corps alignés avec l'étoile, la polyrythmie des périodes, la comète vagabonde qui choque un corps puis son voisin, le ducking et la forme.](schemas/pistes-ensemble.svg)
+
+### Pas à pas : une séquence complète depuis EMPTY SKY
+On construit un petit morceau à cinq pistes : une basse, une mélodie, sa réponse, des cloches avec leurs lunes, et une pulsation. Chaque étape montre une façon de programmer. Les nombres de crans sont donnés à partir d'EMPTY SKY ; l'écran affiche toujours le nom et la valeur, il suffit de le regarder.
+
+**Deux réflexes.** Pour revenir à la page ORBIT depuis n'importe où : **HOME, puis SEQ**. Et regarder le titre en haut de l'écran plutôt que compter les appuis.
+
+1. **La page blanche.** HOME, puis PRESET tout à droite jusqu'à « MONDE 31 BLANK » (EMPTY SKY) : six pistes PLAITS FM, aucune note.
+2. **La gamme et le tempo.** GLO (HARMONY / GLOBAL) : K1 ROOT sur D (2 crans), K2 SCALE sur DORIAN (2 crans), K4 TEMPO sur 72 (8 crans). On peut appuyer sur **PLAY** dès maintenant et laisser jouer : chaque réglage qui suit s'entend aussitôt.
+3. **Piste 1, la basse, en orbite ronde.** HOME ; SELECT sur la piste 1 ; ALGO sur ROUND BASS (5 crans à droite). EDIT 4 fois (MIX / NOTES) : K2 MIDI NOTE sur D2, 38 (10 crans à gauche). HOME, SEQ (ORBIT) : K1 PERIOD sur 2 BAR (2 crans), K3 GATES sur 2. La basse joue deux notes régulières toutes les deux mesures. *Une orbite ronde, c'est un rythme régulier.*
+4. **Piste 2, la mélodie : une phrase sur une orbite ovale.** SELECT sur la piste 2. SEQ jusqu'à GENERATOR / DEJA VU ; REC (le motif est effacé), puis jouer cinq notes au clavier : elles s'écrivent une par une. HOME, SEQ (ORBIT) : K3 GATES sur 5, K2 ECCENTRICITY vers 0,40 (16 crans). SEQ (ORBIT / SYSTEM) : K3 PITCH sur MOTIF. Les cinq notes passent porte après porte, pressées près de l'étoile, retenues loin d'elle ; sur ORBIT, chaque porte affiche la note qu'elle jouera. *C'est le rubato.*
+5. **Piste 3, la réponse : ECHO.** SELECT sur la piste 3. HOME, SEQ (ORBIT) : K1 PERIOD sur 3 BAR (3 crans), K3 GATES sur 3. SEQ (ORBIT / SYSTEM) : K3 PITCH sur ECHO. Elle reprend la dernière note de la mélodie, sur l'accord ; à l'écran, un pointillé relie les deux corps. *Un tour de 3 mesures contre 1 et 2 : une polyrythmie qui se retrouve toutes les 6 mesures.*
+6. **Piste 4, des cloches et leurs lunes.** SELECT sur la piste 4 ; ALGO sur SIX-OP FM (9 crans à droite) : la page SOUND s'ouvre ; K2 SOUND jusqu'à TUB BELLS (l'écran écrit le nom). HOME, SEQ (ORBIT) : K1 PERIOD sur 4 BAR (4 crans), K3 GATES sur 3, K2 ECCENTRICITY vers 0,60 (24 crans). SEQ 2 fois (ORBIT / MOONS) : K1 MOONS sur 2, K3 INTERVAL sur HARMONICS. Chaque cloche est suivie de son octave et de sa quinte. *Les lunes ornent sans rien écrire.*
+7. **Piste 5, une pulsation en rythme, sans orbite.** SELECT sur la piste 5 ; ALGO sur PLAITS HAT (1 cran à gauche). HOME, puis SEQ jusqu'à RHYTHM (5 appuis) : K1 HITS sur 7. Cette piste n'a pas de portes : c'est son rythme euclidien, 7 sur 16, qui joue, contre les orbites. *L'orbite et le rythme jouent ensemble.*
+8. **Les liens entre les pistes.** HOME, SEQ, SEQ (ORBIT / SYSTEM) : K1 PRECESSION sur 20 (4 crans) : les ellipses tournent lentement, la mélodie change sans hasard. SEQ 2 fois (ORBIT / COMET) : K4 CONJUNCTION sur CHORD (2 crans), K1 COMET sur 8 mesures (2 crans), K2 EVENT sur FILTER (3 crans), K3 AMOUNT sur 70 (2 crans). Quand deux corps s'alignent, ils jouent un accord ; toutes les 8 mesures, la comète ouvre le son en frôlant l'étoile.
+9. **Les effets.** EDIT 5 fois (GLOBAL MIXER). SELECT sur la piste 4 (les cloches) : K3 DELAY vers 30, K4 REVERB vers 50. Piste 3 : K4 vers 50. Piste 2 (la mélodie) : K2 GRAIN vers 30, K3 vers 40, K4 vers 40. La basse reste sèche. FX 8 fois (SHARED SPACE) : K4 RETURN vers 50, sinon ni la bande ni la HALL ne s'entendent. HOME : K4 SPACE vers 30 (les grains), K2 MOTION vers 20 (la mélodie s'écarte un peu de la phrase).
+10. **Une forme.** SEQ jusqu'à FORM (10 appuis depuis HOME) : K1 DEPTH vers 80, K2 SECTION sur 8 BARS. Le morceau commence dépouillé, se remplit, culmine, puis redescend.
+11. **Écouter et faire vivre.** PLAY. Puis, sur LIVE : K1 DENSITY pour plus ou moins de notes partout ; REC pour une autre variation (ENV pour revenir) ; ARP pour que la variation se répète à l'identique.
+12. **Garder son Monde.** PLAY pour arrêter, puis SAVE : l'écran de sauvegarde s'ouvre sur le premier emplacement libre ; K4 et PRESET pour le nom ; SAVE une seconde fois.
+
+**Et ensuite.** Remplacer la phrase de la piste 2 par un générateur (GENERATOR, K1 SOURCE sur MARKOV : il improvise avec ses enchaînements) ; passer la piste 3 en période libre (K1 PERIOD au-delà de 12 mesures) pour une réponse qui ne retombe jamais au même endroit ; essayer la comète vagabonde (K1 COMET tout en haut) ; charger un vrai système sur les orbites (ORBIT / SYSTEM, K4 SYSTEM) en gardant les sons.
 
 ## Les voix : les 14 moteurs
 
