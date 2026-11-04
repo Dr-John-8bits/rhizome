@@ -506,6 +506,8 @@ Rhizome est installé sur le second FM-1 (identité `FM-1_968000001`, depuis la 
 - **le séquenceur orbital**, **le tape echo** et **la HALL** gardés ; les grains de Monades.
 Que les autres voix sonnent comme celles de Monades n'est pas un problème : ça sonne déjà très bien.
 
+**Le profil sur l'appareil (4 novembre 2026)**, en % du processeur : KEPLER NIGHT 95 (séquenceur 5, moteurs 32, traitement autour des voix 25, grains 8, effets et mélange 24) ; CHOKED DAWN 92 (4, 29, 24, 7, 25) ; BLACK ORCHARD 74 (4, 22, 18, 7, 22) ; NO STARS 50 (3, 8, 12, 6, 19). Pas de défaut unique à corriger : le traitement autour des voix est celui de Monades, les moteurs de Plaits coûtent environ 8 % chacun même à demi-fréquence, et la bande, la HALL et le mélange 20 à 25 %. **Verdict : plan LEAD.**
+
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
 - Même plateforme fm1-base, même chaîne de compilation, mêmes outils.
