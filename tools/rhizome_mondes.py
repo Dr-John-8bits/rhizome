@@ -1,17 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Rhizome's factory Mondes, for When Day Chokes The Night: complete v13 patches, read by tools/generate_presets.py.
 
-Three families of four, from dusk to dawn, each showing one side of the orbital sequencer:
+Families from dusk to dawn, each showing one side of the orbital sequencer, then two that show the effects and the voices:
  DUSK  resonances: round or nearly round orbits whose periods are simple ratios, heard as slow polyrhythms;
  NIGHT eccentric orbits: rubato (fast near the star, hanging far away), precession and perturbation;
  DAWN  moons and comets: ornaments after each note, rare passages, conjunctions struck as chords;
- DEEP  long forms: LFOs, generators, the form, real planetary systems, gamakas and free periods, Mondes that keep
-       changing for minutes (not all in one).
+ DEEP  long forms: LFOs, generators, the form, real planetary systems and free periods, Mondes that keep changing
+       for minutes (not all in one);
+ ECHO  the tape echo and the HALL in front;
+ VOICE Rhizome's own voices, SIX-OP FM and STRING MACHINE.
 Then EMPTY SKY, a blank start (no gates, silent).
 
 Each Monde reuses the FDDS writer (tools/fdds_mondes.py) for Monades' part of the patch, then adds Rhizome's: the six
-orbits, the comet and conjunctions, the tape, the HALL and Beads. Sounds come from the tone bank. To stay well under
-the FM-1's 85 % ceiling, a Monde plays four or five voices, one heavy engine (Rings, the choir) at most."""
+orbits, the comet and conjunctions, the tape, the HALL and the grains. Sounds come from the tone bank. To stay well
+under the FM-1's 85 % ceiling (measured on the device), a Monde plays four voices at most, and at most one of
+Rhizome's two; the ECHO and VOICE Mondes play three."""
 from fdds_mondes import fdds,c_patch
 
 PERIOD={4:0,6:1,8:2,12:3,16:4,24:5,32:6,48:7,64:8,96:9,112:10,128:11,192:12, # one turn, in sixteenths
@@ -23,8 +26,8 @@ COMET={0:0,4:1,8:2,16:3,32:4,64:5} # one turn, in bars
 EVENT={'SWELL':0,'FREEZE':1,'BOTH':2,'FILTER':3}
 CONJ={'OFF':0,'ACCENT':1,'CHORD':2}
 MEDIA={'DIRTY':0,'CLEAN':1,'DIGITAL':2}
-FAMILIES=['Dusk: resonances','Night: eccentric orbits','Dawn: moons and comets','Deep: long forms','Blank']
-SHORT=['DUSK','NIGHT','DAWN','DEEP','BLANK']
+FAMILIES=['Dusk: resonances','Night: eccentric orbits','Dawn: moons and comets','Deep: long forms','Echo: the tape and the HALL','Voice: SIX-OP FM and STRING MACHINE','Blank']
+SHORT=['DUSK','NIGHT','DAWN','DEEP','ECHO','VOICE','BLANK']
 SYSTEM={'OWN':0,'JUPITER':1,'KEPLER-223':2,'TRAPPIST-1':3,'PLUTO':4}
 
 # A silent track: no gates, no hits, muted.
@@ -128,52 +131,16 @@ MONDES=[
   sky=(0,0,4,'FREEZE',40,'CHORD'),tape=(3,120,100,150),hall=(650,25,500,300,0),beads=(500,800,200,'DIGITAL')),
 
  # ---- DEEP: long forms ----
- # The showcase: few steps (loops of 4 to 12 sixteenths), every kind of note (ORBIT, MOTIF mutated by its generator,
- # ECHO), moons, two free periods that never fall in step, precession, perturbation, a comet, chords, slow LFOs, the form.
- dict(name='COLD IN THE DARK',family=3,tempo=72,root='D',scale='MINOR',macro=[500,60,460,320],
-  echo='1/8 .',delay_fb=420,fx=480,room=700,diffusion=800,grain=(700,450,350),form=(600,2,2),
-  tracks=[('Deep Root',38,1,16,dict(level=380,send=100,room=150)),('Glass Drop',62,1,16,dict(level=230,echo=350,room=400,send=280)),
-   ('Hollow Chime',69,2,16,dict(level=210,echo=300,room=450,send=250)),('Ensemble Haze',57,1,16,dict(level=200,attack=650,decay=950,room=500,send=220)),
-   ('Wool Pad',45,1,16,dict(level=180,attack=700,decay=950,room=500,send=250)),REST],
-  phrase={1:[0,-1,3,-1,7,-1,10,-1,12,-1,10,-1,7,-1,5,-1]},
-  orbits={0:body(1,12),1:body(1,4,ecc=300,pitch='MOTIF',moons=2,spin=3,interval='UP',moon_level=45),2:body(2,6,ecc=450,phase=6,pitch='ECHO'),
-   3:body(1,'17.8s',phase=3),4:body(1,'29.9s',phase=15)},
-  lfo={(1,0):('FREE SLOW','SINE','TONE',500),(3,0):('8 BARS','S&H','HARMONICS',300),(2,0):('4 BARS','TRIANGLE','CUTOFF',350)},
-  gen={1:('MOTIF',700,8,7)},
-  sky=(40,25,16,'BOTH',50,'CHORD'),tape=(3,200,150,250),hall=(800,40,600,450,0),beads=(650,820,300,'CLEAN')),
- # Kepler-223 as measured (3:4:6:8, its eccentricities), the FM's colour turning with a slow LFO; every 16 bars a
- # comet whose FILTER opens the whole sky as it grazes the star.
- dict(name='KEPLER NIGHT',family=3,tempo=60,root='A',scale='DORIAN',macro=[500,60,460,320],
-  echo='1/4',delay_fb=380,fx=480,room=720,diffusion=800,grain=(750,500,300),
-  tracks=[('Moon Tone',57,4,16,dict(level=230,echo=300,room=450,send=250)),('DX Cirrus',64,4,16,dict(level=210,room=500,send=250)),
-   ('Slow Halo',52,4,16,dict(level=200,attack=500,decay=930,room=500,send=220)),('Copper Bell',69,4,16,dict(level=210,echo=350,room=450,send=250)),
-   ('Low Current',33,1,16,dict(level=360,attack=800,decay=960,room=250,send=100)),REST],
-  phrase={0:[0,-1,2,-1,3,-1,7,-1,5,-1,3,-1,2,-1,-1,-1]},
-  orbits={0:body(4,48,ecc=78,pitch='MOTIF'),1:body(4,64,ecc=150),2:body(4,96,ecc=37),3:body(4,128,ecc=51),4:body(1,'31.8s')},
-  lfo={(0,0):('FREE SLOW','SINE','TONE',450),(0,1):('8 BARS','TRIANGLE','SHAPE',350),(2,0):('4 BARS','SINE','CUTOFF',300)},
-  sky=(10,0,16,'FILTER',55,'ACCENT','KEPLER-223'),tape=(3,150,100,200),hall=(850,45,650,400,0),beads=(700,800,250,'DIGITAL')),
  # TRAPPIST-1's resonant chain (2:3:4:6), its notes drawn by generators that remember (deja-vu) and slowly let go.
  dict(name='TRAPPIST DUST',family=3,tempo=66,root='E',scale='HIRAJOSHI',macro=[500,40,480,360],
   echo='1/8 .',delay_fb=450,fx=500,room=680,grain=(650,450,400),
-  tracks=[('Wool Pad',52,4,16,dict(level=200,room=400,send=300)),('Glass Choir',64,4,16,dict(level=220,echo=300,room=450,send=280)),
+  tracks=[('Wool Pad',52,4,16,dict(level=200,room=400,send=300)),('Sine Pearl',64,4,16,dict(level=220,echo=300,room=450,send=280)),
    ('Velvet Choir',57,4,16,dict(level=200,attack=300,room=450,send=250)),('Hollow Chime',69,4,16,dict(level=200,echo=350,room=450,send=280)),
    ('Deep Root',40,1,16,dict(level=360,send=100,room=200)),REST],
   orbits={0:body(4,32,ecc=5),1:body(4,48,ecc=10,phase=4),2:body(4,64,ecc=3,phase=8),3:body(4,96,ecc=4,phase=12),4:body(1,192)},
   gen={1:('RANDOM',800,8,7),3:('MARKOV',600,8,12)},
   lfo={(0,0):('FREE SLOW','SMOOTH','HARMONICS',400)},
   sky=(0,10,0,'SWELL',60,'ACCENT','TRAPPIST-1'),tape=(5,250,150,350),hall=(750,35,550,400,0),beads=(600,840,400,'DIRTY')),
- # A raga at night (Bhairavi): a drone, a flute that sings the phrase with meend, a reed that sways (andolan), bells
- # with kan; the pivot notes draw the generated ones.
- dict(name='RAGA OF ASH',family=3,tempo=52,root='D',scale='BHAIRAVI',macro=[500,40,440,340],vadi=5,samvadi=0,
-  echo='1/4',delay_fb=350,fx=500,room=760,diffusion=850,grain=(800,500,350),
-  tracks=[('Deep Root',38,1,16,dict(level=360,send=100,room=250)),('Hollow Flute',62,6,16,dict(level=250,attack=150,echo=300,room=450,send=250)),
-   ('Warm Reed',57,3,16,dict(level=220,attack=100,echo=300,room=450,send=250)),('DX Tub Bells',74,2,16,dict(level=190,echo=400,room=500,send=300)),
-   ('Open Fifth',50,1,16,dict(level=200,attack=800,decay=960,room=450,send=200)),REST],
-  phrase={1:[0,-1,1,-1,5,-1,-1,-1,7,-1,5,-1,3,-1,1,-1]},
-  orbits={0:body(1,192),1:body(6,64,ecc=250,pitch='MOTIF'),2:body(3,96,ecc=400,phase=8),3:body(2,48,ecc=600,phase=16),4:body(1,128,phase=12)},
-  gamaka={1:('MEEND',700),2:('ANDOLAN',600),3:('KAN',500)},
-  gen={2:('MARKOV',500,8,7)},
-  sky=(15,10,0,'SWELL',60,'ACCENT'),tape=(1,150,100,200),hall=(900,50,650,450,0),beads=(750,780,300,'CLEAN')),
  # The form: calm, build, peak, release, sixteen bars each, tracks falling silent and coming back; slow LFOs open and
  # close the filters and move the voices across.
  dict(name='SLOW TIDES',family=3,tempo=58,root='F',scale='MIXOLYDIAN',macro=[500,60,460,340],form=(900,3,3),
@@ -193,16 +160,61 @@ MONDES=[
    ('Linen Strings',63,1,16,dict(level=200,attack=700,decay=940,room=500,send=200)),REST],
   orbits={0:body(1,'17.8s'),1:body(1,'20.1s',phase=5),2:body(1,'23.5s',phase=10),3:body(1,'29.9s',phase=15),4:body(1,'31.8s',phase=20)},
   sky=(0,0,0,'SWELL',60,'OFF'),tape=(4,100,50,150),hall=(900,60,650,400,0),beads=(750,780,250,'CLEAN')),
+ # ---- ECHO: the tape and the HALL ----
+ # The tape echo in front: all three heads, a worn, wobbling, driven tape; a bell and a flute played into it.
+ dict(name='RUST REELS',family=4,tempo=70,root='C',scale='IWATO',macro=[500,80,480,280],
+  echo='1/8 .',delay_fb=620,fx=600,room=450,grain=(600,400,300),
+  tracks=[('Deep Root',36,2,16,dict(level=400,send=60,room=100)),('Soft Tine',67,3,16,dict(level=240,echo=750,room=250,send=200)),
+   ('Hollow Flute',60,2,16,dict(level=220,attack=150,echo=600,room=300,send=200)),REST,REST,REST],
+  orbits={0:body(2,64),1:body(3,48,ecc=300),2:body(2,96,ecc=450,phase=10)},
+  sky=(10,0,0,'SWELL',60,'ACCENT'),tape=(7,450,350,650),hall=(600,20,500,300,0),beads=(500,800,200,'DIRTY')),
+ # The HALL in front: the largest room, a long predelay, few notes; every 8 bars a comet swells the room.
+ dict(name='CATHEDRAL OF SMOKE',family=4,tempo=48,root='E',scale='HARMONIC MIN',macro=[500,40,440,260],
+  echo='1/4',delay_fb=250,fx=620,room=950,diffusion=900,grain=(800,500,300),
+  tracks=[('Velvet Choir',52,1,16,dict(level=220,attack=700,decay=950,room=700,send=150)),('Pure Water',71,2,16,dict(level=230,echo=200,room=800,send=200)),
+   ('Glass Drop',64,3,16,dict(level=220,echo=250,room=800,send=250)),REST,REST,REST],
+  orbits={0:body(1,192),1:body(2,128,ecc=200,phase=6),2:body(3,96,ecc=350,phase=14)},
+  sky=(0,0,8,'SWELL',90,'ACCENT'),tape=(1,80,50,100),hall=(980,80,700,500,0),beads=(700,780,250,'CLEAN')),
+ # Both, as from an old radio: a vintage HALL, a wobbling tape, a reed that slides into its notes (meend) in Hijaz.
+ dict(name='DRIFTING SIGNAL',family=4,tempo=62,root='D',scale='HIJAZ',macro=[500,60,460,320],
+  echo='1/8 .',delay_fb=480,fx=560,room=650,grain=(700,450,350),
+  tracks=[('Night Floor',38,2,16,dict(level=400,send=80,room=150)),('Warm Reed',62,4,16,dict(level=230,echo=500,room=450,send=250)),
+   ('Moss Pulse',57,2,16,dict(level=210,attack=300,echo=400,room=500,send=250)),REST,REST,REST],
+  gamaka={1:('MEEND',600)},
+  orbits={0:body(2,96,ecc=250),1:body(4,64,ecc=550,phase=4),2:body(2,128,ecc=600,phase=12)},
+  sky=(20,15,16,'BOTH',50,'ACCENT'),tape=(5,600,250,500),hall=(850,40,600,600,1),beads=(600,820,300,'DIRTY')),
+ # ---- VOICE: SIX-OP FM and STRING MACHINE ----
+ # SIX-OP's PLANETS in a gamelan tuning, its notes spinning moons up the scale.
+ dict(name='GLASS PLANETS',family=5,tempo=66,root='A',scale='SLENDRO 5-TET',macro=[500,80,500,300],
+  echo='1/8 .',delay_fb=420,fx=500,room=650,grain=(650,450,300),
+  tracks=[('DX Planets',57,4,16,dict(level=230,echo=350,room=450,send=250)),('Velvet Foundation',33,2,16,dict(level=400,send=60,room=150)),
+   ('Sine Pearl',69,3,16,dict(level=200,echo=300,room=450,send=250)),REST,REST,REST],
+  orbits={0:body(4,48,ecc=200,moons=2,spin=3,interval='UP',moon_level=50),1:body(2,128),2:body(3,64,ecc=300,phase=8)},
+  sky=(0,0,16,'SWELL',60,'ACCENT'),tape=(3,150,100,200),hall=(800,35,600,400,0),beads=(600,800,250,'DIGITAL')),
+ # STRING MACHINE's ensemble on a free period (23.5 s, whatever the tempo), chords when the bodies align.
+ dict(name='ASH ENSEMBLE',family=5,tempo=56,root='F',scale='MELODIC MIN',macro=[500,40,460,320],
+  echo='1/4',delay_fb=350,fx=500,room=720,diffusion=800,grain=(750,500,300),
+  tracks=[('Solina Dusk',53,1,16,dict(level=230,attack=700,decay=950,room=500,send=200)),('Felt Octave',29,2,16,dict(level=400,send=60,room=150)),
+   ('Soft Sine',65,3,16,dict(level=200,echo=350,room=450,send=250)),REST,REST,REST],
+  orbits={0:body(1,'23.5s'),1:body(2,128,ecc=150),2:body(3,96,ecc=400,phase=6)},
+  sky=(15,0,0,'SWELL',60,'CHORD'),tape=(3,120,100,150),hall=(850,45,650,400,0),beads=(700,790,250,'CLEAN')),
+ # SIX-OP's tubular bells at night (Bhupali), a choir held under them; a comet every 32 bars freezes the grains.
+ dict(name='NIGHT BELLS',family=5,tempo=60,root='G',scale='BHUPALI',macro=[500,60,480,300],
+  echo='1/8 .',delay_fb=450,fx=520,room=700,grain=(650,450,300),
+  tracks=[('DX Tub Bells',67,3,16,dict(level=200,echo=400,room=500,send=280)),('Night Voices',55,1,16,dict(level=200,attack=700,decay=950,room=500,send=200)),
+   ('Round Step',31,2,16,dict(level=400,send=60,room=150)),REST,REST,REST],
+  orbits={0:body(3,96,ecc=500,moons=1,spin=4,interval='HARM',moon_level=45),1:body(1,192,phase=12),2:body(2,64,ecc=200)},
+  sky=(10,20,32,'FREEZE',50,'CHORD'),tape=(3,200,100,250),hall=(900,50,650,450,0),beads=(700,800,300,'CLEAN')),
 ]
 # A blank start, as Monades' blank: no gates, no hits, the effects returned at zero.
-BLANK=dict(name='EMPTY SKY',family=4,tempo=64,root='C',scale='MINOR',macro=[500,0,500,0],fx=0,room=600,
+BLANK=dict(name='EMPTY SKY',family=6,tempo=64,root='C',scale='MINOR',macro=[500,0,500,0],fx=0,room=600,
  tracks=[('Soft Tine',48+i*7 if i<4 else 60,0,16,dict(level=300,room=0)) for i in range(6)],orbits={},
  phrase={i:[0 if j%4==0 else 7 if j%4==2 else -1 for j in range(16)] for i in range(6)}, # as Monades' blank: room for Marbles
  sky=(0,0,0,'SWELL',60,'ACCENT'),tape=(1,0,0,0),hall=(700,20,550,300,0),beads=(500,800,200,'DIGITAL'))
 
 # Levels: every Monde near -30 dB RMS over a minute (NO STARS and LOOPS OF ASH, sparse by design, near -36), measured with Rhizome's
 # voices by tests/next_features.cpp; the tracks' levels above are the balance inside a Monde, these the Monde's own.
-GAIN={'LAST LIGHT':0.83,'AMBER HOUR':0.89,'LONG SHADOWS':1.22,'SLOW EMBERS':1.16,'NIGHT SWALLOWS':1.23,'BLACK ORCHARD':1.32,'SLEEPLESS TIDE':1.21,'NO STARS':4.73,'FIRST BIRD':1.86,'PALE COMET':1.11,'CHOKED DAWN':0.78,'DAY BREAKS':1.3,'COLD IN THE DARK':1.13,'KEPLER NIGHT':1.16,'TRAPPIST DUST':1.14,'RAGA OF ASH':1.85,'SLOW TIDES':1.58,'LOOPS OF ASH':1.12}
+GAIN={'LAST LIGHT':0.83,'AMBER HOUR':0.89,'LONG SHADOWS':1.22,'SLOW EMBERS':1.16,'NIGHT SWALLOWS':1.23,'BLACK ORCHARD':1.32,'SLEEPLESS TIDE':1.21,'NO STARS':4.9,'FIRST BIRD':1.86,'PALE COMET':1.11,'CHOKED DAWN':0.78,'DAY BREAKS':1.3,'TRAPPIST DUST':0.93,'SLOW TIDES':1.56,'LOOPS OF ASH':1.12,'RUST REELS':0.47,'CATHEDRAL OF SMOKE':3.76,'DRIFTING SIGNAL':2.32,'GLASS PLANETS':1.43,'ASH ENSEMBLE':2.48,'NIGHT BELLS':3.51}
 
 # The HALL as a voice of its own: the melodic tracks' sends, raised from the values above (where it sat 15 to 20 dB under
 # the direct sound and went unheard) to about 10 dB under it; the bass keeps its small send, for a clear low end.

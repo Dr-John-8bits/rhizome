@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 """Rhizome on an FM-1: the processor load of each factory Monde, read over USB (the diagnostics SysEx, no flash writes).
 
-  measure_fm1.py [--seconds 40] [--worst] [--mondes 0-17] [--port NAME]
+  measure_fm1.py [--seconds 40] [--worst] [--mondes 0-20] [--port NAME]
 
 For each Monde: load it, PLAY, reset the measured peak, let it play, then read the load now and its peak (the SYSTEM
 page's figures), the audio dropouts (xruns), the overload fallbacks to ECO, and the longest audio block against its
@@ -14,8 +14,8 @@ import mido
 
 SCENE, PLAY, MACRO, BEADS_MEDIA, CLEAN_TAPE = 20, 16, 14, 149, 1   # app/dsp/dreams.h
 NAMES = ['LAST LIGHT', 'AMBER HOUR', 'LONG SHADOWS', 'SLOW EMBERS', 'NIGHT SWALLOWS', 'BLACK ORCHARD', 'SLEEPLESS TIDE',
-         'NO STARS', 'FIRST BIRD', 'PALE COMET', 'CHOKED DAWN', 'DAY BREAKS', 'COLD IN THE DARK', 'KEPLER NIGHT',
-         'TRAPPIST DUST', 'RAGA OF ASH', 'SLOW TIDES', 'LOOPS OF ASH']
+         'NO STARS', 'FIRST BIRD', 'PALE COMET', 'CHOKED DAWN', 'DAY BREAKS', 'TRAPPIST DUST', 'SLOW TIDES',
+         'LOOPS OF ASH', 'RUST REELS', 'CATHEDRAL OF SMOKE', 'DRIFTING SIGNAL', 'GLASS PLANETS', 'ASH ENSEMBLE', 'NIGHT BELLS']
 
 
 class Device:
@@ -66,7 +66,7 @@ class Device:
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--seconds', type=int, default=40); ap.add_argument('--worst', action='store_true')
-    ap.add_argument('--mondes', default='0-17'); ap.add_argument('--port'); ap.add_argument('--json')
+    ap.add_argument('--mondes', default='0-20'); ap.add_argument('--port'); ap.add_argument('--json')
     a = ap.parse_args()
     lo, _, hi = a.mondes.partition('-'); ids = range(int(lo), int(hi or lo) + 1)
     dev = Device(a.port); results = []

@@ -5,6 +5,8 @@
     "Night: eccentric orbits",
     "Dawn: moons and comets",
     "Deep: long forms",
+    "Echo: the tape and the HALL",
+    "Voice: SIX-OP FM and STRING MACHINE",
     "Blank"
   ],
   "family_short": [
@@ -12,6 +14,8 @@
     "NIGHT",
     "DAWN",
     "DEEP",
+    "ECHO",
+    "VOICE",
     "BLANK"
   ],
   "tone_fields": [
@@ -7718,7 +7722,7 @@
           "tone": 85,
           "harm": 780,
           "decay": 950,
-          "level": 851,
+          "level": 882,
           "send": 300,
           "hits": 0,
           "length": 16,
@@ -10514,1162 +10518,12 @@
       "v11ok": true
     },
     {
-      "name": "COLD IN THE DARK",
-      "family": 3,
-      "tempo": 72,
-      "root": 2,
-      "scale": 1,
-      "seed": 1380568372,
-      "macro": [
-        500,
-        60,
-        460,
-        320
-      ],
-      "locked": 1,
-      "freeze": 0,
-      "grain_size": 700,
-      "grain_pos": 450,
-      "feedback": 350,
-      "quality": 0,
-      "transpose": 0,
-      "swing": 0,
-      "grain_pitch": 0,
-      "reverse": 0,
-      "duck_source": -1,
-      "duck_amount": 0,
-      "duck_release": 500,
-      "tracks": [
-        {
-          "model": 8,
-          "tone": 105,
-          "harm": 190,
-          "decay": 135,
-          "level": 429,
-          "send": 100,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 38,
-          "pan": 500,
-          "mute": 0,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 100,
-          "cutoff": 480,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 0
-        },
-        {
-          "model": 3,
-          "tone": 205,
-          "harm": 649,
-          "decay": 180,
-          "level": 260,
-          "send": 280,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 62,
-          "pan": 340,
-          "mute": 0,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 500,
-          "cutoff": 850,
-          "resonance": 0,
-          "filter": 3,
-          "breathe": 70
-        },
-        {
-          "model": 3,
-          "tone": 350,
-          "harm": 649,
-          "decay": 760,
-          "level": 237,
-          "send": 250,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 69,
-          "pan": 660,
-          "mute": 0,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 500,
-          "cutoff": 760,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 0
-        },
-        {
-          "model": 13,
-          "tone": 650,
-          "harm": 500,
-          "decay": 950,
-          "level": 226,
-          "send": 220,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 57,
-          "pan": 220,
-          "mute": 0,
-          "speed": 1,
-          "attack": 650,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 550,
-          "cutoff": 720,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 260
-        },
-        {
-          "model": 4,
-          "tone": 90,
-          "harm": 500,
-          "decay": 950,
-          "level": 0,
-          "send": 250,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 45,
-          "pan": 780,
-          "mute": 1,
-          "speed": 1,
-          "attack": 700,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 114,
-          "cutoff": 750,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 0
-        },
-        {
-          "model": 11,
-          "tone": 700,
-          "harm": 0,
-          "decay": 500,
-          "level": 0,
-          "send": 200,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 48,
-          "pan": 500,
-          "mute": 1,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 200,
-          "cutoff": 650,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 120
-        }
-      ],
-      "tones": [
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1
-      ],
-      "v10": false,
-      "ext": {
-        "tracks": [
-          {
-            "delay_send": 0,
-            "reverb_send": 150,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 350,
-            "reverb_send": 880,
-            "notes": [
-              0,
-              -1,
-              3,
-              -1,
-              7,
-              -1,
-              10,
-              -1,
-              12,
-              -1,
-              10,
-              -1,
-              7,
-              -1,
-              5,
-              -1
-            ]
-          },
-          {
-            "delay_send": 300,
-            "reverb_send": 990,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 1000,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 1000,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 330,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          }
-        ],
-        "delay_ms": 200,
-        "delay_fb": 420,
-        "reverb_time": 700,
-        "fx_level": 480,
-        "send_hp": 0,
-        "echo_tone": 500,
-        "room_tone": 500,
-        "lfo": [
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 15,
-              "shape": 0,
-              "target": 5,
-              "depth": 500
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 1,
-              "shape": 1,
-              "target": 0,
-              "depth": 350
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 0,
-              "shape": 5,
-              "target": 6,
-              "depth": 300
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ]
-        ],
-        "echo_sync": 8,
-        "room_diffusion": 800,
-        "chorus": 0,
-        "chorus_depth": 500,
-        "gen": [
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 3,
-            "dejavu": 700,
-            "loop": 8,
-            "spread": 7
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          }
-        ],
-        "form": 600,
-        "form_bars": 2,
-        "form_drops": 2,
-        "gamaka": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "gamaka_amount": [
-          500,
-          500,
-          500,
-          500,
-          500,
-          500
-        ],
-        "vadi": -1,
-        "samvadi": -1,
-        "motion_every": 0
-      },
-      "id": 12,
-      "v11": {
-        "orbit": [
-          [
-            1,
-            3,
-            0,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            1,
-            0,
-            300,
-            0,
-            1,
-            2,
-            2,
-            1,
-            45
-          ],
-          [
-            2,
-            1,
-            450,
-            6,
-            2,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            1,
-            16,
-            0,
-            3,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            0,
-            4,
-            0,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            0,
-            4,
-            0,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ]
-        ],
-        "sky": [
-          40,
-          25,
-          3,
-          2,
-          50,
-          2,
-          0
-        ],
-        "tape": [
-          3,
-          200,
-          150,
-          250
-        ],
-        "hall": [
-          800,
-          40,
-          600,
-          450,
-          0
-        ],
-        "beads": [
-          650,
-          820,
-          300,
-          1
-        ]
-      },
-      "v11ok": true
-    },
-    {
-      "name": "KEPLER NIGHT",
-      "family": 3,
-      "tempo": 60,
-      "root": 9,
-      "scale": 3,
-      "seed": 1380576291,
-      "macro": [
-        500,
-        60,
-        460,
-        320
-      ],
-      "locked": 1,
-      "freeze": 0,
-      "grain_size": 750,
-      "grain_pos": 500,
-      "feedback": 300,
-      "quality": 0,
-      "transpose": 0,
-      "swing": 0,
-      "grain_pitch": 0,
-      "reverse": 0,
-      "duck_source": -1,
-      "duck_amount": 0,
-      "duck_release": 500,
-      "tracks": [
-        {
-          "model": 3,
-          "tone": 70,
-          "harm": 750,
-          "decay": 1000,
-          "level": 267,
-          "send": 250,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 57,
-          "pan": 500,
-          "mute": 0,
-          "speed": 1,
-          "attack": 800,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 500,
-          "cutoff": 740,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 340
-        },
-        {
-          "model": 12,
-          "tone": 500,
-          "harm": 812,
-          "decay": 950,
-          "level": 244,
-          "send": 250,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 64,
-          "pan": 340,
-          "mute": 0,
-          "speed": 1,
-          "attack": 500,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 500,
-          "cutoff": 860,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 260
-        },
-        {
-          "model": 7,
-          "tone": 492,
-          "harm": 600,
-          "decay": 930,
-          "level": 232,
-          "send": 220,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 52,
-          "pan": 660,
-          "mute": 0,
-          "speed": 1,
-          "attack": 500,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 220,
-          "cutoff": 740,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 340
-        },
-        {
-          "model": 3,
-          "tone": 260,
-          "harm": 750,
-          "decay": 200,
-          "level": 244,
-          "send": 250,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 69,
-          "pan": 220,
-          "mute": 0,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 500,
-          "cutoff": 890,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 0
-        },
-        {
-          "model": 4,
-          "tone": 460,
-          "harm": 500,
-          "decay": 960,
-          "level": 0,
-          "send": 100,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 33,
-          "pan": 780,
-          "mute": 1,
-          "speed": 1,
-          "attack": 800,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 488,
-          "cutoff": 830,
-          "resonance": 0,
-          "filter": 3,
-          "breathe": 180
-        },
-        {
-          "model": 11,
-          "tone": 700,
-          "harm": 0,
-          "decay": 500,
-          "level": 0,
-          "send": 200,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 48,
-          "pan": 500,
-          "mute": 1,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 200,
-          "cutoff": 650,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 120
-        }
-      ],
-      "tones": [
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1
-      ],
-      "v10": false,
-      "ext": {
-        "tracks": [
-          {
-            "delay_send": 300,
-            "reverb_send": 450,
-            "notes": [
-              0,
-              -1,
-              2,
-              -1,
-              3,
-              -1,
-              7,
-              -1,
-              5,
-              -1,
-              3,
-              -1,
-              2,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 1000,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 1000,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 350,
-            "reverb_send": 990,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 550,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 330,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          }
-        ],
-        "delay_ms": 200,
-        "delay_fb": 380,
-        "reverb_time": 720,
-        "fx_level": 480,
-        "send_hp": 0,
-        "echo_tone": 500,
-        "room_tone": 500,
-        "lfo": [
-          [
-            {
-              "rate": 15,
-              "shape": 0,
-              "target": 5,
-              "depth": 450
-            },
-            {
-              "rate": 0,
-              "shape": 1,
-              "target": 7,
-              "depth": 350
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 1,
-              "shape": 0,
-              "target": 0,
-              "depth": 300
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ]
-        ],
-        "echo_sync": 9,
-        "room_diffusion": 800,
-        "chorus": 0,
-        "chorus_depth": 500,
-        "gen": [
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          }
-        ],
-        "form": 0,
-        "form_bars": 1,
-        "form_drops": 2,
-        "gamaka": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "gamaka_amount": [
-          500,
-          500,
-          500,
-          500,
-          500,
-          500
-        ],
-        "vadi": -1,
-        "samvadi": -1,
-        "motion_every": 0
-      },
-      "id": 13,
-      "v11": {
-        "orbit": [
-          [
-            4,
-            7,
-            78,
-            0,
-            1,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            4,
-            8,
-            150,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            4,
-            9,
-            37,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            4,
-            11,
-            51,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            0,
-            4,
-            0,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            0,
-            4,
-            0,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ]
-        ],
-        "sky": [
-          10,
-          0,
-          3,
-          3,
-          55,
-          1,
-          2
-        ],
-        "tape": [
-          3,
-          150,
-          100,
-          200
-        ],
-        "hall": [
-          850,
-          45,
-          650,
-          400,
-          0
-        ],
-        "beads": [
-          700,
-          800,
-          250,
-          2
-        ]
-      },
-      "v11ok": true
-    },
-    {
       "name": "TRAPPIST DUST",
       "family": 3,
       "tempo": 66,
       "root": 4,
       "scale": 64,
-      "seed": 1380584210,
+      "seed": 1380568372,
       "macro": [
         500,
         40,
@@ -11695,7 +10549,7 @@
           "tone": 90,
           "harm": 500,
           "decay": 700,
-          "level": 228,
+          "level": 186,
           "send": 300,
           "hits": 0,
           "length": 16,
@@ -11715,11 +10569,11 @@
           "breathe": 0
         },
         {
-          "model": 6,
-          "tone": 75,
-          "harm": 840,
-          "decay": 330,
-          "level": 251,
+          "model": 3,
+          "tone": 90,
+          "harm": 234,
+          "decay": 700,
+          "level": 205,
           "send": 280,
           "hits": 0,
           "length": 16,
@@ -11729,21 +10583,21 @@
           "pan": 340,
           "mute": 0,
           "speed": 1,
-          "attack": 160,
+          "attack": 0,
           "ratchet": 1,
           "accent": 200,
-          "shape": 800,
-          "cutoff": 810,
+          "shape": 500,
+          "cutoff": 750,
           "resonance": 0,
           "filter": 1,
-          "breathe": 340
+          "breathe": 0
         },
         {
           "model": 7,
           "tone": 212,
           "harm": 0,
           "decay": 550,
-          "level": 228,
+          "level": 186,
           "send": 250,
           "hits": 0,
           "length": 16,
@@ -11767,7 +10621,7 @@
           "tone": 350,
           "harm": 649,
           "decay": 760,
-          "level": 228,
+          "level": 186,
           "send": 280,
           "hits": 0,
           "length": 16,
@@ -12137,7 +10991,7 @@
         "samvadi": -1,
         "motion_every": 0
       },
-      "id": 14,
+      "id": 12,
       "v11": {
         "orbit": [
           [
@@ -12239,587 +11093,12 @@
       "v11ok": true
     },
     {
-      "name": "RAGA OF ASH",
-      "family": 3,
-      "tempo": 52,
-      "root": 2,
-      "scale": 41,
-      "seed": 1380592129,
-      "macro": [
-        500,
-        40,
-        440,
-        340
-      ],
-      "locked": 1,
-      "freeze": 0,
-      "grain_size": 800,
-      "grain_pos": 500,
-      "feedback": 350,
-      "quality": 0,
-      "transpose": 0,
-      "swing": 0,
-      "grain_pitch": 0,
-      "reverse": 0,
-      "duck_source": -1,
-      "duck_amount": 0,
-      "duck_release": 500,
-      "tracks": [
-        {
-          "model": 8,
-          "tone": 105,
-          "harm": 190,
-          "decay": 135,
-          "level": 666,
-          "send": 100,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 38,
-          "pan": 500,
-          "mute": 0,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 100,
-          "cutoff": 480,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 0
-        },
-        {
-          "model": 4,
-          "tone": 340,
-          "harm": 500,
-          "decay": 820,
-          "level": 462,
-          "send": 250,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 62,
-          "pan": 340,
-          "mute": 0,
-          "speed": 1,
-          "attack": 150,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 250,
-          "cutoff": 870,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 0
-        },
-        {
-          "model": 3,
-          "tone": 380,
-          "harm": 234,
-          "decay": 330,
-          "level": 407,
-          "send": 250,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 57,
-          "pan": 660,
-          "mute": 0,
-          "speed": 1,
-          "attack": 100,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 500,
-          "cutoff": 810,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 340
-        },
-        {
-          "model": 12,
-          "tone": 500,
-          "harm": 557,
-          "decay": 900,
-          "level": 352,
-          "send": 300,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 74,
-          "pan": 220,
-          "mute": 0,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 500,
-          "cutoff": 900,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 100
-        },
-        {
-          "model": 7,
-          "tone": 184,
-          "harm": 900,
-          "decay": 960,
-          "level": 0,
-          "send": 200,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 50,
-          "pan": 780,
-          "mute": 1,
-          "speed": 1,
-          "attack": 800,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 183,
-          "cutoff": 850,
-          "resonance": 0,
-          "filter": 3,
-          "breathe": 70
-        },
-        {
-          "model": 11,
-          "tone": 700,
-          "harm": 0,
-          "decay": 500,
-          "level": 0,
-          "send": 200,
-          "hits": 0,
-          "length": 16,
-          "rotate": 0,
-          "prob": 1000,
-          "note": 48,
-          "pan": 500,
-          "mute": 1,
-          "speed": 1,
-          "attack": 0,
-          "ratchet": 1,
-          "accent": 200,
-          "shape": 200,
-          "cutoff": 650,
-          "resonance": 0,
-          "filter": 1,
-          "breathe": 120
-        }
-      ],
-      "tones": [
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1
-      ],
-      "v10": false,
-      "ext": {
-        "tracks": [
-          {
-            "delay_send": 0,
-            "reverb_send": 250,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 300,
-            "reverb_send": 990,
-            "notes": [
-              0,
-              -1,
-              1,
-              -1,
-              5,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              5,
-              -1,
-              3,
-              -1,
-              1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 300,
-            "reverb_send": 990,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 400,
-            "reverb_send": 1000,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 990,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          },
-          {
-            "delay_send": 0,
-            "reverb_send": 330,
-            "notes": [
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1,
-              0,
-              -1,
-              -1,
-              -1,
-              7,
-              -1,
-              -1,
-              -1
-            ]
-          }
-        ],
-        "delay_ms": 200,
-        "delay_fb": 350,
-        "reverb_time": 760,
-        "fx_level": 500,
-        "send_hp": 0,
-        "echo_tone": 500,
-        "room_tone": 500,
-        "lfo": [
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ],
-          [
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            },
-            {
-              "rate": 7,
-              "shape": 0,
-              "target": 0,
-              "depth": 0
-            }
-          ]
-        ],
-        "echo_sync": 9,
-        "room_diffusion": 850,
-        "chorus": 0,
-        "chorus_depth": 500,
-        "gen": [
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 2,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 7
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          },
-          {
-            "source": 0,
-            "dejavu": 500,
-            "loop": 8,
-            "spread": 12
-          }
-        ],
-        "form": 0,
-        "form_bars": 1,
-        "form_drops": 2,
-        "gamaka": [
-          0,
-          2,
-          3,
-          1,
-          0,
-          0
-        ],
-        "gamaka_amount": [
-          500,
-          700,
-          600,
-          500,
-          500,
-          500
-        ],
-        "vadi": 5,
-        "samvadi": 0,
-        "motion_every": 0
-      },
-      "id": 15,
-      "v11": {
-        "orbit": [
-          [
-            1,
-            12,
-            0,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            6,
-            8,
-            250,
-            0,
-            1,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            3,
-            9,
-            400,
-            8,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            2,
-            7,
-            600,
-            16,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            0,
-            4,
-            0,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ],
-          [
-            0,
-            4,
-            0,
-            0,
-            0,
-            0,
-            3,
-            1,
-            60
-          ]
-        ],
-        "sky": [
-          15,
-          10,
-          0,
-          0,
-          60,
-          1,
-          0
-        ],
-        "tape": [
-          1,
-          150,
-          100,
-          200
-        ],
-        "hall": [
-          900,
-          50,
-          650,
-          450,
-          0
-        ],
-        "beads": [
-          750,
-          780,
-          300,
-          1
-        ]
-      },
-      "v11ok": true
-    },
-    {
       "name": "SLOW TIDES",
       "family": 3,
       "tempo": 58,
       "root": 5,
       "scale": 9,
-      "seed": 1380600048,
+      "seed": 1380576291,
       "macro": [
         500,
         60,
@@ -12845,7 +11124,7 @@
           "tone": 400,
           "harm": 45,
           "decay": 920,
-          "level": 600,
+          "level": 593,
           "send": 100,
           "hits": 0,
           "length": 16,
@@ -12869,7 +11148,7 @@
           "tone": 280,
           "harm": 744,
           "decay": 550,
-          "level": 332,
+          "level": 328,
           "send": 250,
           "hits": 0,
           "length": 16,
@@ -12893,7 +11172,7 @@
           "tone": 70,
           "harm": 750,
           "decay": 1000,
-          "level": 332,
+          "level": 328,
           "send": 280,
           "hits": 0,
           "length": 16,
@@ -12917,7 +11196,7 @@
           "tone": 500,
           "harm": 751,
           "decay": 950,
-          "level": 316,
+          "level": 312,
           "send": 280,
           "hits": 0,
           "length": 16,
@@ -13287,7 +11566,7 @@
         "samvadi": -1,
         "motion_every": 0
       },
-      "id": 16,
+      "id": 13,
       "v11": {
         "orbit": [
           [
@@ -13394,7 +11673,7 @@
       "tempo": 60,
       "root": 5,
       "scale": 1,
-      "seed": 1380607967,
+      "seed": 1380584210,
       "macro": [
         500,
         0,
@@ -13862,7 +12141,7 @@
         "samvadi": -1,
         "motion_every": 0
       },
-      "id": 17,
+      "id": 14,
       "v11": {
         "orbit": [
           [
@@ -13964,8 +12243,3458 @@
       "v11ok": true
     },
     {
-      "name": "EMPTY SKY",
+      "name": "RUST REELS",
       "family": 4,
+      "tempo": 70,
+      "root": 0,
+      "scale": 67,
+      "seed": 1380592129,
+      "macro": [
+        500,
+        80,
+        480,
+        280
+      ],
+      "locked": 1,
+      "freeze": 0,
+      "grain_size": 600,
+      "grain_pos": 400,
+      "feedback": 300,
+      "quality": 0,
+      "transpose": 0,
+      "swing": 0,
+      "grain_pitch": 0,
+      "reverse": 0,
+      "duck_source": -1,
+      "duck_amount": 0,
+      "duck_release": 500,
+      "tracks": [
+        {
+          "model": 8,
+          "tone": 105,
+          "harm": 190,
+          "decay": 135,
+          "level": 188,
+          "send": 60,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 36,
+          "pan": 500,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 100,
+          "cutoff": 480,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 0
+        },
+        {
+          "model": 3,
+          "tone": 280,
+          "harm": 477,
+          "decay": 550,
+          "level": 113,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 67,
+          "pan": 340,
+          "mute": 0,
+          "speed": 1,
+          "attack": 100,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 500,
+          "cutoff": 820,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 180
+        },
+        {
+          "model": 4,
+          "tone": 340,
+          "harm": 500,
+          "decay": 820,
+          "level": 103,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 60,
+          "pan": 660,
+          "mute": 0,
+          "speed": 1,
+          "attack": 150,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 250,
+          "cutoff": 870,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 0
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 220,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 780,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 500,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        }
+      ],
+      "tones": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "v10": false,
+      "ext": {
+        "tracks": [
+          {
+            "delay_send": 0,
+            "reverb_send": 100,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 750,
+            "reverb_send": 550,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 600,
+            "reverb_send": 660,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          }
+        ],
+        "delay_ms": 200,
+        "delay_fb": 620,
+        "reverb_time": 450,
+        "fx_level": 600,
+        "send_hp": 0,
+        "echo_tone": 500,
+        "room_tone": 500,
+        "lfo": [
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ]
+        ],
+        "echo_sync": 8,
+        "room_diffusion": 0,
+        "chorus": 0,
+        "chorus_depth": 500,
+        "gen": [
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          }
+        ],
+        "form": 0,
+        "form_bars": 1,
+        "form_drops": 2,
+        "gamaka": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gamaka_amount": [
+          500,
+          500,
+          500,
+          500,
+          500,
+          500
+        ],
+        "vadi": -1,
+        "samvadi": -1,
+        "motion_every": 0
+      },
+      "id": 15,
+      "v11": {
+        "orbit": [
+          [
+            2,
+            8,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            3,
+            7,
+            300,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            2,
+            9,
+            450,
+            10,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ]
+        ],
+        "sky": [
+          10,
+          0,
+          0,
+          0,
+          60,
+          1,
+          0
+        ],
+        "tape": [
+          7,
+          450,
+          350,
+          650
+        ],
+        "hall": [
+          600,
+          20,
+          500,
+          300,
+          0
+        ],
+        "beads": [
+          500,
+          800,
+          200,
+          0
+        ]
+      },
+      "v11ok": true
+    },
+    {
+      "name": "CATHEDRAL OF SMOKE",
+      "family": 4,
+      "tempo": 48,
+      "root": 4,
+      "scale": 11,
+      "seed": 1380600048,
+      "macro": [
+        500,
+        40,
+        440,
+        260
+      ],
+      "locked": 1,
+      "freeze": 0,
+      "grain_size": 800,
+      "grain_pos": 500,
+      "feedback": 300,
+      "quality": 0,
+      "transpose": 0,
+      "swing": 0,
+      "grain_pitch": 0,
+      "reverse": 0,
+      "duck_source": -1,
+      "duck_amount": 0,
+      "duck_release": 500,
+      "tracks": [
+        {
+          "model": 7,
+          "tone": 212,
+          "harm": 0,
+          "decay": 950,
+          "level": 827,
+          "send": 150,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 52,
+          "pan": 500,
+          "mute": 0,
+          "speed": 1,
+          "attack": 700,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 214,
+          "cutoff": 820,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 180
+        },
+        {
+          "model": 3,
+          "tone": 55,
+          "harm": 234,
+          "decay": 250,
+          "level": 865,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 71,
+          "pan": 340,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 500,
+          "cutoff": 790,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 70
+        },
+        {
+          "model": 3,
+          "tone": 205,
+          "harm": 649,
+          "decay": 180,
+          "level": 827,
+          "send": 250,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 64,
+          "pan": 660,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 500,
+          "cutoff": 850,
+          "resonance": 0,
+          "filter": 3,
+          "breathe": 70
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 220,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 780,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 500,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        }
+      ],
+      "tones": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "v10": false,
+      "ext": {
+        "tracks": [
+          {
+            "delay_send": 0,
+            "reverb_send": 700,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 200,
+            "reverb_send": 1000,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 250,
+            "reverb_send": 1000,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          }
+        ],
+        "delay_ms": 200,
+        "delay_fb": 250,
+        "reverb_time": 950,
+        "fx_level": 620,
+        "send_hp": 0,
+        "echo_tone": 500,
+        "room_tone": 500,
+        "lfo": [
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ]
+        ],
+        "echo_sync": 9,
+        "room_diffusion": 900,
+        "chorus": 0,
+        "chorus_depth": 500,
+        "gen": [
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          }
+        ],
+        "form": 0,
+        "form_bars": 1,
+        "form_drops": 2,
+        "gamaka": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gamaka_amount": [
+          500,
+          500,
+          500,
+          500,
+          500,
+          500
+        ],
+        "vadi": -1,
+        "samvadi": -1,
+        "motion_every": 0
+      },
+      "id": 16,
+      "v11": {
+        "orbit": [
+          [
+            1,
+            12,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            2,
+            11,
+            200,
+            6,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            3,
+            9,
+            350,
+            14,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ]
+        ],
+        "sky": [
+          0,
+          0,
+          2,
+          0,
+          90,
+          1,
+          0
+        ],
+        "tape": [
+          1,
+          80,
+          50,
+          100
+        ],
+        "hall": [
+          980,
+          80,
+          700,
+          500,
+          0
+        ],
+        "beads": [
+          700,
+          780,
+          250,
+          1
+        ]
+      },
+      "v11ok": true
+    },
+    {
+      "name": "DRIFTING SIGNAL",
+      "family": 4,
+      "tempo": 62,
+      "root": 2,
+      "scale": 58,
+      "seed": 1380607967,
+      "macro": [
+        500,
+        60,
+        460,
+        320
+      ],
+      "locked": 1,
+      "freeze": 0,
+      "grain_size": 700,
+      "grain_pos": 450,
+      "feedback": 350,
+      "quality": 0,
+      "transpose": 0,
+      "swing": 0,
+      "grain_pitch": 0,
+      "reverse": 0,
+      "duck_source": -1,
+      "duck_amount": 0,
+      "duck_release": 500,
+      "tracks": [
+        {
+          "model": 8,
+          "tone": 355,
+          "harm": 190,
+          "decay": 355,
+          "level": 928,
+          "send": 80,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 38,
+          "pan": 500,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 100,
+          "cutoff": 640,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 0
+        },
+        {
+          "model": 3,
+          "tone": 380,
+          "harm": 234,
+          "decay": 330,
+          "level": 534,
+          "send": 250,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 62,
+          "pan": 340,
+          "mute": 0,
+          "speed": 1,
+          "attack": 160,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 500,
+          "cutoff": 810,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 340
+        },
+        {
+          "model": 4,
+          "tone": 260,
+          "harm": 622,
+          "decay": 200,
+          "level": 487,
+          "send": 250,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 57,
+          "pan": 660,
+          "mute": 0,
+          "speed": 1,
+          "attack": 300,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 420,
+          "cutoff": 890,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 0
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 220,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 780,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 500,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        }
+      ],
+      "tones": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "v10": false,
+      "ext": {
+        "tracks": [
+          {
+            "delay_send": 0,
+            "reverb_send": 150,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 500,
+            "reverb_send": 990,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 400,
+            "reverb_send": 1000,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          }
+        ],
+        "delay_ms": 200,
+        "delay_fb": 480,
+        "reverb_time": 650,
+        "fx_level": 560,
+        "send_hp": 0,
+        "echo_tone": 500,
+        "room_tone": 500,
+        "lfo": [
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ]
+        ],
+        "echo_sync": 8,
+        "room_diffusion": 0,
+        "chorus": 0,
+        "chorus_depth": 500,
+        "gen": [
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          }
+        ],
+        "form": 0,
+        "form_bars": 1,
+        "form_drops": 2,
+        "gamaka": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gamaka_amount": [
+          500,
+          600,
+          500,
+          500,
+          500,
+          500
+        ],
+        "vadi": -1,
+        "samvadi": -1,
+        "motion_every": 0
+      },
+      "id": 17,
+      "v11": {
+        "orbit": [
+          [
+            2,
+            9,
+            250,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            4,
+            8,
+            550,
+            4,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            2,
+            11,
+            600,
+            12,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ]
+        ],
+        "sky": [
+          20,
+          15,
+          3,
+          2,
+          50,
+          1,
+          0
+        ],
+        "tape": [
+          5,
+          600,
+          250,
+          500
+        ],
+        "hall": [
+          850,
+          40,
+          600,
+          600,
+          1
+        ],
+        "beads": [
+          600,
+          820,
+          300,
+          0
+        ]
+      },
+      "v11ok": true
+    },
+    {
+      "name": "GLASS PLANETS",
+      "family": 5,
+      "tempo": 66,
+      "root": 9,
+      "scale": 87,
+      "seed": 1380615886,
+      "macro": [
+        500,
+        80,
+        500,
+        300
+      ],
+      "locked": 1,
+      "freeze": 0,
+      "grain_size": 650,
+      "grain_pos": 450,
+      "feedback": 300,
+      "quality": 0,
+      "transpose": 0,
+      "swing": 0,
+      "grain_pitch": 0,
+      "reverse": 0,
+      "duck_source": -1,
+      "duck_amount": 0,
+      "duck_release": 500,
+      "tracks": [
+        {
+          "model": 12,
+          "tone": 500,
+          "harm": 802,
+          "decay": 950,
+          "level": 329,
+          "send": 250,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 57,
+          "pan": 500,
+          "mute": 0,
+          "speed": 1,
+          "attack": 400,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 500,
+          "cutoff": 880,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 200
+        },
+        {
+          "model": 8,
+          "tone": 80,
+          "harm": 80,
+          "decay": 80,
+          "level": 572,
+          "send": 60,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 33,
+          "pan": 340,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 100,
+          "cutoff": 400,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 0
+        },
+        {
+          "model": 3,
+          "tone": 90,
+          "harm": 234,
+          "decay": 700,
+          "level": 286,
+          "send": 250,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 69,
+          "pan": 660,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 500,
+          "cutoff": 750,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 0
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 220,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 780,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 500,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        }
+      ],
+      "tones": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "v10": false,
+      "ext": {
+        "tracks": [
+          {
+            "delay_send": 350,
+            "reverb_send": 450,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 300,
+            "reverb_send": 990,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          }
+        ],
+        "delay_ms": 200,
+        "delay_fb": 420,
+        "reverb_time": 650,
+        "fx_level": 500,
+        "send_hp": 0,
+        "echo_tone": 500,
+        "room_tone": 500,
+        "lfo": [
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ]
+        ],
+        "echo_sync": 8,
+        "room_diffusion": 0,
+        "chorus": 0,
+        "chorus_depth": 500,
+        "gen": [
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          }
+        ],
+        "form": 0,
+        "form_bars": 1,
+        "form_drops": 2,
+        "gamaka": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gamaka_amount": [
+          500,
+          500,
+          500,
+          500,
+          500,
+          500
+        ],
+        "vadi": -1,
+        "samvadi": -1,
+        "motion_every": 0
+      },
+      "id": 18,
+      "v11": {
+        "orbit": [
+          [
+            4,
+            7,
+            200,
+            0,
+            0,
+            2,
+            2,
+            1,
+            50
+          ],
+          [
+            2,
+            11,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            3,
+            8,
+            300,
+            8,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ]
+        ],
+        "sky": [
+          0,
+          0,
+          3,
+          0,
+          60,
+          1,
+          0
+        ],
+        "tape": [
+          3,
+          150,
+          100,
+          200
+        ],
+        "hall": [
+          800,
+          35,
+          600,
+          400,
+          0
+        ],
+        "beads": [
+          600,
+          800,
+          250,
+          2
+        ]
+      },
+      "v11ok": true
+    },
+    {
+      "name": "ASH ENSEMBLE",
+      "family": 5,
+      "tempo": 56,
+      "root": 5,
+      "scale": 12,
+      "seed": 1380623805,
+      "macro": [
+        500,
+        40,
+        460,
+        320
+      ],
+      "locked": 1,
+      "freeze": 0,
+      "grain_size": 750,
+      "grain_pos": 500,
+      "feedback": 300,
+      "quality": 0,
+      "transpose": 0,
+      "swing": 0,
+      "grain_pitch": 0,
+      "reverse": 0,
+      "duck_source": -1,
+      "duck_amount": 0,
+      "duck_release": 500,
+      "tracks": [
+        {
+          "model": 13,
+          "tone": 450,
+          "harm": 318,
+          "decay": 950,
+          "level": 570,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 53,
+          "pan": 500,
+          "mute": 0,
+          "speed": 1,
+          "attack": 700,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 300,
+          "cutoff": 760,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 220
+        },
+        {
+          "model": 8,
+          "tone": 380,
+          "harm": 300,
+          "decay": 80,
+          "level": 992,
+          "send": 60,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 29,
+          "pan": 340,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 100,
+          "cutoff": 400,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 0
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 496,
+          "send": 250,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 65,
+          "pan": 660,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 220,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 780,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 500,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        }
+      ],
+      "tones": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "v10": false,
+      "ext": {
+        "tracks": [
+          {
+            "delay_send": 0,
+            "reverb_send": 500,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 350,
+            "reverb_send": 990,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          }
+        ],
+        "delay_ms": 200,
+        "delay_fb": 350,
+        "reverb_time": 720,
+        "fx_level": 500,
+        "send_hp": 0,
+        "echo_tone": 500,
+        "room_tone": 500,
+        "lfo": [
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ]
+        ],
+        "echo_sync": 9,
+        "room_diffusion": 800,
+        "chorus": 0,
+        "chorus_depth": 500,
+        "gen": [
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          }
+        ],
+        "form": 0,
+        "form_bars": 1,
+        "form_drops": 2,
+        "gamaka": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gamaka_amount": [
+          500,
+          500,
+          500,
+          500,
+          500,
+          500
+        ],
+        "vadi": -1,
+        "samvadi": -1,
+        "motion_every": 0
+      },
+      "id": 19,
+      "v11": {
+        "orbit": [
+          [
+            1,
+            18,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            2,
+            11,
+            150,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            3,
+            9,
+            400,
+            6,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ]
+        ],
+        "sky": [
+          15,
+          0,
+          0,
+          0,
+          60,
+          2,
+          0
+        ],
+        "tape": [
+          3,
+          120,
+          100,
+          150
+        ],
+        "hall": [
+          850,
+          45,
+          650,
+          400,
+          0
+        ],
+        "beads": [
+          700,
+          790,
+          250,
+          1
+        ]
+      },
+      "v11ok": true
+    },
+    {
+      "name": "NIGHT BELLS",
+      "family": 5,
+      "tempo": 60,
+      "root": 7,
+      "scale": 47,
+      "seed": 1380631724,
+      "macro": [
+        500,
+        60,
+        480,
+        300
+      ],
+      "locked": 1,
+      "freeze": 0,
+      "grain_size": 650,
+      "grain_pos": 450,
+      "feedback": 300,
+      "quality": 0,
+      "transpose": 0,
+      "swing": 0,
+      "grain_pitch": 0,
+      "reverse": 0,
+      "duck_source": -1,
+      "duck_amount": 0,
+      "duck_release": 500,
+      "tracks": [
+        {
+          "model": 12,
+          "tone": 500,
+          "harm": 557,
+          "decay": 900,
+          "level": 702,
+          "send": 280,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 67,
+          "pan": 500,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 500,
+          "cutoff": 900,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 100
+        },
+        {
+          "model": 7,
+          "tone": 436,
+          "harm": 0,
+          "decay": 950,
+          "level": 702,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 55,
+          "pan": 340,
+          "mute": 0,
+          "speed": 1,
+          "attack": 700,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 220,
+          "cutoff": 830,
+          "resonance": 0,
+          "filter": 3,
+          "breathe": 180
+        },
+        {
+          "model": 8,
+          "tone": 130,
+          "harm": 300,
+          "decay": 190,
+          "level": 1000,
+          "send": 60,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 31,
+          "pan": 660,
+          "mute": 0,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 100,
+          "cutoff": 560,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 0
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 220,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 780,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        },
+        {
+          "model": 11,
+          "tone": 700,
+          "harm": 0,
+          "decay": 500,
+          "level": 0,
+          "send": 200,
+          "hits": 0,
+          "length": 16,
+          "rotate": 0,
+          "prob": 1000,
+          "note": 48,
+          "pan": 500,
+          "mute": 1,
+          "speed": 1,
+          "attack": 0,
+          "ratchet": 1,
+          "accent": 200,
+          "shape": 200,
+          "cutoff": 650,
+          "resonance": 0,
+          "filter": 1,
+          "breathe": 120
+        }
+      ],
+      "tones": [
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1
+      ],
+      "v10": false,
+      "ext": {
+        "tracks": [
+          {
+            "delay_send": 400,
+            "reverb_send": 500,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 1000,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          },
+          {
+            "delay_send": 0,
+            "reverb_send": 330,
+            "notes": [
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              7,
+              -1,
+              -1,
+              -1
+            ]
+          }
+        ],
+        "delay_ms": 200,
+        "delay_fb": 450,
+        "reverb_time": 700,
+        "fx_level": 520,
+        "send_hp": 0,
+        "echo_tone": 500,
+        "room_tone": 500,
+        "lfo": [
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ],
+          [
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            },
+            {
+              "rate": 7,
+              "shape": 0,
+              "target": 0,
+              "depth": 0
+            }
+          ]
+        ],
+        "echo_sync": 8,
+        "room_diffusion": 0,
+        "chorus": 0,
+        "chorus_depth": 500,
+        "gen": [
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          },
+          {
+            "source": 0,
+            "dejavu": 500,
+            "loop": 8,
+            "spread": 12
+          }
+        ],
+        "form": 0,
+        "form_bars": 1,
+        "form_drops": 2,
+        "gamaka": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "gamaka_amount": [
+          500,
+          500,
+          500,
+          500,
+          500,
+          500
+        ],
+        "vadi": -1,
+        "samvadi": -1,
+        "motion_every": 0
+      },
+      "id": 20,
+      "v11": {
+        "orbit": [
+          [
+            3,
+            9,
+            500,
+            0,
+            0,
+            1,
+            3,
+            5,
+            45
+          ],
+          [
+            1,
+            12,
+            0,
+            12,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            2,
+            8,
+            200,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ],
+          [
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            3,
+            1,
+            60
+          ]
+        ],
+        "sky": [
+          10,
+          20,
+          4,
+          1,
+          50,
+          2,
+          0
+        ],
+        "tape": [
+          3,
+          200,
+          100,
+          250
+        ],
+        "hall": [
+          900,
+          50,
+          650,
+          450,
+          0
+        ],
+        "beads": [
+          700,
+          800,
+          300,
+          1
+        ]
+      },
+      "v11ok": true
+    },
+    {
+      "name": "EMPTY SKY",
+      "family": 6,
       "tempo": 64,
       "root": 0,
       "scale": 1,
@@ -14437,7 +16166,7 @@
         "samvadi": -1,
         "motion_every": 0
       },
-      "id": 18,
+      "id": 21,
       "v11": {
         "orbit": [
           [

@@ -76,9 +76,9 @@ Deux différences :
 
 ## Les Mondes
 
-Rhizome a **18 Mondes**, écrits pour When Day Chokes The Night. Les trois premières familles vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. La quatrième, DEEP, fait évoluer la musique sur plusieurs minutes. Le 19e, **EMPTY SKY**, est une page blanche : aucune porte, aucun coup, les effets à zéro.
+Rhizome a **21 Mondes**, écrits pour When Day Chokes The Night. Les trois premières familles vont du crépuscule à l'aube, et chacune montre une idée du séquenceur orbital. La quatrième, DEEP, fait évoluer la musique sur plusieurs minutes. ECHO met en avant la bande et la HALL, VOICE les deux voix propres à Rhizome. Le 22e, **EMPTY SKY**, est une page blanche : aucune porte, aucun coup, les effets à zéro.
 
-**Chaque Monde joue quatre voix au plus**, pour rester loin de la limite de 85 % du processeur : la bande, la HALL et les grains en prennent déjà une bonne part. Les sons sont ceux de Monades, avec SIX-OP FM et STRING MACHINE, les deux voix propres à Rhizome, dans les Mondes DEEP (une seule des deux dans les plus chargés). Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas).
+**Chaque Monde joue quatre voix au plus**, pour rester loin de la limite de 85 % du processeur : la bande, la HALL et les grains en prennent déjà une bonne part. Les sons sont ceux de Monades, avec SIX-OP FM et STRING MACHINE, les deux voix propres à Rhizome, dans SLOW TIDES, LOOPS OF ASH et la famille VOICE (une seule des deux par Monde, sauf SLOW TIDES). Les familles ECHO et VOICE jouent trois voix : elles sont légères. Tous sont réglés au même niveau d'écoute, mesuré sur une minute (sauf NO STARS et LOOPS OF ASH, plus clairsemés, un peu plus bas).
 
 **DUSK, les résonances.** Des orbites rondes ou presque, dont les périodes sont des rapports simples. On entend des polyrythmes lents et réguliers.
 
@@ -111,12 +111,25 @@ Rhizome a **18 Mondes**, écrits pour When Day Chokes The Night. Les trois premi
 
 | Monde | Gamme · tempo | Ce qu'on entend |
 |---|---|---|
-| 13 COLD IN THE DARK | D MINOR · 72 | La vitrine : des boucles de quelques pas, les trois sources de notes, une phrase que son générateur fait muter, des lunes, une nappe en période libre qui ne tombe jamais en place, la précession, une comète, des accords, des LFO lents et la forme. |
-| 14 KEPLER NIGHT | A DORIAN · 60 | Le système Kepler-223 tel qu'il a été mesuré (3:4:6:8), une nappe DX7 et un chœur, la couleur de la FM qui tourne avec un LFO lent ; toutes les 16 mesures, une comète dont le FILTER ouvre tout le ciel à son passage. |
-| 15 TRAPPIST DUST | E HIRAJOSHI · 66 | La chaîne résonante de TRAPPIST-1 (2:3:4:6), ses notes tirées par des générateurs qui s'en souviennent (déjà-vu), puis les lâchent peu à peu. |
-| 16 RAGA OF ASH | D BHAIRAVI · 52 | Un raga de nuit : un bourdon grave, une flûte qui chante sa phrase en meend, une anche qui ondule (andolan), des cloches DX7 avec kan, et les notes pivots. |
-| 17 SLOW TIDES | F MIXOLYDIAN · 58 | La forme : calme, montée, sommet, retombée, seize mesures chacun, des pistes qui se taisent et reviennent ; des LFO ouvrent les filtres et déplacent les voix. |
-| 18 LOOPS OF ASH | F MINOR · 60 | Quatre périodes libres, une porte chacune : des longueurs des boucles de bande de *Music for Airports* (Brian Eno). Quatre voix qui ne retombent jamais ensemble : la musique ne se répète jamais. |
+| 13 TRAPPIST DUST | E HIRAJOSHI · 66 | La chaîne résonante de TRAPPIST-1 (2:3:4:6), ses notes tirées par des générateurs qui s'en souviennent (déjà-vu), puis les lâchent peu à peu. |
+| 14 SLOW TIDES | F MIXOLYDIAN · 58 | La forme : calme, montée, sommet, retombée, seize mesures chacun, des pistes qui se taisent et reviennent ; des LFO ouvrent les filtres et déplacent les voix. |
+| 15 LOOPS OF ASH | F MINOR · 60 | Quatre périodes libres, une porte chacune : des longueurs des boucles de bande de *Music for Airports* (Brian Eno). Quatre voix qui ne retombent jamais ensemble : la musique ne se répète jamais. |
+
+**ECHO, la bande et la HALL.** Trois voix seulement, pour laisser toute la place aux effets.
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 16 RUST REELS | C IWATO · 70 | La bande en avant : ses trois têtes, une bande usée, qui pleure et sature ; une cloche et une flûte jouées dedans, l'écho très présent. |
+| 17 CATHEDRAL OF SMOKE | E HARMONIC MIN · 48 | La HALL en avant : la plus grande salle, une longue pré-attente, peu de notes ; toutes les 8 mesures, une comète fait gonfler la salle. |
+| 18 DRIFTING SIGNAL | D HIJAZ · 62 | Les deux, comme une vieille radio : une HALL VINTAGE, une bande qui ondule, une anche qui glisse vers ses notes (meend). |
+
+**VOICE, les voix de Rhizome.** SIX-OP FM ou STRING MACHINE au premier plan, avec deux voix de Monades.
+
+| Monde | Gamme · tempo | Ce qu'on entend |
+|---|---|---|
+| 19 GLASS PLANETS | A SLENDRO · 66 | Le son DX7 PLANETS dans un accord de gamelan ; chaque note fait tourner deux lunes qui montent la gamme. |
+| 20 ASH ENSEMBLE | F MELODIC MIN · 56 | Les cordes de STRING MACHINE sur une période libre de 23,5 s, quel que soit le tempo ; des accords quand les corps s'alignent. |
+| 21 NIGHT BELLS | G BHUPALI · 60 | Les cloches tubulaires du DX7 sur un chœur tenu ; une comète toutes les 32 mesures fige les grains. |
 
 ## Les voix : les 14 moteurs
 

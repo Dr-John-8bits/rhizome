@@ -62,7 +62,7 @@ static const char *help_lines[NB][5]={
  {"LFO: freeze the granular memory","The cloud keeps playing.","Tracks remain live and playable.","LFO again: resume recording","FX: edit the cloud and tape"},
  {"EDIT: Sound/Filter/Env/Mix/Mixer","PRESET: 256 sound presets","ALGO: 12 Monades + 2 Rhizome","Rhythm and notes are preserved.","HOME + PRESET: whole Monde"},
  {"GLO: Harmony > Raga > System >","Look > MIDI > Channels > Zones >","Banks. Harmony: root / scale","System: tempo / quality","SAVE stores these preferences."},
- {"K1 DENSITY: number of events","K2 MOTION: melodic movement","K3 COLOUR: brighter / darker","K4 SPACE: granular level","PRESET: 90 Mondes + Blank"},
+ {"K1 DENSITY: number of events","K2 MOTION: melodic movement","K3 COLOUR: brighter / darker","K4 SPACE: granular level","PRESET: 21 Mondes + Blank"},
  {"Stop PLAY; use internal clock.","SAVE stores Monde and preferences,","then opens the save screen:","16 Mondes / 64 tones, free slot.","Granular audio is not stored."},
  {"ARP: lock the random seed","The same seed repeats.","REC: create a new variation","ENV: undo the last variation","Unequal lengths keep cycling."},
  {"SEQ: Orbit > System > Moons >","Comet > Rhythm > Groove > Bass >","Phrase > Gen > Form","K4: event probability","REC: dice this page"},

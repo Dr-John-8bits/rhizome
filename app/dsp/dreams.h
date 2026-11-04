@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-enum { MD_TRACKS=6, MD_MODELS=14, MD_RATE=44100, MD_QUANTUM=64, MD_BIOMES=19, MD_TONE_PRESETS=256, MD_BLANK_BIOME=18 }; /* Rhizome: 18 Mondes and EMPTY SKY */
+enum { MD_TRACKS=6, MD_MODELS=14, MD_RATE=44100, MD_QUANTUM=64, MD_BIOMES=22, MD_TONE_PRESETS=256, MD_BLANK_BIOME=21 }; /* Rhizome: 21 Mondes and EMPTY SKY */
 /* Monades' twelve voices, then Rhizome's two own, from Plaits (Mutable Instruments, MIT): SIX-OP FM (K2 picks one of
  * 96 DX7 sounds) and STRING MACHINE (K2 the chord). For these two, K1 TONE is Plaits' TIMBRE, K3 SHAPE its MORPH. */
 enum { MD_KICK, MD_SNARE, MD_HAT, MD_FM, MD_VA, MD_RINGS, MD_HARMONIC, MD_CHOIR, MD_BASS, MD_ELEMENTS, MD_MELLOW, MD_SATIN, MD_SIXOP, MD_STRINGS };
