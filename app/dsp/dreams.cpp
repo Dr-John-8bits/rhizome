@@ -2,7 +2,7 @@
  * Mutable Dreams. Original Mutable Instruments DSP remains under its MIT notices.
  * Six interchangeable monophonic slots. No allocations in render. */
 #include "dreams.h"
-extern "C" { uint32_t plat_ticks(void); } // profiling (plat.h)
+extern "C" { __attribute__((weak)) uint32_t plat_ticks(void){return 0;} } // profiling (plat.h); the DSP alone (tests) has none
 static const float PLAT_TICKS=24.0f; // plat.h PLAT_TICKS_PER_US
 #include <math.h>
 #include <string.h>
