@@ -982,7 +982,7 @@ void app_input_only(void) {
  if((d=plat_enc(EN_ALGO))){dream_dismiss_intro();dream_cmd(MD_MODEL,dream_ui.track,clamp(p->track[dream_ui.track].model+d,0,MD_MODELS-1));dream_ui.page=SOUND;}
  if((d=plat_enc(EN_PRESET))&&dream_ui.help<0){dream_dismiss_intro();
   if(dream_ui.page==BANKS){for(int j=0;j<=bank_char;j++)if(!bank_name[j])bank_name[j]=' ';bank_name[bank_char]=clamp(bank_name[bank_char]+d,32,126);bank_name[23]=0;bank_armed=-1;}else if(dream_ui.page==SOUND||dream_ui.page==FILTER||dream_ui.page==ENVELOPE||dream_ui.page==MIX||dream_ui.page==MIXER||dream_ui.page==BASSLINE||dream_ui.page==MODULATION||dream_ui.page==PHRASE||dream_ui.page==LFO_A||dream_ui.page==LFO_B||dream_ui.page==GENERATOR){
-   int id=p->tone_preset[dream_ui.track];if(id<0)id=p->track[dream_ui.track].model*16-(d>0?1:0);
+   int id=p->tone_preset[dream_ui.track];if(id<0)id=md_tone_first(p->track[dream_ui.track].model)-(d>0?1:0); /* a modified sound: from its engine's first */
    id=clamp(id+d,0,MD_TONE_PRESETS-1);dream_cmd(MD_TONE_PRESET,dream_ui.track,id);app_say(md_tone_name(id),"");
   }else if(dream_ui.page==MORPH)morph_choose(d);
   else{int id=clamp(p->biome_id+d,0,MD_BIOMES-1);if(id==p->biome_id)app_say(monde_label(id),""); /* past the first or last Monde: nothing to load */

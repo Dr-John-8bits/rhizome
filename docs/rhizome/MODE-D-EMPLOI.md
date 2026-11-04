@@ -71,6 +71,50 @@ Les boutons du FM-1 portent les noms du firmware d'origine de M-VAVE, qui ne son
 | FX | TAPE ECHO → TAPE ECHO / AGE → HALL → HALL / COLOR → GRANULAR BUS → GRAIN CLOUD → TAPE / MOTION → SHARED SPACE → SPACE TONE → ECHO SYNC / CHORUS → MARBLES / TIDES / WARPS → LFO A → LFO B |
 | GLO | HARMONY / GLOBAL → RAGA / GAMAKA → QUALITY / SYSTEM → LOOK / STARTUP → MIDI / PERFORMANCE → MIDI CHANNELS → MIDI OUT ZONES → USER BANKS |
 
+### K1 à K4, page par page
+L'aide-mémoire de toutes les pages : ce que règlent les quatre potards. Le détail de chaque page est plus bas.
+
+| Page | K1 · K2 · K3 · K4 |
+|---|---|
+| LIVE MONDE | DENSITY · MOTION · COLOUR · SPACE (les quatre macros) |
+| MORPH | le Monde B · la position de A vers B · le passage automatique · ce qui change |
+| DERIVE | la distance de la maison · la durée d'un glissement · le voyage · ce qui dérive |
+| SOUND | TONE (BRIGHT) · HARMONICS (SOUND, CHORD) · SHAPE (DECAY, EXCITER, ENVELOPE, REGISTER) · LEVEL |
+| VELVET FILTER | CUTOFF · RESONANCE · CHARACTER (le mode) · BREATHE |
+| ENVELOPE / BLOOM | ATTACK · DECAY · LEVEL · SEND (grains) |
+| MIX / NOTES | SEND (grains) · MIDI NOTE (note de base) · PAN · CLOCK DIV |
+| GLOBAL MIXER | LEVEL · GRAIN · DELAY (bande) · REVERB (HALL), pour la piste choisie |
+| ORBIT | PERIOD · ECCENTRICITY · GATES · PHASE |
+| ORBIT / SYSTEM | PRECESSION · PERTURBATION · PITCH (source des notes) · SYSTEM |
+| ORBIT / MOONS | MOONS · SPIN · INTERVAL · LEVEL |
+| ORBIT / COMET | COMET · EVENT · AMOUNT · CONJUNCTION |
+| RHYTHM | HITS · LENGTH · ROTATION · CHANCE |
+| GROOVE / REPEATS | SWING · REPEATS · ACCENT · CLOCK DIV |
+| BASS / MOTIFS | PHRASE (OFF, EUCLID, STEP) · MOTIF · GLIDE · BASE NOTE |
+| PHRASE / NOTES | STEP · NOTE / REST · ACCENT · CHANCE |
+| GENERATOR / DEJA VU | SOURCE · DEJA VU · LOOP · SPREAD |
+| FORM | DEPTH · SECTION · RESTING · MOTION |
+| TAPE ECHO | TIME · FEEDBACK · HEADS · WOW |
+| TAPE ECHO / AGE | DRIVE · AGE · TONE · TRANSPORT |
+| HALL | DECAY · SIZE · PRE-DELAY · MOD |
+| HALL / COLOR | BASS · TREBLE · DIFFUSION · VINTAGE |
+| GRANULAR BUS | SPACE · GRAIN SIZE · POSITION · FEEDBACK |
+| GRAIN CLOUD | DENSITY · SHAPE · RANDOM · MEDIA |
+| TAPE / MOTION | PITCH (des grains) · DIRECTION · DUCK FROM · DUCK % |
+| SHARED SPACE | ECHO (temps de la bande) · FEEDBACK · ROOM TAIL (longueur de la HALL) · RETURN |
+| SPACE TONE | SEND HIGH-PASS · ECHO TONE · ROOM TONE · DIFFUSION |
+| ECHO SYNC / CHORUS | ECHO SYNC · FEEDBACK · CHORUS MIX · CHORUS DEPTH |
+| MARBLES / TIDES / WARPS | MARBLES · TIDES · CYCLE · WARPS |
+| LFO A, LFO B | RATE · SHAPE · TARGET · DEPTH |
+| HARMONY / GLOBAL | ROOT · SCALE · TRANSPOSE · TEMPO |
+| RAGA / GAMAKA | VADI · SAMVADI · GAMAKA · AMOUNT |
+| QUALITY / SYSTEM | le tempo · ECO ou FULL · la remontée du ducking · le pic mesuré à zéro |
+| LOOK / STARTUP | MOTION (animations) · START SOUND · INTRO · CPU MAX |
+| MIDI / PERFORMANCE | CLOCK IN · SCALE SNAP · NOTES OUT · CLOCK OUT |
+| MIDI CHANNELS | la piste · son canal d'entrée · son canal de sortie · ALL FROM |
+| MIDI OUT ZONES | la zone · sa note basse · sa note haute · son canal |
+| USER BANKS | l'emplacement · MONDES ou SOUNDS · LOAD · le curseur du nom |
+
 ### Les autres commandes
 
 | Commande | Ce qu'elle fait |
@@ -106,6 +150,29 @@ Les potards K1 à K4 avancent de 2 par cran pour les valeurs de 0 à 100.
 ### DICE : tirer une page au sort
 Sur les pages EDIT, de RHYTHM à FORM, de GRANULAR BUS à LFO B (sauf GRAIN CLOUD) et sur RAGA / GAMAKA, **REC** tire au sort les réglages K1 à K4 de la page affichée, pour la piste choisie si c'est une page de piste. L'écran affiche par exemple « DICE: LFO A T3 ». ENV annule. Ne changent jamais : la gamme, la note de base, la transposition, le tempo, les mutes, les moteurs, le MIDI et les autres pistes. Les réinjections restent loin du larsen, et un effet tiré au sort reste audible.
 
+| Page | Ce que REC tire au sort |
+|---|---|
+| SOUND | TONE, HARMONICS, et SHAPE ou DECAY selon le moteur. |
+| VELVET FILTER | Le mode (jamais OFF), la coupure (basse en passe-haut, au milieu en passe-bande, jamais fermée en passe-bas), la résonance, BREATHE. |
+| ENVELOPE / BLOOM | L'attaque (moteurs mélodiques), le déclin, l'envoi vers les grains. |
+| MIX / NOTES | L'envoi vers les grains, le panoramique, la division d'horloge (1 à 4). |
+| GLOBAL MIXER | Le niveau de la piste (30 à 80), les envois vers les grains, la bande et la HALL. |
+| RHYTHM | La longueur (5 à 16), le nombre de coups (au moins un), la rotation, CHANCE. |
+| GROOVE / REPEATS | Le swing, les répétitions, l'accent, la division d'horloge. |
+| BASS / MOTIFS | Le motif et le glide (le mode de phrase et la note de base restent). |
+| PHRASE / NOTES | Les 16 notes (silences compris, le premier pas sonne), l'accent, CHANCE. |
+| FORM | La profondeur, la longueur des sections, les pistes au repos, MOTION. |
+| GRANULAR BUS | Le niveau des grains, leur taille, leur position, la réinjection. |
+| TAPE / MOTION | La hauteur des grains (octave, quinte, quarte ou rien), le sens, et la quantité de ducking si une source est choisie. |
+| SHARED SPACE | Le temps de la bande (ou sa division si elle est calée sur le tempo), la réinjection, la longueur de la HALL, le retour. |
+| SPACE TONE | Le passe-haut des envois, la couleur de la bande et de la HALL, la diffusion. |
+| ECHO SYNC / CHORUS | La division, la réinjection, le chorus et sa profondeur. |
+| MARBLES / TIDES / WARPS | Les quatre réglages de la piste. |
+| LFO A, LFO B | La vitesse, la forme, la cible (pas le filtre si la piste n'en a pas), la profondeur (faible sur la hauteur). |
+| RAGA / GAMAKA | La vadi et la samvadi (des notes de la gamme), le gamaka de la piste et sa quantité. |
+
+Sur SHARED SPACE, SPACE TONE et ECHO SYNC / CHORUS, un retour d'effets à 0 remonte, et une piste sans aucun envoi en reçoit : le tirage reste audible.
+
 ## L'accueil : LIVE MONDE, MORPH, DERIVE
 
 ### LIVE MONDE (HOME 1 fois)
@@ -140,6 +207,10 @@ Le Monde en cours (A) glisse vers un autre (B). Les nombres glissent (tempo, fil
 
 REC garde le mélange en cours, ENV revient à A.
 
+**À l'écran** : le Monde A s'éteint à gauche, le Monde B s'allume à droite. La barre de position porte un trait par piste, le moment où ses choix basculent ; dessous, le tempo de A, le tempo en cours et celui de B, puis les deux gammes (la claire est celle qui joue), et six carrés, un par piste : creux avant sa bascule, sombre pendant son fondu, plein après, un tiret si rien ne bascule.
+
+**Ce qui ne glisse pas.** MORPH fait glisser les sons, les rythmes, les notes, les envois, le temps et la réinjection de la bande, la longueur de la HALL et le retour. Les réglages propres à Rhizome restent ceux de A pendant tout le passage : **les orbites** (périodes, portes, excentricités, sources des notes, lunes), **la comète**, les têtes, l'usure et le transport de la bande, la taille et la couleur de la HALL, et les réglages de GRAIN CLOUD. Pour passer aussi aux orbites de B, il faut charger B (PRESET sur LIVE). Les mutes, le verrou de graine et la qualité ne bougent pas non plus.
+
 ### DERIVE (HOME 3 fois) : laisser le Monde vivre seul
 Le Monde change tout seul pendant la lecture, pendant des minutes ou des heures. Dès que K2 quitte OFF, le Monde en cours devient **la maison** : il glisse vers une variante tirée autour d'elle, puis vers la suivante. Glissent : timbres, filtres, enveloppes, panoramique, envois, accents, nombre de coups, LFO déjà actifs, grains, bande, HALL, chorus, et le tempo (±10 %). De temps en temps une piste se tait le temps d'un glissement, puis revient. Ne bougent jamais : la gamme, la note de base, la transposition, les mutes.
 
@@ -151,6 +222,10 @@ Le Monde change tout seul pendant la lecture, pendant des minutes ou des heures.
 | K4 DRIFT | ALL, SOUND, RHYTHM, EFFECTS : ce qui dérive. |
 
 REC : l'état actuel devient la maison. ENV : retour à la maison. Avec ARP, la même dérive refait le même chemin. Pour une installation, K2 sur 128 ou 256 mesures.
+
+**À l'écran** : la maison au centre, et le son en cours autour d'elle, d'autant plus loin qu'il s'en est éloigné. Le temps écoulé, l'avancée du glissement en cours, le temps avant le suivant (« NEXT »), et les trois derniers changements (« T3 DECAY UP », « T5 RESTS », « T5 COMES BACK », « NEW NOTES », « HOME AGAIN »…).
+
+Comme MORPH, la dérive ne touche pas aux orbites, à la comète ni aux réglages propres à la bande, à la HALL et aux grains : le ciel du Monde reste le même, ce sont les sons, les notes et les envois qui dérivent. Un réglage tourné pendant la dérive reste, et la maison le prend aussi. Charger un Monde arrête la dérive.
 
 ## Les Mondes
 
@@ -639,6 +714,8 @@ La vraie courbe du filtre, avec sa bosse de résonance ; un repère suit la coup
 | K3 | CHARACTER | Le mode : OFF, LP 12 dB, LP 24 dB, LOW PASS GATE (s'assombrit avec le déclin), HIGH PASS, BAND PASS, NOTCH, HP 24 dB. |
 | K4 | BREATHE | Un lent mouvement du filtre, comme une respiration. |
 
+« FILTER OFF » s'affiche quand le mode est OFF : CUTOFF et RESONANCE n'agissent alors pas. Les LFO sur CUTOFF ou RESONANCE et TIDES demandent un filtre.
+
 ### ENVELOPE / BLOOM (EDIT 3 fois)
 La courbe de l'enveloppe, et un point qui suit chaque note.
 
@@ -649,6 +726,8 @@ La courbe de l'enveloppe, et un point qui suit chaque note.
 | K3 | LEVEL | Le niveau de la piste. |
 | K4 | SEND | L'envoi vers les grains. |
 
+Sur les batteries (KICK, SNARE, HAT) et RINGS, K1 affiche « MELODIC ONLY » : leur longueur se règle avec DECAY. Le bouton ENV, lui, n'ouvre pas cette page : il annule.
+
 ### MIX / NOTES (EDIT 4 fois)
 | Potard | Réglage |
 |---|---|
@@ -656,6 +735,8 @@ La courbe de l'enveloppe, et un point qui suit chaque note.
 | K2 | MIDI NOTE : la note de base de la piste, 24 à 96. |
 | K3 | PAN : gauche / droite. |
 | K4 | CLOCK DIV : la piste avance un pas tous les 1 à 8 pas. |
+
+À l'écran : le panoramique entre L et R, la note de base sur un clavier, la division d'horloge. La note de base est celle que la piste joue sans phrase ni générateur ; c'est aussi le point de départ des notes d'un corps.
 
 ### GLOBAL MIXER (EDIT 5 fois)
 Pour les six pistes : vumètre, niveau, et barres d'envoi vers les grains, la bande et la HALL. À droite, les retours et le niveau final. K1 à K4 règlent la piste choisie avec SELECT (T1 à T6).
@@ -667,6 +748,8 @@ Pour les six pistes : vumètre, niveau, et barres d'envoi vers les grains, la ba
 | K3 | DELAY : l'envoi vers la bande. |
 | K4 | REVERB : l'envoi vers la HALL. |
 
+À droite de l'écran : les retours **G** (grains), **D** (bande) et **R** (HALL), le vumètre **M** (le niveau après MASTER) et **LIM** (le limiteur de sortie, qui s'allume s'il travaille). Une piste coupée (SEL) est grisée.
+
 ## Le trajet du son : envois et retours
 
 Chaque piste joue à sec vers la sortie. En plus, elle peut verser une part de ce qu'elle joue dans trois effets communs aux six pistes : **la bande**, **la HALL** et **les grains**. Chaque effet renvoie ensuite ce qu'il a fabriqué vers la sortie, par son retour.
@@ -676,6 +759,15 @@ Chaque piste joue à sec vers la sortie. En plus, elle peut verser une part de c
 - Pour entendre un effet sur une piste, il faut donc les deux : l'envoi de la piste et le retour de l'effet au-dessus de 0. Quand on n'entend pas un effet, sa page le dit en haut de l'écran, par exemple « RETURN AT 0 » ou « NO SEND ».
 
 Au-dessus de tout : **MASTER**, le volume final.
+
+**Je n'entends pas un effet : quoi vérifier.**
+- La piste joue : pas coupée (SEL), niveau au-dessus de 0 (GLOBAL MIXER, K1).
+- Son envoi vers cet effet est au-dessus de 0 (GLOBAL MIXER : K2 grains, K3 bande, K4 HALL).
+- Le retour est au-dessus de 0 : SHARED SPACE K4 pour la bande et la HALL, LIVE K4 (SPACE) pour les grains.
+- Pour les grains : la mémoire se remplit seulement quand des pistes y envoient et que FREEZE (le bouton LFO) est relâché ; et GRAIN CLOUD K1 DENSITY ne doit pas être au milieu (aucun grain).
+- Pour la bande : K4 TRANSPORT sur RUN ; en FREEZE, plus rien de nouveau n'entre.
+- Le passe-haut des envois (SPACE TONE, K1) très haut peut ne presque rien laisser passer d'une piste grave.
+- La page de l'effet le dit en haut de l'écran : « RETURN AT 0 », « NO SEND », « NO TRACK SENDS: SEE MIXER ».
 
 ## La bande : TAPE ECHO
 
@@ -776,7 +868,11 @@ Le nuage de grains enregistre sans arrêt, sur une mémoire de 1,5 à 3 secondes
 
 À l'écran (GRANULAR BUS et GRAIN CLOUD) : la mémoire, avec le présent à droite ; le niveau écrit le long de la mémoire ; chaque grain vivant, avec un trait blanc là où il lit ; le crochet de POSITION et le trait du feedback.
 
-**Le ducking.** Une piste choisie, la source, fait de la place pour elle : à chacune de ses notes, les autres pistes baissent d'un coup, puis remontent doucement (la vitesse de remontée : QUALITY / SYSTEM, K3). C'est l'effet « pompe » : une note grave qui creuse les nappes.
+**Le ducking.** Une piste choisie, la source, fait de la place pour elle : à chacune de ses notes, les autres pistes baissent d'un coup, puis remontent doucement. C'est l'effet « pompe » : une note grave qui creuse les nappes.
+- **Qui baisse** : les cinq autres pistes (leur son à sec et ce qu'elles envoient aux effets) et le retour des grains. La source, elle, ne baisse pas.
+- **Quand** : à chaque note de la source, qu'elle vienne de la séquence, d'une orbite, du clavier ou du MIDI. Une source coupée ne déclenche rien.
+- **Combien** : TAPE / MOTION K4, jusqu'à 90 %. **Combien de temps** : la remontée, QUALITY / SYSTEM K3, de 0,04 à 1,5 s.
+- **À l'écran** : sur TAPE / MOTION, la barre rouge DUCK montre en direct de combien le reste est baissé.
 
 ## Les autres pages d'effets et de mouvement
 
@@ -811,10 +907,12 @@ Trois façons de faire bouger la piste choisie, d'après trois modules de Mutabl
 
 | Potard | Réglage | Ce qu'il fait |
 |---|---|---|
-| K1 | MARBLES | Fait varier les notes d'une phrase active (pas les temps forts) : une note peut devenir la note de base, ou la note de base plus une tierce, une quarte ou une quinte. Graine verrouillée, la même variation revient. |
-| K2 | TIDES | Fait monter et descendre le filtre de la piste, comme une marée (il faut un filtre). |
-| K3 | CYCLE | La durée d'un aller-retour de TIDES, de 0,5 à 20 secondes. |
-| K4 | WARPS | Fait battre le volume du son à la fréquence de sa propre note (une modulation en anneau) : plus métallique, plus creux. |
+| K1 | MARBLES | Fait varier les notes d'une phrase active (BASS / MOTIFS sur EUCLID ou STEP ; sinon l'écran dit « MARBLES ACTS ON PHRASES: BASS PAGE »). Les pas 1, 5, 9 et 13 (les temps) ne changent jamais ; sur les autres, MARBLES est la probabilité qu'une note devienne la note de base, ou la note de base plus 3, 5 ou 7 demi-tons, ramenée dans la gamme. Ces choix dépendent de la graine et du pas : graine verrouillée, la même variation revient à chaque tour. |
+| K2 | TIDES | Fait monter et descendre la coupure du filtre de la piste en triangle, jusqu'à 20 % au-dessus et au-dessous de son réglage (il faut un filtre ; sinon « NEEDS A TRACK FILTER »). |
+| K3 | CYCLE | La durée d'un aller-retour de TIDES, de 0,5 à 20 secondes, libre (il ne suit pas le tempo : pour un mouvement calé, un LFO synchronisé sur CUTOFF). |
+| K4 | WARPS | Fait battre le volume du son à la fréquence de sa propre note (une modulation en anneau) : plus métallique, plus creux, une couleur à l'octave au-dessus. À fond, le volume bat de moitié. Agit aussi sur ce que la piste envoie aux effets. |
+
+À l'écran : le cycle de TIDES avec le point où en est la piste, les pas de la phrase que MARBLES peut changer (carrés : fixes, points : variables), la profondeur de WARPS.
 
 ### LFO A et LFO B (FX 12 et 13 fois, piste choisie)
 Deux LFO par piste : des mouvements lents et réguliers (ou au hasard) qui font varier un réglage tout seul. L'écran montre deux cycles de l'onde et la valeur en cours.
@@ -827,6 +925,10 @@ Deux LFO par piste : des mouvements lents et réguliers (ou au hasard) qui font 
 | K4 | DEPTH | La profondeur ; négative, elle inverse le mouvement. 0 coupe le LFO. |
 
 **Les 20 cibles** : CUTOFF · RESONANCE · LEVEL · PAN · PITCH · TONE · HARMONICS · SHAPE · ECHO SEND (envoi vers la bande) · ROOM SEND (vers la HALL) · GRAIN SEND · ECHO TIME (le temps de la bande) · GRAIN POS · ATTACK · DECAY · ECHO FEEDBACK · GRAIN SIZE · NOTES IN SCALE (la note monte et descend dans la gamme) · HITS (la densité) · ROTATE (le rythme tourne sur son anneau).
+
+Avec SAMPLE & HOLD synchronisé à la mesure sur ROTATE, les coups changent de place à chaque mesure sans changer de nombre. Sur HARMONICS d'une piste STRING MACHINE, un accord au hasard à chaque cycle.
+
+**Quand un LFO ne fait rien, l'écran dit pourquoi** : « DEPTH 0: THIS LFO IS OFF » (profondeur nulle), « NEEDS A TRACK FILTER » (cible CUTOFF ou RESONANCE sans filtre), « RETURN 0: SEE SPACE » (cible sur la bande ou la HALL avec un retour à 0), « GRAIN MIX 0: SEE GRANULAR » (cible sur les grains avec SPACE à 0), « THIS ENGINE HAS NO ATTACK » (cible ATTACK sur une batterie), « DRUM ENGINE: NO NOTES » (cible NOTES sur une batterie), « STEP MODE: EVERY STEP PLAYS » (cible ROTATE sur une phrase en STEP). Les vitesses synchronisées redémarrent avec PLAY.
 
 ## L'harmonie et le système
 
@@ -870,6 +972,8 @@ Avec la gamme **CUSTOM**, les touches du clavier ajoutent ou retirent leur note.
 | K3 | GAMAKA | L'ornement de la piste choisie : OFF, KAN (une note frôlée juste avant), MEEND (un glissé depuis la note précédente), ANDOLAN (une lente oscillation), MIX. |
 | K4 | AMOUNT | La quantité d'ornement. |
 
+À l'écran : à gauche, la gamme avec la vadi (anneau épais) et la samvadi (anneau fin) ; à droite, le gamaka de la piste choisie dessiné sur 600 ms, et un point quand une de ses notes sonne. Les gamakas ne partent pas en MIDI.
+
 ### QUALITY / SYSTEM (GLO 3 fois)
 La version (« RHIZOME 0.0.1 »), le mode ECO ou FULL, la **charge et le pic du processeur**, les décrochages, la mémoire.
 
@@ -892,6 +996,8 @@ REC sur cette page : **panique**, tout se tait, la bande et les traînes d'effet
 | K3 | INTRO : rejoue l'animation de démarrage. |
 | K4 | CPU MAX : remet à zéro le pic processeur. |
 
+SAVE, à l'arrêt, garde ces préférences.
+
 ### Sauvegarder et recharger
 **SAVE**, à l'arrêt et sur horloge interne, garde le Monde en cours et les préférences (animations, son de démarrage, MIDI, gamme CUSTOM) pour le prochain démarrage, puis ouvre **USER BANKS** (GLO 8 fois) sur le premier emplacement libre. Un second SAVE garde le Monde dans cet emplacement, pour de bon. La mémoire des grains n'est pas gardée.
 
@@ -903,6 +1009,10 @@ REC sur cette page : **panique**, tout se tait, la bande et les traînes d'effet
 | K4 | NAME CURSOR : la lettre du nom à modifier ; PRESET la change. |
 
 Un emplacement occupé demande deux appuis sur SAVE. Les Mondes d'usine restent toujours disponibles. Un Monde ou une sauvegarde de Monades se charge aussi dans Rhizome.
+
+**À l'écran** : en haut, tous les emplacements de la banque (plein = pris, vide = libre, le choisi encadré) ; dessous, son état (« SLOT 3: FREE », ou le nom du Monde gardé), le nom qui sera donné, et ce que fera SAVE (« SAVE: SAVE IN THIS SLOT » ou « SAVE TWICE: OVERWRITE THIS SLOT »). Les emplacements se lisent à l'arrêt : pendant la lecture, « STOP TO READ ». Pour sauver, il faut être à l'arrêt (« STOP BEFORE SAVING ») et sur horloge interne (« USE INTERNAL CLOCK TO SAVE »). Charger un emplacement alors que le Monde en cours a des changements non sauvés fait d'abord apparaître la carte « KEEP YOUR CHANGES? ».
+
+Dans la banque **SOUNDS**, les 64 emplacements gardent **le son** de la piste choisie : son moteur, ses réglages de SOUND, de VELVET FILTER et d'ENVELOPE, son glide, TIDES et WARPS. LOAD le remet sur la piste choisie, sans toucher à son rythme, ses notes, son mixage ni ses envois.
 
 ### MIDI
 | Page | K1 | K2 | K3 | K4 |
@@ -918,6 +1028,45 @@ Un emplacement occupé demande deux appuis sur SAVE. Les Mondes d'usine restent 
 - **Notes envoyées** : seules les notes de la séquence, des orbites et des lunes sortent, jamais celles reçues. En gammes microtonales, en TRACKS, chaque note part avec un pitch bend (régler la plage de l'instrument sur ±2 demi-tons).
 - Le FM-1 n'a pas de prise MIDI OUT : pour faire jouer un synthé, il faut un hôte USB entre les deux (ordinateur, MPC, boîtier hôte USB-MIDI).
 - REC sur la page MIDI : panique, et « tout éteint » (CC 123) sur les canaux de sortie.
+
+**En détail.**
+- **Plusieurs pistes sur le même canal d'entrée** : chaque note, CC ou pitch bend les joue toutes. Changer le canal d'entrée d'une piste relâche la note qu'elle tenait.
+- **Un canal qu'aucune piste n'écoute** est ignoré (sauf les CC 16 à 19 du canal 16).
+- **SCALE SNAP** (MIDI, K2) ramène les notes reçues dans la gamme.
+- **En sortie TRACKS**, deux pistes sur le même canal s'y partagent une voix (chaque note arrête la précédente) ; une piste sur OFF n'envoie rien ; une piste au niveau 0 envoie quand même ses notes, ce qui permet de la faire jouer seulement par une autre machine.
+- **En sortie ZONES**, une note qui tombe dans deux zones part sur les deux canaux ; les notes microtonales sont arrondies au demi-ton. Zones par défaut : 1 de C1 à B2 sur le canal 1, 2 de C3 à B4 sur le canal 2, 3 de C5 à C7 sur le canal 3, les autres coupées.
+- **La vélocité** suit les accents. Quand la sortie USB est pleine, les messages attendent leur tour : aucune fin de note n'est perdue.
+- **L'horloge** : CLOCK OUT sur ON envoie l'horloge, start et stop avec PLAY, sur horloge interne seulement. CLOCK IN sur USB ou TRS fait suivre au FM-1 une autre machine (l'horloge envoyée se coupe), et le tempo affiché suit.
+- **Sur la page MIDI / PERFORMANCE**, les pistes s'allument à chaque note, et pour chaque prise (USB, TRS) IN et OUT s'allument à chaque message, avec leur compteur.
+
+## Comment faire
+
+| Je veux… | Je fais |
+|---|---|
+| Changer le tempo | GLO (HARMONY), K4 ; ou QUALITY / SYSTEM, K1. Sur horloge externe, c'est l'autre machine qui mène. |
+| Choisir la gamme et la note de base | GLO (HARMONY) : K1 la note, K2 la gamme. Avec CUSTOM, le clavier ajoute ou retire des notes. |
+| Choisir une piste, la couper | SELECT la piste ; SEL la coupe ou la rétablit. |
+| Jouer au clavier | SELECT la piste, puis les touches (première touche : F3) ; OCT− et OCT+ changent d'octave. Les notes suivent la gamme. |
+| Changer le son d'une piste | SELECT la piste ; ALGO change le moteur ; sur SOUND, PRESET choisit un des 256 sons ; puis VELVET FILTER et ENVELOPE pour l'affiner. |
+| Changer le volume d'une piste | GLOBAL MIXER, K1 (aussi SOUND K4 et ENVELOPE K3). |
+| Mettre une piste en orbite | SEQ (ORBIT) : K3 GATES au-dessus de 0. |
+| Remettre une piste en rythme | SEQ (ORBIT) : K3 GATES à 0, puis RHYTHM. |
+| Écrire une phrase au clavier | SEQ jusqu'à GENERATOR ; REC efface ; jouer les notes une à une. |
+| Faire jouer cette phrase par un corps | ORBIT / SYSTEM, K3 PITCH sur MOTIF. |
+| Faire évoluer les notes toutes seules | Pour tout le Monde : MOTION (LIVE K2). Pour une piste : GENERATOR (RANDOM, MARKOV, MOTIF), ou un LFO sur NOTES IN SCALE, ou MARBLES sur une phrase. |
+| Faire bouger un réglage tout seul | FX 12 fois (LFO A) : K3 la cible, K2 la forme, K1 la vitesse, K4 la profondeur. |
+| Mettre de la bande ou de la HALL sur une piste | GLOBAL MIXER : K3 (bande), K4 (HALL) ; et SHARED SPACE, K4 RETURN au-dessus de 0. |
+| Figer les grains | Le bouton LFO ; de nouveau pour relancer. |
+| Faire répéter la même variation | ARP (graine verrouillée). REC sur LIVE en tire une nouvelle, ENV revient à la précédente. |
+| Passer d'un Monde à l'autre en douceur | HOME 2 fois (MORPH) : PRESET ou K1 le Monde d'arrivée, K2 à la main ou K3 sur un nombre de mesures, puis PLAY. |
+| Laisser le Monde vivre seul (installation) | HOME 3 fois (DERIVE) : K2 sur 128 ou 256 mesures, K1 la distance, PLAY ; ARP pour un chemin reproductible. |
+| Sauver mon Monde | Arrêter, horloge interne, SAVE, puis SAVE encore pour le garder dans l'emplacement. |
+| Recharger une sauvegarde | GLO 8 fois (USER BANKS) : K2 MONDES ou SOUNDS, K1 l'emplacement, K3 vers la droite. |
+| Envoyer les notes à un autre synthé | GLO 5 fois (MIDI) : K3 NOTES OUT sur TRACKS ou ZONES ; K4 CLOCK OUT sur ON pour qu'il suive le tempo. Il faut un hôte USB entre les deux (ordinateur, MPC, boîtier USB-MIDI). |
+| Choisir les canaux des pistes | GLO 6 fois (MIDI CHANNELS) : K1 la piste, K2 son entrée, K3 sa sortie ; K4 ALL FROM pour les six à la suite. |
+| Régler des zones de clavier | GLO 5 fois : NOTES OUT sur ZONES ; GLO 7 fois (MIDI OUT ZONES) : K1 la zone, K2 et K3 ses limites, K4 son canal. |
+| Tout faire taire | QUALITY / SYSTEM ou MIDI, puis REC : panique ; la bande et les traînes sont effacées. |
+| Annuler | ENV : une étape (la dernière variation, le dernier DICE, le début d'un MORPH). Après un changement de Monde, il n'y a rien à annuler. |
 
 ## Recettes
 
@@ -945,6 +1094,29 @@ Le simulateur fait tourner le vrai firmware de Rhizome dans le navigateur, avec 
 - **Souris** : cliquer sur un bouton ; faire glisser un potard vers le haut ou le bas, ou utiliser la molette.
 - **Clavier de l'ordinateur** : les touches Q W E R T Y U I et A S D F G H J K jouent les touches blanches ; 1 à 0 et le tiret jouent les noires. P = PLAY, O = REC, Échap = HOME, Z et X = OCT− et OCT+.
 - **Tenir un bouton** (pour ouvrir l'aide d'une page) : Maj-clic ou clic droit le garde enfoncé jusqu'au clic suivant.
+
+## Les 256 sons
+
+PRESET, sur les pages d'une piste, choisit un des 256 sons, dans cet ordre (le numéro affiché commence à 1). Tourner PRESET passe d'un son au suivant, et d'un moteur à l'autre ; après une modification, PRESET repart du premier son du moteur de la piste. Les sons de SIX-OP FM et STRING MACHINE, avec leur son DX7 et leur accord, sont détaillés dans [Les voix](#les-voix-les-14-moteurs).
+
+| Numéros | Moteur | Sons |
+|---|---|---|
+| 1 à 16 | PLAITS KICK | Felt Foot · Deep Pillow · Round Sub · Moss Kick · Soft Knock · Dub Heart · Clay Drum · Warm Pulse · Low Pebble · Thud Room · Rubber Step · Satin Kick · Stone Floor · Dust Punch · Long Earth · Tight Seed |
+| 17 à 32 | PLAITS SNARE | Brush Skin · Paper Snare · Muted Rim · Sand Brush · Velvet Snap · Dry Twig · Soft Clap · Dust Snare · Thin Shell · Wood Snare · Loose Skin · Grain Snap · Rain Stick · Low Rattle · Warm Wire · Short Ember |
+| 33 à 48 | PLAITS HAT | Silk Hat · Mist Tick · Dry Leaf · Closed Dust · Shaker Sand · Open Air · Fine Rain · Soft Metal · Leaf Shake · Glass Dust · Tiny Bell · Loose Seeds · Steam Hat · Warm Ride · Grain Rust · Short Hiss |
+| 49 à 64 | PLAITS FM | Pure Water · Sine Pearl · Wool Bass · Glass Drop · Soft Tine · Rubber Bell · Warm Reed · Amber Keys · Low Orbit · Velvet FM · Copper Bell · Hollow Chime · Dream Marimba · Deep Bloom · Moon Tone · Slow Glass |
+| 65 à 80 | PLAITS VA | Round Reed · Wool Pad · Satin Bass · Soft Saw · Warm Strings · Hollow Flute · Dust Organ · Muted Pluck · Slow Brass · Cedar Pad · Moss Pulse · Silk Lead · Low Current · Warm Fifth · Cloud Reed · Felt Keys |
+| 81 à 96 | RINGS MODAL | Wood Bowl · Warm Wire · Clay Bell · Moss String · Glass Pool · Soft Steel · Hollow Log · Deep Vessel · Copper Rain · Silk String · Small Stone · Low Gong · Paper Plate · Ice Bell · Amber Chime · Felt Mallet |
+| 97 à 112 | PLAITS HARMONIC | Sine Lantern · Warm Organ · Odd Velvet · Soft Spectrum · Hollow Pipe · Amber Pad · Glass Choir · Low Partial · Silk Harmonic · Felt Organ · Slow Aurora · Moss Chord · High Mist · Bronze Bloom · Deep Spectrum · Pure Harmonic |
+| 113 à 128 | SINE CHOIR | Minor Cloud · Major Dawn · Suspended Air · Open Fifth · Velvet Choir · Sunlit Voices · Floating Sus · Deep Fifth · Minor Moss · Major Silk · Suspended Dew · Wide Horizon · Night Voices · Warm Meadow · Slow Halo · Low Shelter |
+| 129 à 144 | ROUND BASS | Velvet Foundation · Deep Root · Round Step · Soft Rubber · Warm Undertow · Dub Anchor · Low Lantern · Sub Bloom · Wooden Pulse · Gentle Current · Round Motion · Night Floor · Felt Octave · Amber Bass · Slow Earth · Clear Foundation |
+| 145 à 160 | ELEMENTS STRIKE | Felt Mallet · Moss Marimba · Wooden Bell · Clay Bowl · Amber Bar · Soft Glass · Muted Metal · Low Vessel · Gentle Pluck · Reed Pluck · Warm Tine · Quiet Wire · Sand Seeds · Pebble Rain · Dust Bells · Soft Chimes |
+| 161 à 176 | MELLOW DRIFT | Mellow Candle · Mellow Linen · Mellow Dusk · Mellow Willow · Mellow Honey · Mellow Ember · Mellow Lagoon · Mellow Moss · Mellow Cloud · Mellow Dune · Mellow Cedar · Mellow Haze · Mellow Amber · Mellow Shelter · Mellow Wool · Mellow Moon |
+| 177 à 192 | ROUND BASS | Velvet Candle · Velvet Linen · Velvet Dusk · Velvet Willow · Velvet Honey · Velvet Ember · Velvet Lagoon · Velvet Moss · Velvet Cloud · Velvet Dune · Velvet Cedar · Velvet Haze · Velvet Amber · Velvet Shelter · Velvet Wool · Velvet Moon |
+| 193 à 208 | PLAITS VA | Hearth Candle · Hearth Linen · Hearth Dusk · Hearth Willow · Hearth Honey · Hearth Ember · Hearth Lagoon · Hearth Moss · Hearth Cloud · Hearth Dune · Hearth Cedar · Hearth Haze · Hearth Amber · Hearth Shelter · Hearth Wool · Hearth Moon |
+| 209 à 224 | SATIN MORPH | Soft Sine · Wool Triangle · Hollow Reed · Rounded Saw · Dusky Organ · Linen Strings · Cedar Bass · Honey Pulse · Felt Keys · Slow Amber · Velour Fifth · Quiet Brass · Warm Current · Paper Flute · Deep Satin · Morning Ribbon |
+| 225 à 240 | SIX-OP FM | DX Ice Pad · DX M1 Pads · DX Soundtrack · DX Planets · DX Cirrus · DX Textures · DX Etherial · DX Airy · DX Vangelis · DX Strings · DX Wineglass · DX Fairlight · DX E.Piano · DX Winter Rhodes · DX Tub Bells · DX Vibe |
+| 241 à 256 | STRING MACHINE | Solina Dusk · Ensemble Haze · Cold Strings · Octave Veil · Night Ensemble · Pale Orchestra · Thin Strings · Warm Ensemble · Distant Strings · Organ Strings · Glass Ensemble · Low Strings · Wide Ensemble · Frozen Strings · Hollow Choir · Last Ensemble |
 
 ## Glossaire
 

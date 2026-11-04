@@ -1,0 +1,14 @@
+# PRESET on SOUND, after the sound was modified, starts from the engine's first library sound (SIX-OP: 225, not a VA sound).
+wait 3400
+tap HOME
+spin PRESET 40
+wait 100
+spin ALGO 9
+wait 80
+expect model 12
+spin K1 3
+wait 80
+spin PRESET 1
+wait 80
+expect tone_preset 224
+expect model 12

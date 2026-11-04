@@ -207,6 +207,7 @@ unsigned md_voice_arena_spare(void); /* the least room SIX-OP or STRING MACHINE 
 const char *md_biome_name(int id);
 const char *md_biome_family(int id);
 const char *md_tone_name(int id);
+int md_tone_first(int model); /* the first library sound of an engine */
 int md_tone_model(int id);
 const char *md_scale_name(int scale);
 int md_quantize(int note,int root,int scale);
