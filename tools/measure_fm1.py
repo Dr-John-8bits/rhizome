@@ -54,9 +54,13 @@ class Device:
         self.call(2, [c, t, z & 127, z >> 7]); time.sleep(.05)
 
     def status(self):
-        w = struct.unpack('<%dI' % 47, self.call(1)[:188])
-        return dict(cpu=w[2], peak=w[3], xruns=w[4], overloads=w[5], quality=w[9], playing=w[10],
-                    block_us_max=w[37], block_us_budget=w[38], quality_reductions=w[40])
+        raw = self.call(1)
+        w = struct.unpack('<%dI' % 47, raw[:188])
+        d = dict(cpu=w[2], peak=w[3], xruns=w[4], overloads=w[5], quality=w[9], playing=w[10],
+                 block_us_max=w[37], block_us_budget=w[38], quality_reductions=w[40])
+        if len(raw) >= 212:  # the profile, % of the processor: sequencer, engines, voice chain, grains, effects, all
+            d['prof'] = [round(x, 1) for x in struct.unpack('<6f', raw[188:212])]
+        return d
 
 
 def main():

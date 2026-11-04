@@ -184,6 +184,8 @@ int plat_store_save(uint32_t obj, const void *src, uint32_t len);   /* 0 = ok */
 
 /* audio load in % of the render budget, and xruns since boot (device: from the ISR) */
 uint32_t plat_cpu_pct(void);
+uint32_t plat_ticks(void);             /* a free-running counter, PLAT_TICKS_PER_US a microsecond (profiling) */
+#define PLAT_TICKS_PER_US 24u
 /* Mutable Dreams bench extension: unsmoothed whole audio callback timing. */
 uint32_t plat_audio_peak_us(void);
 void plat_audio_peak_reset(void);

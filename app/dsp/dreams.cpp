@@ -2,6 +2,8 @@
  * Mutable Dreams. Original Mutable Instruments DSP remains under its MIT notices.
  * Six interchangeable monophonic slots. No allocations in render. */
 #include "dreams.h"
+extern "C" { uint32_t plat_ticks(void); } // profiling (plat.h)
+static const float PLAT_TICKS=24.0f; // plat.h PLAT_TICKS_PER_US
 #include <math.h>
 #include <string.h>
 #include <new>
@@ -471,7 +473,10 @@ static void tick() {
  morph_step();drift_step(duration);returnable=memcmp(&previous,&patch,sizeof patch)!=0;
  stats.step=step++;untilstep+=duration;
 }
+// Profiling (stats.prof): ticks spent in each part, turned into percent of a second of audio once a second.
+static uint32_t prof_acc[6],prof_frames;
 static void quantum(float *lr,unsigned n) {
+ const uint32_t pt0=plat_ticks();
  // Conservative admission guard from 0.4.1 FM-1 costs with full-rate tape, LP24 and maximum repeats.
  // Count unmuted slots before playback so the tape cannot prefill four FULL grains
  // immediately before a dense six-voice attack. Existing audible tails also count.
@@ -498,6 +503,7 @@ static void quantum(float *lr,unsigned n) {
  float duckdec=1.0f-1.0f/(MD_RATE*(.04f+unit(patch.duck_release)*1.46f));
  for(unsigned k=0;k<n;k++){duck[k]=1-duckenv*unit(patch.duck_amount)*.9f;duckenv*=duckdec;}
  stats.duck_gain=n?duck[n-1]:1;
+ const uint32_t pt1=plat_ticks();prof_acc[0]+=pt1-pt0; // the sequencer, the orbits, the LFOs
  for(unsigned i=0;i<6;i++) {
   md_track &t=patch.track[i];Voice &v=voices[i];bool trig=v.trigger;v.trigger=0;
   if(trig) {v.active=1;v.attacking=t.attack>0; if(!v.attacking)v.env=1;v.lpg=1;}
@@ -528,7 +534,7 @@ static void quantum(float *lr,unsigned n) {
   if(t.model==MD_SIXOP&&v.engine&&v.half!=(int)eco){static_cast<plaits::SixOpEngine*>(v.engine)->set_half_rate(eco);v.half=eco;}
   unsigned engine_n=eco?(n+(v.eco_phase?0:1))/2:n;
   if(eco)p.note+=12.0f; // same concert pitch at 22.05 kHz; linear reconstruction below.
-  if(engine_n&&v.engine)v.engine->Render(p,out,aux,engine_n,&done);
+  if(engine_n&&v.engine){const uint32_t e0=plat_ticks();v.engine->Render(p,out,aux,engine_n,&done);prof_acc[1]+=plat_ticks()-e0;}
   if(eco){memcpy(tmp,out,engine_n*sizeof(float));unsigned j=0;
    for(unsigned k=0;k<n;k++){if(!v.eco_phase){v.eco_previous=v.eco_next;v.eco_next=tmp[j++];out[k]=(v.eco_previous+v.eco_next)*.5f;}else out[k]=v.eco_next;v.eco_phase^=1;}
   }
@@ -598,6 +604,7 @@ static void quantum(float *lr,unsigned n) {
  const float echo_feedback=lfo_echo_fb?fminf(.8f,clamp01(unit(patch.delay_fb)+lfo_echo_fb*.5f)):unit(patch.delay_fb),effect_return=unit(patch.fx_level)+(1.4f-unit(patch.fx_level))*comet_swell;
  reel_block(n,echo_ms_now()*(1+lfo_echo_time*.5f),lfo_echo_time?.002f:.00005f); // Rhizome: the tape's speed, wow, dropouts
  const float echo_tone=tone_coef(patch.echo_tone,.04f,.25f,.9f);
+ {const uint32_t pt2=plat_ticks();prof_acc[2]+=pt2-pt1;} // the voices (engines included: [2] minus [1] is the chain around them)
  hall_block(n); // Rhizome: the HALL's settings for this block
  const bool send_hp=patch.send_hp>0;if(send_hp&&patch.send_hp!=send_hp_set){send_hp_set=patch.send_hp;float fc=md_send_hp_hz(patch.send_hp)/(float)MD_RATE;send_hp_filter[0].set_f_q<stmlib::FREQUENCY_ACCURATE>(fc,.707f);send_hp_filter[1].set_f_q<stmlib::FREQUENCY_ACCURATE>(fc,.707f);}
  if(patch.chorus&&!fx_shed){ // de-interleave in place through the scratch buffers: no extra memory
@@ -606,7 +613,7 @@ static void quantum(float *lr,unsigned n) {
   for(unsigned k=0;k<n;k++){lr[2*k]=out[k];lr[2*k+1]=aux[k];}
  }
  const bool frozen=patch.freeze||orbit_comet_frozen(); // Rhizome: the comet can freeze the tape
- static float bead_l[Q],bead_r[Q];beads_block(send,n,bead_l,bead_r,frozen); // Rhizome: Beads, on the grain sends (static: off the audio stack)
+ static float bead_l[Q],bead_r[Q];const uint32_t pg=plat_ticks();beads_block(send,n,bead_l,bead_r,frozen);const uint32_t pg2=plat_ticks();prof_acc[3]+=pg2-pg; // Rhizome: Beads, on the grain sends (static: off the audio stack)
  float fx_peak[3]={stats.fx_peak[0],stats.fx_peak[1],stats.fx_peak[2]},out_peak[2]={stats.out_peak[0],stats.out_peak[1]},limit_peak=stats.limit_peak;
  for(unsigned k=0;k<n;k++) {
   const float wet[2]={bead_l[k],bead_r[k]};
@@ -637,6 +644,8 @@ static void quantum(float *lr,unsigned n) {
  for(unsigned j=0;j<3;j++)stats.fx_peak[j]=fx_peak[j];
  stats.out_peak[0]=out_peak[0];stats.out_peak[1]=out_peak[1];stats.limit_peak=limit_peak;
  stats.frames+=n;
+ {const uint32_t pe=plat_ticks();prof_acc[4]+=pe-pg2;prof_acc[5]+=pe-pt0;prof_frames+=n;
+  if(prof_frames>=MD_RATE){for(int k=0;k<6;k++){stats.prof[k]=prof_acc[k]*(100.0f/(PLAT_TICKS*1e6f));prof_acc[k]=0;}stats.prof[2]-=stats.prof[1];prof_frames=0;}}
 }
 }
 extern "C" {

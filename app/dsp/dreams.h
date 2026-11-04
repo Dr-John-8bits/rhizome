@@ -155,6 +155,7 @@ typedef struct { uint32_t frames,step,events[6],dropped_commands,nonfinite; floa
  int32_t conj_a,conj_b;float conj_pos;uint32_t conj_count;
  float moon_t0[6],moon_note[6][3];int32_t moon_hit[6];uint32_t moon_hits[6];
  /* The comet: its mean anomaly (0 = at the star), how strongly its passage acts now (0..1), passages so far. */
+ float prof[6]; /* % of the processor over the last second of audio: sequencer and orbits, voice engines, voice chain, grains, effects and mix, all */
  float comet_M,comet_now,comet_filter_hz;uint32_t comet_passes,shocks; int32_t shock_left[6],shock_kind[6]; float shock_burst; /* shock_burst: a shock's jolt on the effects, 0..1 */ /* WANDER: shocks so far; each body's notes still shocked and how (1 skip, 2 push, 3 pitch) */ /* comet_filter_hz: the FILTER event's cutoff now, 0 when off */
  int32_t motif_at[6]; /* MOTIF: the phrase step each body looks from for its next note */ } md_stats;
 /* Monades granular view: tape overview (256 columns, oldest wraps at the write head), grains as samples behind the head. */

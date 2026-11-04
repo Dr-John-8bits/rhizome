@@ -151,6 +151,7 @@ static int32_t enc_acc[NE];
 static uint32_t lit_btn, lit_keys, dim_btn, dim_keys;
 
 uint32_t plat_ms(void) { return now_ms; }
+uint32_t plat_ticks(void) { return now_ms * 1000u * PLAT_TICKS_PER_US; } /* the host has no audio budget: coarse */
 uint32_t plat_buttons(void) { return held_btn | mirror_in_buttons(); }   /* (+ the host's: the mirror's remote) */
 uint32_t plat_keys(void) { return held_keys | mirror_in_keys(); }
 static uint32_t plat_remote_keys(void) { return 0; }   /* (the device's remote control: the script is this one's) */
