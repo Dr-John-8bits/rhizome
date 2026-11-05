@@ -989,7 +989,7 @@ La version (« RHIZOME 0.1.0 » ; « RHIZOME DEV » dans le simulateur), le mode
 
 REC sur cette page : **panique**, tout se tait, la bande et les traînes d'effets sont effacées.
 
-**La garde du processeur.** La limite est **85 %** du processeur, et les Mondes de Rhizome restent entre 61 et 78 % au plus fort. Si un Monde fait à la main est trop lourd (six voix lourdes, avec la bande, la HALL et les grains grands ouverts), Rhizome passe de lui-même en ECO avant de jouer. S'il déborde encore, de façon répétée (trois blocs audio trop longs en deux secondes), il coupe le chorus et la diffusion, et la HALL passe en VINTAGE, jusqu'au Monde suivant. Un bloc isolé un peu long, sans conséquence audible, ne déclenche rien.
+**La garde du processeur.** La limite est **85 %** du processeur, et les Mondes de Rhizome restent entre 61 et 78 % au plus fort. Si un Monde fait à la main est trop lourd (six voix lourdes, avec la bande, la HALL et les grains grands ouverts), Rhizome passe de lui-même en ECO avant de jouer. S'il déborde encore, de façon répétée (trois blocs audio qui prennent plus de 95 % de leur temps, en deux secondes), il coupe le chorus et la diffusion, et la HALL passe en VINTAGE, jusqu'au Monde suivant. Un bloc isolé un peu long, sans conséquence audible, ne déclenche rien.
 
 ### LOOK / STARTUP (GLO 4 fois)
 | Potard | Réglage |

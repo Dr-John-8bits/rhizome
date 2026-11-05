@@ -5,7 +5,7 @@
   measure_fm1.py [--seconds 40] [--worst] [--mondes 0-29] [--port NAME]
 
 For each Monde: load it, PLAY, reset the measured peak, let it play, then read the load now and its peak (the SYSTEM
-page's figures), the audio dropouts (xruns), the blocks over 90 % of their time, how often the firmware shed
+page's figures), the audio dropouts (xruns), the blocks over 95 % of their time, how often the firmware shed
 (ECO, then the chorus and the HALL's diffusion: only when long blocks repeat), and the longest audio block against its
 budget. --worst also opens SPACE fully with Beads on CLEAN TAPE (its heaviest). The rule: the peak never reaches 85 %.
 Writes a JSON next to the printout if --json is given. Needs mido with python-rtmidi.
