@@ -528,6 +528,8 @@ Que les autres voix sonnent comme celles de Monades n'est pas un problème : ça
 
 **Mesuré sur le FM-1 après l'allègement (5 novembre 2026).** Pics de 61 à 78 %, **aucun décrochage**. Les cinq Mondes allégés : 0 à 2 blocs trop longs, plus aucun délestage. Mais ces pics varient d'une mesure à l'autre autour du même seuil : cette fois, BLACK ORCHARD (8 blocs) et NO STARS (3) se sont délestés une fois, alors qu'à la mesure précédente BLACK ORCHARD en avait 6 sans délestage et NO STARS aucun. Le plus long bloc reste à 94 % de son temps : le son ne décroche jamais. Deux pistes pour la suite : alléger aussi ces deux Mondes, ou réserver le délestage aux blocs au-delà de 95 % (la marge réelle avant décrochage), ce qui toucherait base/device/main_fm1.c. **Choisi : le seuil passe à 95 %** (base/device/main_fm1.c), toujours trois blocs en deux secondes.
 
+**Mesuré sur le FM-1 avec le seuil à 95 % (5 novembre 2026).** Les 30 Mondes : pics de 61 à 78 %, charge de 52 à 75 %, **aucun décrochage, aucun bloc au-delà de 95 %, aucun délestage**. Le plus long bloc atteint 92 % de son temps (GLASS PLANETS, 5 348 µs sur 5 804). La HALL et le chorus restent entiers dans tous les Mondes.
+
 ## Le code et GitHub
 - Rhizome est **dérivé de Monades**. Mais **GitHub ne permet pas de forker son propre dépôt dans le même compte**. Donc on crée un nouveau dépôt `Dr-John-8bits/rhizome` et on y pousse l'historique de Monades. Monades reste une « source » (un remote `monades`) d'où l'on récupère les corrections communes (MIDI, gammes, plateforme).
 - Même plateforme fm1-base, même chaîne de compilation, mêmes outils.
