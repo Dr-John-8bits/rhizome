@@ -81,7 +81,7 @@ MONDES=[
    ('Low Orbit',55,3,16,dict(level=240,echo=350,room=400,send=300)),('Night Voices',48,1,16,dict(level=190,attack=700,decay=950,room=500,send=250)),
    REST,REST],
   orbits={0:body(2,64,ecc=400),1:body(4,48,ecc=700,phase=3),2:body(3,96,ecc=650,phase=14),3:body(1,192,ecc=300)},
-  sky=(25,10,0,'SWELL',60,'ACCENT'),tape=(3,250,150,350),hall=(800,35,600,450,0),beads=(650,840,350,'DIRTY')),
+  sky=(25,10,0,'SWELL',60,'ACCENT'),tape=(3,250,150,350),hall=(800,35,600,450,0),beads=(650,840,350,'CLEAN')),
  dict(name='BLACK ORCHARD',family=1,tempo=66,root='G',scale='KUMOI',macro=[500,120,460,380],
   echo='1/8',delay_fb=400,fx=480,room=620,grain=(600,400,350),
   tracks=[('Velvet Moss',31,2,16,dict(level=400,send=100,room=200)),('Clay Bell',67,4,16,dict(level=240,echo=300,room=350,send=280)),
