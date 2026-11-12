@@ -663,6 +663,7 @@ Dix moteurs viennent du code publié par Mutable Instruments (huit de Plaits, un
 | **STRING MACHINE** | Des cordes d'ensemble, comme les Solina des années 70, avec leur chorus : la nappe d'ambient par excellence. Chaque note joue un accord. | BRIGHT : filtre et ensemble | CHORD : l'accord, dont l'écran écrit le nom | REGISTER : le mélange des registres | moyen |
 
 - **La colonne « Calcul »** donne le coût de chaque moteur. Chaque voix qui sonne coûte aussi son filtre, son enveloppe et ses envois. Une voix dont le son s'est éteint se met en veille et ne coûte plus rien jusqu'à sa note suivante.
+- **À niveau de piste égal, les moteurs sortent à peu près aussi fort** : une grosse caisse se règle comme les autres voix, sans la pousser au maximum. Comme dans Plaits, elle passe par une saturation douce qui lui donne du corps.
 - **KICK, SNARE, HAT et RINGS** règlent leur longueur avec DECAY ; les autres ont une enveloppe (page ENVELOPE : attaque et déclin). SIX-OP FM garde en plus les enveloppes de son DX7.
 - **Les batteries ne jouent pas de mélodie** : sur une orbite, elles ignorent la source des notes et leurs lunes répètent le même coup.
 - **En ECO** (QUALITY / SYSTEM), FM, VA, HARMONIC, SIX-OP FM et STRING MACHINE sont calculés à mi-cadence pour soulager le processeur : les aigus s'adoucissent un peu. SIX-OP FM garde la durée de ses enveloppes.
