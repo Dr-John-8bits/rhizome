@@ -166,6 +166,9 @@ static void reset_voice(unsigned i) {
  repeats[i].remaining=0;
 }
 #include "preset_bank.inc"
+#ifndef KICK_MAKEUP
+#define KICK_MAKEUP 1.45f
+#endif
 static void clear_audio() {
  reset_fx();beads_reset();
  memset(repeats,0,sizeof repeats);
@@ -646,7 +649,9 @@ static void quantum(float *lr,unsigned n) {
   // Keep the exact envelope -> filter -> gain order, but let the SVF retain
   // coefficients and state in registers across a tile instead of the mixer.
   for(unsigned k=0;k<n;k++){
-   float x=t.model==MD_ELEMENTS?(out[k]+aux[k]*.3f)*3.0f*v.velocity:t.model==MD_RINGS?(out[k]+aux[k])*12.0f:out[k]*plaits_gain;
+   // Plaits sends its bass drum through an overdrive at drive 0.5 (pre-gain .9375, soft clip, post-gain 1.5) that was
+   // skipped here, leaving the kick about half as loud as the other engines; that stage, plus a makeup to their level.
+   float x=t.model==MD_ELEMENTS?(out[k]+aux[k]*.3f)*3.0f*v.velocity:t.model==MD_RINGS?(out[k]+aux[k])*12.0f:t.model==MD_KICK?stmlib::SoftClip(out[k]*.9375f)*(1.5f*KICK_MAKEUP):out[k]*plaits_gain;
    if(melodic){if(v.midi_gate<0){v.env*=.9975f;v.attacking=0;}else if(v.attacking){v.env+=attackstep;if(v.env>=1){v.env=1;v.attacking=0;}}else if(v.midi_gate==0)v.env*=dec;x*=v.env;}
    out[k]=x;
   }
