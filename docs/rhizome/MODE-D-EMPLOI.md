@@ -649,7 +649,7 @@ D'où vient la note d'une piste, et comment la faire évoluer, dépend de **la f
 | en orbite, source **ORBIT** | la distance à l'étoile | [A](#a-un-corps-en-source-orbit) |
 | en orbite, source **MOTIF** | une phrase, porte après porte | [B](#b-un-corps-en-source-motif) |
 | en orbite, source **ECHO** | la piste d'avant | [C](#c-un-corps-en-source-echo) |
-| dans un **système réel** (JUPITER, KEPLER-223, TRAPPIST-1, PLUTO) | la source de chaque corps (A, B ou C) | [D](#d-un-système-réel-jupiter-et-les-autres) |
+| dans un **système réel** | la source de chaque corps (A, B ou C) | [D](#d-un-système-réel-jupiter-et-les-autres) |
 | en rythme, **sans phrase** | la note de base | [E](#e-une-piste-en-rythme-sans-phrase) |
 | en rythme, **avec une phrase** | la phrase | [F](#f-une-piste-en-rythme-avec-une-phrase) |
 
@@ -729,21 +729,23 @@ Charger un système remet la perturbation à 0. MORPH et DERIVE ne touchent pas 
 
 ### Qui agit sur quoi
 
-| | Corps ORBIT | Corps MOTIF | Corps ECHO | Rythme sans phrase | Rythme avec phrase |
+| Réglage | Corps ORBIT | Corps MOTIF | Corps ECHO | Rythme sans phrase | Rythme avec phrase |
 |---|---|---|---|---|---|
-| Note de base (MIX / NOTES K2) | oui (le bas de la mélodie) | oui (déplace la phrase) | non | oui | oui (déplace la phrase) |
-| ECCENTRICITY | oui (la mélodie) | rythme seulement | rythme seulement | — | — |
-| PERTURBATION | oui | rythme seulement | rythme seulement | — | — |
-| GENERATOR | oui | RANDOM seulement | non | oui | non |
-| MOTION (LIVE K2) | oui | oui | non | oui, sauf avec un générateur | non |
+| MIDI NOTE (EDIT 4 fois) | oui | oui | non | oui | oui |
+| ECCENTRICITY | oui | rythme | rythme | — | — |
+| PERTURBATION | oui | rythme | rythme | — | — |
+| GENERATOR | oui | RANDOM | non | oui | non |
+| MOTION (LIVE K2) | oui | oui | non | oui, sans générateur | non |
 | MARBLES | non | non | non | non | oui |
-| LFO sur NOTES IN SCALE | non | non | non | oui | oui |
-| LFO sur PITCH (un glissé continu, hors de la gamme : à faible profondeur, un vibrato) | oui | oui | oui | oui | oui |
-| Comète WANDER (SEQ 4 fois : des notes déplacées d'une ou deux notes de la gamme) | oui | oui | oui | non | non |
-| Conjonction CHORD (SEQ 4 fois : le second corps prend une note de l'accord du premier) | oui | oui | oui | non | non |
-| Lunes (SEQ 3 fois : des notes d'ornement après la note) | oui | oui | oui | non | non |
+| LFO NOTES IN SCALE | non | non | non | oui | oui |
+| LFO sur PITCH | oui | oui | oui | oui | oui |
+| Comète WANDER | oui | oui | oui | non | non |
+| Conjonction CHORD | oui | oui | oui | non | non |
+| Lunes (SEQ 3 fois) | oui | oui | oui | non | non |
 | TRANSPOSE (GLO 1 fois, K3) | oui | oui | oui | oui | oui |
-| Gamaka (GLO 2 fois : un ornement autour de la note) | oui | oui | oui | oui | oui |
+| GAMAKA (GLO 2 fois) | oui | oui | oui | oui | oui |
+
+La note de base est le bas de la mélodie d'un corps ORBIT ; elle déplace toute la phrase d'un corps MOTIF ou d'une piste avec phrase ; un corps ECHO l'ignore. ECCENTRICITY et PERTURBATION ne changent que le rythme d'un corps MOTIF ou ECHO. Le LFO sur PITCH fait glisser la hauteur en continu, hors de la gamme : à faible profondeur, un vibrato. La comète WANDER (SEQ 4 fois) déplace des notes d'une ou deux notes de la gamme ; en conjonction CHORD, le second corps prend une note de l'accord du premier ; les lunes ajoutent des notes d'ornement après la note ; le gamaka orne la note elle-même.
 
 ## Les voix : les 14 moteurs
 
