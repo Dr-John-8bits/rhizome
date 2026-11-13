@@ -450,6 +450,7 @@ Les **générateurs** (page GENERATOR) agissent aussi sur un corps : avec ORBIT 
 - **Les autres pistes perdent leurs portes** : elles reviennent à leur rythme (page RHYTHM), souvent muet dans un Monde d'usine, où les pistes jouent par leurs orbites.
 - **Chaque corps reçoit** la durée de tour et l'excentricité du vrai corps, 4 portes, la phase à 0 ; la précession est réglée (un peu pour PLUTO, aucune pour les autres) et la perturbation remise à 0.
 - **Rien d'autre ne change** : les sons, les notes de base, la source des notes (ORBIT, MOTIF, ECHO), la gamme, la comète et les conjonctions restent ceux du Monde. Les corps repartent de là où ils sont, sans saut.
+- **Les orbites de JUPITER et de TRAPPIST-1 sont presque rondes** : en source ORBIT, chaque corps rejoue presque toujours la même note. Pour les faire chanter : [D. Un système réel](#d-un-système-réel-jupiter-et-les-autres).
 - **Dès qu'on touche une orbite**, le système redevient OWN : ce sont désormais vos orbites. **ENV** revient aux orbites d'avant le premier système chargé.
 
 **Pourquoi ces quatre.** Chacun est une résonance orbitale célèbre, dont les rapports tombent exactement sur les durées de tour du séquenceur : la résonance de Laplace des lunes de Jupiter (Io, Europe et Ganymède tournent en 1:2:4), la chaîne parfaite de Kepler-223 (3:4:6:8, mesurée en 2016), le système de TRAPPIST-1 et ses sept planètes (les quatre extérieures en 2:3:4:6), et Pluton, qui fait deux tours quand Neptune en fait trois, sur une orbite très allongée qui croise celle de Neptune. Quatre façons différentes d'entendre une polyrythmie réelle.
@@ -596,7 +597,7 @@ Le séquenceur de Rhizome offre plusieurs façons de faire jouer une piste. Ce c
 ### Une piste, trois questions
 Pour chaque piste, on répond à trois questions, dans cet ordre :
 1. **Quand joue-t-elle ?** Soit **en orbite** : elle a des portes (SEQ 1 fois, K3 GATES de 1 à 16), et elle joue en les franchissant. Soit **en rythme** : aucune porte (GATES à 0), et c'est la page RHYTHM qui décide (HITS sur LENGTH). Jamais les deux à la fois : tant qu'il y a des portes, l'orbite a la main.
-2. **Quelle note ?** Pour un corps, c'est K3 PITCH (SEQ 2 fois) : **ORBIT** (la distance à l'étoile, plus près = plus aigu), **MOTIF** (une phrase qu'on joue au clavier sur GENERATOR, rejouée porte après porte) ou **ECHO** (la note de la piste d'avant). Pour une piste en rythme : sa note de base, une **phrase** écrite (BASS / MOTIFS puis PHRASE / NOTES), ou un **générateur** (GENERATOR : RANDOM, MARKOV, MOTIF). Ensuite, pour toutes, MOTION et le générateur peuvent écarter la note, et la gamme la range.
+2. **Quelle note ?** Pour un corps, c'est K3 PITCH (SEQ 2 fois) : **ORBIT** (la distance à l'étoile, plus près = plus aigu), **MOTIF** (une phrase qu'on joue au clavier sur GENERATOR, rejouée porte après porte) ou **ECHO** (la note de la piste d'avant). Pour une piste en rythme : sa note de base, une **phrase** écrite (BASS / MOTIFS puis PHRASE / NOTES), ou un **générateur** (GENERATOR : RANDOM, MARKOV, MOTIF). Ensuite, pour toutes, MOTION et le générateur peuvent écarter la note, et la gamme la range. Pour les faire évoluer, cas par cas : [Faire évoluer les notes](#faire-évoluer-les-notes).
 3. **Quels ornements ?** Les **lunes** (un corps : des notes après la note), les **REPEATS** (une piste en rythme : un coup répété), le **gamaka** (toutes : un glissé, une oscillation).
 
 ![Programmer une piste en trois questions : quand joue-t-elle (en orbite ou en rythme), quelle note (ORBIT, MOTIF, ECHO pour un corps ; note de base, phrase ou générateur pour un rythme), quels ornements (lunes, repeats, gamaka) ; et ce qui agit sur tout le Monde.](schemas/programmer-piste.svg)
@@ -638,6 +639,111 @@ On construit un petit morceau à cinq pistes : une basse, une mélodie, sa répo
 12. **Garder son Monde.** PLAY pour arrêter, puis SAVE : l'écran de sauvegarde s'ouvre sur le premier emplacement libre ; K4 et PRESET pour le nom ; SAVE une seconde fois.
 
 **Et ensuite.** Remplacer la phrase de la piste 2 par un générateur (GENERATOR, K1 SOURCE sur MARKOV : il improvise avec ses enchaînements) ; passer la piste 3 en période libre (K1 PERIOD au-delà de 12 mesures) pour une réponse qui ne retombe jamais au même endroit ; essayer la comète vagabonde (K1 COMET tout en haut) ; charger un vrai système sur les orbites (ORBIT / SYSTEM, K4 SYSTEM) en gardant les sons.
+
+## Faire évoluer les notes
+
+D'où vient la note d'une piste, et comment la faire évoluer, dépend de **la façon dont la piste joue**. Trouvez votre cas dans le tableau, puis suivez sa procédure.
+
+| La piste joue… | La note vient de… | Procédure |
+|---|---|---|
+| en orbite, source **ORBIT** | la distance à l'étoile | [A](#a-un-corps-en-source-orbit) |
+| en orbite, source **MOTIF** | une phrase, porte après porte | [B](#b-un-corps-en-source-motif) |
+| en orbite, source **ECHO** | la piste d'avant | [C](#c-un-corps-en-source-echo) |
+| dans un **système réel** (JUPITER, KEPLER-223, TRAPPIST-1, PLUTO) | la source de chaque corps (A, B ou C) | [D](#d-un-système-réel-jupiter-et-les-autres) |
+| en rythme, **sans phrase** | la note de base | [E](#e-une-piste-en-rythme-sans-phrase) |
+| en rythme, **avec une phrase** | la phrase | [F](#f-une-piste-en-rythme-avec-une-phrase) |
+
+**Pour savoir comment joue une piste** : SELECT la piste, SEQ 1 fois (ORBIT). Si K3 GATES est au-dessus de 0, elle joue en orbite, et SEQ 2 fois montre sa source (K3 PITCH). Si GATES est à 0, elle joue en rythme, et SEQ 7 fois (BASS / MOTIFS) dit si une phrase est active (K1 sur EUCLID ou STEP).
+
+Les batteries (KICK, SNARE, HAT) n'ont pas de mélodie : rien de ce qui suit ne change leur note.
+
+### A. Un corps en source ORBIT
+**Ce qu'on entend.** Loin de l'étoile, le corps joue sa note de base ; plus il s'en approche, plus il monte, jusqu'à six notes de la gamme au-dessus. La mélodie suit donc la forme de l'orbite et revient à chaque tour.
+
+> **Une orbite ronde joue toujours la même note.** Le corps reste à la même distance de l'étoile : il rejoue la note située trois notes de la gamme au-dessus de sa note de base, à chaque porte. **Un seul cran d'ECCENTRICITY suffit** pour obtenir toute la mélodie, de la note de base à six notes au-dessus.
+
+1. **Faire naître la mélodie.** SELECT la piste ; SEQ 1 fois (ORBIT) ; **K2 ECCENTRICITY** au-dessus de 0. Un cran : la mélodie entière, presque sans rubato. Plus haut : le même chant, mais les notes se pressent près de l'étoile et traînent loin d'elle.
+2. **Choisir le registre.** EDIT 4 fois (MIX / NOTES) ; **K2 MIDI NOTE** : la note la plus grave de la mélodie.
+3. **Faire hésiter les notes** (tout le système). SEQ 2 fois (ORBIT / SYSTEM) ; **K2 PERTURBATION**. À 100, une note sur deux glisse d'une note de la gamme, vers le haut ou le bas, et un quart des portes se taisent.
+4. **Faire varier la mélodie d'un tour à l'autre.** SEQ 9 fois (GENERATOR / DEJA VU) ; **K1 SOURCE** sur RANDOM ; **K4 SPREAD** de 2 à 5 (l'écart, en demi-tons) ; **K2 DEJA VU** vers 70 (la variation revient, mute lentement) ; **K3 LOOP** : la longueur de la boucle, par exemple le nombre de portes.
+5. **Transposer la mélodie par une phrase** (facultatif). Avec SOURCE sur **MOTIF** ou **MARKOV**, le générateur ajoute à chaque note un intervalle pris dans la phrase écrite au clavier sur cette page : la mélodie de l'orbite se décale selon la phrase.
+6. **Pour tout le Monde.** LIVE, **K2 MOTION** : une part des notes saute d'un degré, d'une quarte, d'une quinte ou d'une octave.
+
+### B. Un corps en source MOTIF
+**Ce qu'on entend.** Le corps joue une phrase, une note par porte, dans l'ordre, et la reprend au début. Le rythme vient de l'orbite (portes, rubato), les notes de la phrase.
+
+1. **Écrire la phrase.** SELECT la piste ; SEQ 9 fois (GENERATOR / DEJA VU) ; **REC** efface la phrase ; jouez les notes au clavier, une par une : chacune s'écrit au pas suivant. Les silences de la phrase sont sautés.
+2. **La faire jouer par le corps.** SEQ 2 fois (ORBIT / SYSTEM) ; **K3 PITCH sur MOTIF**. Sur ORBIT (SEQ 1 fois), chaque porte affiche la note qu'elle va jouer, la prochaine en blanc.
+3. **Changer une seule note.** SEQ 8 fois (PHRASE / NOTES) ; **K1 STEP** : le pas ; **K2 NOTE / REST** : les demi-tons au-dessus de la note de base, ramenés dans la gamme, ou −1 pour un silence (sauté par le corps).
+4. **Changer toute la phrase d'un coup.** SEQ 8 fois, **REC** : une phrase au hasard (ENV l'annule). Ou SEQ 7 fois (BASS / MOTIFS), **K2 MOTIF** : un des quatre motifs tout faits remplace la phrase.
+5. **Déplacer la phrase.** EDIT 4 fois (MIX / NOTES), **K2 MIDI NOTE** : toute la phrase monte ou descend avec la note de base.
+6. **Faire varier la phrase toute seule.** SEQ 9 fois ; **K1 SOURCE sur RANDOM** ; **K4 SPREAD** petit (2 à 4) ; **K2 DEJA VU** vers 70. Chaque note s'écarte un peu, et l'écart revient d'un tour à l'autre. **Évitez MOTIF et MARKOV ici** : ils rajoutent les intervalles de la phrase une deuxième fois, et la phrase s'envole vers l'aigu.
+7. **Pour tout le Monde.** LIVE, **K2 MOTION**.
+
+### C. Un corps en source ECHO
+**Ce qu'on entend.** Le corps reprend la dernière note jouée par la piste précédente (la piste 3 répond à la piste 2 ; la piste 1 répond à la piste 6), montée sur la note de l'accord de la tonique juste au-dessus. Sa note de base ne compte pas.
+
+1. **Le mettre en écho.** SELECT la piste ; SEQ 2 fois (ORBIT / SYSTEM) ; **K3 PITCH sur ECHO**. À l'écran, un pointillé relie les deux corps.
+2. **Faire évoluer ses notes : faites évoluer la piste d'avant**, avec la procédure de son cas (A, B, E ou F). L'écho suit.
+3. Ni le générateur ni MOTION n'agissent sur un écho : il répond à ce qu'il entend.
+
+### D. Un système réel (JUPITER et les autres)
+**Ce qui change en chargeant un système** (SEQ 2 fois, K4 SYSTEM) : le rythme. Chaque corps reçoit 4 portes, la durée de tour et l'excentricité du vrai corps ; les autres pistes perdent leurs portes. **Ce qui ne change pas : les notes.** Chaque corps garde sa note de base et sa source (ORBIT, MOTIF ou ECHO). Les réglages HITS et LENGTH de la page RHYTHM ne comptent pas pour les corps.
+
+| Système | Ses orbites | En source ORBIT |
+|---|---|---|
+| JUPITER | presque rondes (moins de 0,01) | chaque corps rejoue sa même note |
+| TRAPPIST-1 | presque rondes (0,003 à 0,010) | des notes presque fixes |
+| KEPLER-223 | un peu ovales (0,04 à 0,15) | une mélodie par corps, peu de rubato |
+| PLUTO | Pluton très ovale (0,25) | une vraie mélodie avec rubato |
+
+**Faire chanter JUPITER (ou TRAPPIST-1)**, au choix, piste par piste :
+1. **Une phrase sur la résonance** : procédure B (source MOTIF) sur la piste mélodique. La résonance 1:2:4 donne le rythme, la phrase les notes. Ajoutez le générateur en RANDOM avec un DEJA VU vers 70 pour qu'elle mute lentement.
+2. **Une mélodie d'orbite** : SEQ 1 fois, **K2 ECCENTRICITY sur 1 cran**. La durée de tour ne bouge pas : la polyrythmie reste celle de Jupiter, et le corps chante (procédure A).
+3. **Des notes qui varient sur place** : gardez l'orbite ronde et mettez le générateur en RANDOM (procédure A, étape 4). La note fixe devient un centre autour duquel les notes tournent.
+4. **Des points d'appui** : laissez un ou deux corps en ORBIT, ronds, sur une note fixe, sous les autres. C'est souvent le plus beau.
+
+Charger un système remet la perturbation à 0. MORPH et DERIVE ne touchent pas aux orbites : pour changer de système en jouant, rechargez-le sur K4 SYSTEM.
+
+### E. Une piste en rythme, sans phrase
+**Ce qu'on entend.** Chaque coup (page RHYTHM) joue la note de base de la piste.
+
+1. **Choisir la note.** EDIT 4 fois (MIX / NOTES), **K2 MIDI NOTE**.
+2. **Des notes inventées.** SEQ 9 fois (GENERATOR / DEJA VU), **K1 SOURCE** :
+   - **RANDOM** : des notes au hasard autour de la note de base ; **K4 SPREAD** l'écart en demi-tons (petit pour une basse, par exemple 5 à 7).
+   - **MARKOV** : écrivez d'abord une phrase au clavier sur cette page (REC, puis les touches) ; il improvise avec ses enchaînements.
+   - **MOTIF** : la même phrase, jouée dans l'ordre ; **K4 SPREAD** la chance qu'une note se déplace.
+   - Puis **K2 DEJA VU** (0 : toujours nouveau ; 100 : la boucle se fige) et **K3 LOOP** (sa longueur).
+3. **Des notes qui suivent un mouvement.** FX 12 fois (LFO A) : **K3 TARGET sur NOTES IN SCALE**, **K4 DEPTH** (l'ampleur), **K1 RATE** (calé sur le tempo, par exemple 1 ou 2 mesures), **K2 SHAPE** (TRIANGLE : la note monte et descend la gamme ; SAMPLE & HOLD : une note au hasard par cycle).
+4. **Pour tout le Monde.** LIVE, **K2 MOTION**. Sur une piste dont le générateur est actif, MOTION n'agit pas : c'est le générateur qui décide. SEQ 10 fois (FORM), **K4 MOTION** règle tous les combien de pas MOTION tire une nouvelle note.
+
+### F. Une piste en rythme, avec une phrase
+**Ce qu'on entend.** Chaque coup joue la note de son pas dans la phrase (EUCLID), ou chaque pas joue sa note (STEP).
+
+1. **Activer la phrase.** SEQ 7 fois (BASS / MOTIFS), **K1 PHRASE** sur EUCLID ou STEP.
+2. **L'écrire** : au clavier (SEQ 9 fois, REC, puis les touches), ou pas à pas (SEQ 8 fois, PHRASE / NOTES : K1 le pas, K2 la note).
+3. **La changer d'un coup.** SEQ 8 fois, **REC** : une phrase au hasard (ENV l'annule). Ou SEQ 7 fois, **K2 MOTIF** : un des quatre motifs tout faits.
+4. **La faire varier toute seule.** FX 11 fois (MARBLES / TIDES / WARPS), **K1 MARBLES** : la chance qu'une note change (elle devient la note de base, ou la note de base plus 3, 5 ou 7 demi-tons, dans la gamme). Les temps (pas 1, 5, 9, 13) ne bougent jamais ; graine verrouillée (ARP), la même variation revient à chaque tour.
+5. **Un mouvement par-dessus.** LFO A ou B sur **NOTES IN SCALE** (comme en E, étape 3).
+6. **Ce qui n'agit pas** : le générateur et MOTION. Quand une phrase est active, c'est elle qui donne les notes.
+
+### Qui agit sur quoi
+
+| | Corps ORBIT | Corps MOTIF | Corps ECHO | Rythme sans phrase | Rythme avec phrase |
+|---|---|---|---|---|---|
+| Note de base (MIX / NOTES K2) | oui (le bas de la mélodie) | oui (déplace la phrase) | non | oui | oui (déplace la phrase) |
+| ECCENTRICITY | oui (la mélodie) | rythme seulement | rythme seulement | — | — |
+| PERTURBATION | oui | rythme seulement | rythme seulement | — | — |
+| GENERATOR | oui | RANDOM seulement | non | oui | non |
+| MOTION (LIVE K2) | oui | oui | non | oui, sauf avec un générateur | non |
+| MARBLES | non | non | non | non | oui |
+| LFO sur NOTES IN SCALE | non | non | non | oui | oui |
+| LFO sur PITCH (un glissé continu, hors de la gamme : à faible profondeur, un vibrato) | oui | oui | oui | oui | oui |
+| Comète WANDER (SEQ 4 fois : des notes déplacées d'une ou deux notes de la gamme) | oui | oui | oui | non | non |
+| Conjonction CHORD (SEQ 4 fois : le second corps prend une note de l'accord du premier) | oui | oui | oui | non | non |
+| Lunes (SEQ 3 fois : des notes d'ornement après la note) | oui | oui | oui | non | non |
+| TRANSPOSE (GLO 1 fois, K3) | oui | oui | oui | oui | oui |
+| Gamaka (GLO 2 fois : un ornement autour de la note) | oui | oui | oui | oui | oui |
 
 ## Les voix : les 14 moteurs
 
@@ -1057,7 +1163,7 @@ Dans la banque **SOUNDS**, les 64 emplacements gardent **le son** de la piste ch
 | Remettre une piste en rythme | SEQ (ORBIT) : K3 GATES à 0, puis RHYTHM. |
 | Écrire une phrase au clavier | SEQ jusqu'à GENERATOR ; REC efface ; jouer les notes une à une. |
 | Faire jouer cette phrase par un corps | ORBIT / SYSTEM, K3 PITCH sur MOTIF. |
-| Faire évoluer les notes toutes seules | Pour tout le Monde : MOTION (LIVE K2). Pour une piste : GENERATOR (RANDOM, MARKOV, MOTIF), ou un LFO sur NOTES IN SCALE, ou MARBLES sur une phrase. |
+| Faire évoluer les notes | Selon la façon dont la piste joue (orbite ORBIT, MOTIF ou ECHO, système réel, rythme avec ou sans phrase) : voir [Faire évoluer les notes](#faire-évoluer-les-notes). |
 | Faire bouger un réglage tout seul | FX 12 fois (LFO A) : K3 la cible, K2 la forme, K1 la vitesse, K4 la profondeur. |
 | Mettre de la bande ou de la HALL sur une piste | GLOBAL MIXER : K3 (bande), K4 (HALL) ; et SHARED SPACE, K4 RETURN au-dessus de 0. |
 | Figer les grains | Le bouton LFO ; de nouveau pour relancer. |
